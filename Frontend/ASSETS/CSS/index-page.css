@@ -1,0 +1,550 @@
+/**
+
+ * ==========================================================================
+
+ * LA COCCINA — Página inicial (loja)
+
+ * ==========================================================================
+
+ */
+
+
+
+.hero {
+
+  width: 100%;
+
+  min-height: auto;
+
+  padding: calc(var(--header-h) + 1rem) 0 2rem;
+
+  background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
+
+    url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1974&auto=format&fit=crop')
+
+    center center / cover no-repeat;
+
+}
+
+
+
+.hero-layout {
+
+  width: 100%;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+  gap: 2rem;
+
+  padding: 0 5%;
+
+}
+
+
+
+.hero-layout:has(.hero-daily.is-visible) {
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+
+
+.hero-left {
+
+  flex: 1 1 320px;
+
+  max-width: 700px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  margin: 0 auto;
+
+}
+
+
+
+.hero-mascot {
+
+  display: block;
+
+  width: 100%;
+
+  max-width: min(700px, 100%);
+
+  height: auto;
+
+  margin: 0 auto 0.5rem;
+
+}
+
+
+
+.hero-title {
+
+  font-size: clamp(2rem, 6vw, 4.2rem);
+
+  line-height: 1.1;
+
+  margin-bottom: 1.5rem;
+
+  text-align: center;
+
+  color: var(--color-gold);
+
+  font-weight: 800;
+
+  width: 100%;
+
+}
+
+
+
+.hero-title span {
+
+  display: inline-block;
+
+}
+
+
+
+.hero-cta {
+
+  margin-top: 1rem;
+
+  background: var(--color-gold);
+
+  color: #000;
+
+  border: none;
+
+  padding: 0.9rem 2rem;
+
+  border-radius: 50px;
+
+  font-size: 1rem;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+
+  text-decoration: none;
+
+  display: inline-block;
+
+}
+
+
+
+.hero-cta:hover {
+
+  transform: translateY(-3px);
+
+  background: var(--color-gold-hover);
+
+}
+
+
+
+.hero-daily {
+
+  flex: 1 1 280px;
+
+  max-width: 780px;
+
+  display: none;
+
+  justify-content: center;
+
+  padding-top: 0.5rem;
+
+}
+
+
+
+.hero-daily.is-visible {
+
+  display: flex;
+
+}
+
+
+
+#daily-title {
+
+  display: none;
+
+  color: var(--color-gold);
+
+  font-size: clamp(1.4rem, 4vw, 2rem);
+
+  margin-bottom: 0.75rem;
+
+  text-align: center;
+
+}
+
+
+
+#daily-special {
+
+  width: 100%;
+
+}
+
+
+
+.daily-special-box {
+
+  background: #151515;
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+
+  max-width: 100%;
+
+  margin: 0 auto;
+
+  text-align: center;
+
+  padding: clamp(1rem, 4vw, 2rem);
+
+}
+
+
+
+.daily-special-box img {
+
+  width: 100%;
+
+  max-height: min(50vh, 420px);
+
+  object-fit: cover;
+
+  border-radius: 18px;
+
+  margin-bottom: 1rem;
+
+}
+
+
+
+.daily-special-box h3 {
+
+  color: #fff;
+
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+
+  margin: 0.5rem 0;
+
+}
+
+
+
+.daily-special-box p {
+
+  color: #ccc;
+
+  font-size: 0.95rem;
+
+  margin-bottom: 1rem;
+
+}
+
+
+
+.daily-special-actions {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-top: 0.5rem;
+
+}
+
+
+
+.daily-special-actions strong {
+
+  color: var(--color-gold);
+
+  font-size: clamp(1.4rem, 5vw, 2rem);
+
+}
+
+
+
+.menu-section {
+
+  padding: 1rem 3%;
+
+  width: 100%;
+
+}
+
+
+
+.products-slider {
+
+  position: relative;
+
+  width: 100%;
+
+  padding: 0 4.5rem;
+
+}
+
+
+
+.products-row {
+
+  display: flex;
+
+  gap: 1.75rem;
+
+  overflow-x: auto;
+
+  scroll-behavior: auto;
+
+  scroll-snap-type: none;
+
+  scrollbar-width: none;
+
+  padding: 1rem 0.5rem;
+
+  -webkit-overflow-scrolling: touch;
+
+}
+
+
+
+.products-row.is-animating {
+
+  scroll-snap-type: none;
+
+}
+
+
+
+.products-row::-webkit-scrollbar {
+
+  display: none;
+
+}
+
+
+
+.card {
+
+  width: min(85vw, 320px);
+
+  max-width: 445px;
+
+  flex: 0 0 auto;
+
+  scroll-snap-align: start;
+
+  background: var(--color-card);
+
+  border-radius: 16px;
+
+  overflow: hidden;
+
+  display: flex;
+
+  flex-direction: column;
+
+  transition: transform 0.3s, box-shadow 0.3s;
+
+}
+
+
+
+.card:hover {
+
+  transform: translateY(-8px);
+
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+
+}
+
+
+
+.card img {
+
+  width: 100%;
+
+  height: clamp(180px, 40vw, 280px);
+
+  object-fit: cover;
+
+  object-position: center;
+
+  display: block;
+
+}
+
+
+
+.card-content {
+
+  padding: 1rem;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+
+
+.card-content h3 {
+
+  font-size: clamp(1rem, 3vw, 1.25rem);
+
+  margin: 0 0 0.5rem;
+
+  color: #fff;
+
+}
+
+
+
+.card-content p {
+
+  color: var(--color-muted);
+
+  line-height: 1.45;
+
+  margin: 0 0 0.75rem;
+
+  flex: 1;
+
+  display: -webkit-box;
+
+  -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 4;
+
+  line-clamp: 4;
+
+  overflow: hidden;
+
+  font-size: 0.9rem;
+
+}
+
+
+
+.card-content strong {
+
+  color: var(--color-gold);
+
+  font-size: clamp(1.25rem, 4vw, 1.6rem);
+
+  font-weight: 700;
+
+  margin: 0 0 0.75rem;
+
+  display: block;
+
+}
+
+
+
+.slider-btn {
+
+  position: absolute;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 2.75rem;
+
+  height: 2.75rem;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #1a1a1a;
+
+  color: var(--color-gold);
+
+  font-size: 1.25rem;
+
+  cursor: pointer;
+
+  z-index: 10;
+
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+
+  transition: transform 0.2s, background 0.2s;
+
+}
+
+
+
+.slider-btn:hover {
+
+  background: #252525;
+
+  transform: translateY(-50%) scale(1.06);
+
+}
+
+
+
+.slider-btn.prev {
+
+  left: 0.35rem;
+
+}
+
+
+
+.slider-btn.next {
+
+  right: 0.35rem;
+
+}
+
+
+
+#cardapio {
+
+  scroll-margin-top: calc(var(--header-h) + 1rem);
+
+}
+

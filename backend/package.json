@@ -1,0 +1,23 @@
+{
+  "name": "la-coccina-backend",
+  "version": "1.0.0",
+  "description": "Backend do La Coccina",
+  "main": "server.js",
+  "scripts": {
+    "start": "node -e \"if(!process.env.SERVE_FRONTEND)process.env.SERVE_FRONTEND='true';require('./server.js')\"",
+    "start:online": "node -e \"process.env.NODE_ENV='production';process.env.SERVE_FRONTEND='true';require('./server.js')\"",
+    "dev": "nodemon server.js",
+    "stop": "powershell -ExecutionPolicy Bypass -File parar-servidor.ps1",
+    "hash-password": "node scripts/hash-password.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "multer": "^2.1.1",
+    "mysql2": "^3.22.3"
+  }
+}

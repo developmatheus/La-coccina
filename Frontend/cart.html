@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho - La Coccina</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/imagens/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/imagens/favicon-192.png">
+  <link rel="apple-touch-icon" href="assets/imagens/apple-touch-icon.png">
+
+  <!-- Segurança -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' http://127.0.0.1:3001 http://localhost:3001 https: data:; connect-src 'self' http://127.0.0.1:3001 http://localhost:3001 https://wa.me https://api.whatsapp.com; frame-ancestors 'none'; base-uri 'self';">
+
+  <link rel="stylesheet" href="assets/CSS/global.css">
+  <link rel="stylesheet" href="assets/CSS/cart-page.css">
+  <link rel="stylesheet" href="assets/CSS/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="cart-page">
+
+<header>
+  <div class="logo">La Coccina</div>
+  <a href="index.html" class="btn-back">← Voltar à Loja</a>
+</header>
+
+<h1 class="section-title cart-page-title">🛒 Seu Carrinho</h1>
+
+<div class="cart-container">
+  <!-- PRODUTOS -->
+  <div class="cart-items" id="cart-items"></div>
+
+  <!-- RESUMO -->
+  <div class="summary">
+    <h2>Resumo do Pedido</h2>
+    
+    <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos()">
+    
+    <select id="bairro" onchange="habilitarEndereco()">
+      <option value="0">Locais de entrega...</option>
+      <option value="0.0">Cachoeira do Bom Jesus</option>
+      <option value="8.99">Ingleses</option>
+      <option value="8.99">Vargem do bom jesus</option>
+      <option value="9.99">Vargem Grande/Pequena</option>
+      <option value="12.99">Rio Vermelho</option>
+      <option value="12.99">Canasvieiras</option>
+    </select>
+
+    <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos()">
+    <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos()">
+    
+    <select id="payment">
+      <option value="pix">PIX</option>
+      <option value="dinheiro">Dinheiro</option>
+      <option value="cartao">Cartão</option>
+    </select>
+
+    <textarea id="obs" placeholder="Observações do pedido" oninput="verificarCampos()"></textarea>
+
+    <div class="cart-totals-row">
+      <span>Subtotal</span>
+      <span>R$ <strong id="subtotal">0.00</strong></span>
+    </div>
+
+    <div class="cart-totals-row">
+      <span>Frete</span>
+      <span>R$ <strong id="frete">0.00</strong></span>
+    </div>
+
+    <div class="cart-total-big">
+      <strong>Total</strong>
+      <strong id="total-price">0.00</strong>
+    </div>
+
+    <button type="button" id="whatsapp-btn" class="whatsapp-btn" disabled>
+      📱 Enviar Pedido pelo WhatsApp
+    </button>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-overlay">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h2>La Coccina</h2>
+          <p>Sabor que conquista todos os dias.</p>
+          <p>Endereço: Cachoeira do Bom Jesus, Florianópolis - SC</p>
+          <p>Horário: Terça a Domingo, 10:00 às 15:00</p>
+        </div>
+        <div class="footer-col footer-col--center">
+          <img src="assets/imagens/icons.png" alt="Benefícios" class="footer-benefits">
+        </div>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/lacoccinarestaurante/" target="_blank" rel="noopener">
+          <img src="assets/imagens/instagram.png" width="40" height="40" alt="Instagram">
+        </a>
+        <a href="https://wa.me/5548984138554" target="_blank" rel="noopener">
+          <img src="assets/imagens/whatsapp.png" width="40" height="40" alt="WhatsApp">
+        </a>
+      </div>
+      <p class="footer-copy">© 2026 La Coccina - Todos os direitos reservados</p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/security.js"></script>
+<script>
+    /* ==========================================================================
+       CARRINHO — La Coccina
+       ========================================================================== */
+    let cartSubtotal = 0;
+
+    function loadCart() {
+      localStorage.removeItem('laCoccinaCartLocked');
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="cart-empty-msg">Seu carrinho está vazio. Volte à loja e adicione pratos.</p>`;
+        updateTotal(0);
+        verificarCampos();
+        return;
+      }
+
+      cartSubtotal = 0;
+
+      cart.forEach((item, index) => {
+        const qty = item.quantity || 1;
+        const itemTotal = parseFloat(item.price) * qty;
+        cartSubtotal += itemTotal;
+
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="${LaCoccinaSecurity.uploadUrl(item.image)}" alt="">
+          <div class="cart-item-info">
+            <strong>${item.name}</strong><br>
+            <small>R$ ${parseFloat(item.price).toFixed(2)} × ${qty}</small>
+          </div>
+          <div class="cart-item-actions">
+            <div class="cart-item-actions-row">
+              <span class="cart-item-price">R$ ${itemTotal.toFixed(2)}</span>
+              <button type="button" class="remove-btn" onclick="removeFromCart(${index})">Remover</button>
+            </div>
+            <div>
+              <button type="button" class="qty" onclick="changeQuantity(${index}, -1)">−</button>
+              <span class="qty-val">${qty}</span>
+              <button type="button" class="qty" onclick="changeQuantity(${index}, 1)">+</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      updateTotal(cartSubtotal);
+    }
+
+    function updateTotal(subtotal) {
+      const frete = parseFloat(document.getElementById('bairro').value) || 0;
+      const total = subtotal + frete;
+
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('frete').textContent = frete.toFixed(2);
+      document.getElementById('total-price').textContent = total.toFixed(2);
+    }
+
+    function changeQuantity(index, change) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart[index].quantity = (cart[index].quantity || 1) + change;
+      if (cart[index].quantity < 1) cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    function removeFromCart(index) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
+    }
+
+    function habilitarEndereco() {
+      document.getElementById('address').disabled = document.getElementById('bairro').value === "0";
+      updateTotal(cartSubtotal);
+      verificarCampos();
+    }
+
+    function verificarCampos() {
+      const name = document.getElementById('customer-name').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const bairro = document.getElementById('bairro').value;
+      const btn = document.getElementById('whatsapp-btn');
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      btn.classList.remove('enabled', 'locked');
+
+      if (cart.length === 0) {
+        btn.disabled = true;
+        btn.classList.add('locked');
+        return;
+      }
+
+      if (name && address && phone && bairro !== '0') {
+        btn.disabled = false;
+        btn.classList.add('enabled');
+      } else {
+        btn.disabled = true;
+      }
+    }
+
+    function buildWhatsAppMessage() {
+      const name = document.getElementById('customer-name').value.trim();
+      const bairroText = document.getElementById('bairro').options[document.getElementById('bairro').selectedIndex].text;
+      const address = document.getElementById('address').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const payment = document.getElementById('payment').value;
+      const obs = document.getElementById('obs').value.trim();
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+      let subtotal = 0;
+      let itemsText = '';
+
+      cart.forEach((item) => {
+        const qty = item.quantity || 1;
+        const itemTotal = parseFloat(item.price) * qty;
+        subtotal += itemTotal;
+        itemsText += `• ${qty}x ${item.name} → R$ ${itemTotal.toFixed(2)}\n`;
+      });
+
+      const frete = parseFloat(document.getElementById('frete').textContent) || 0;
+      const total = subtotal + frete;
+
+      let message = `🍝 *NOVO PEDIDO - LA COCCINA*\n\n`;
+      message += `*👤 Cliente:* ${name}\n`;
+      message += `*📍 Endereço:* ${bairroText} - ${address}\n`;
+      message += `*📱 Telefone:* ${phone}\n\n`;
+      message += `*📋 Itens do Pedido:*\n${itemsText}\n`;
+      message += `*💰 Subtotal:* R$ ${subtotal.toFixed(2)}\n`;
+      message += `*🚚 Frete:* R$ ${frete.toFixed(2)}\n`;
+      message += `*💵 Total:* R$ ${total.toFixed(2)}\n`;
+      message += `*💳 Pagamento:* ${payment.toUpperCase()}\n`;
+      if (obs) message += `\n*📝 Observações:* ${obs}\n`;
+
+      return message;
+    }
+
+    function sendToWhatsApp() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const name = document.getElementById('customer-name').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const bairro = document.getElementById('bairro').value;
+
+      if (cart.length === 0) {
+        alert('🛒 Seu carrinho está vazio!');
+        return;
+      }
+
+      if (!name || !address || !phone || bairro === '0') {
+        alert('⚠️ Preencha nome, local de entrega, endereço e WhatsApp.');
+        return;
+      }
+
+      const message = buildWhatsAppMessage();
+      const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
+
+      localStorage.removeItem('cart');
+      window.location.href = whatsappUrl;
+    }
+
+    window.onload = () => {
+      loadCart();
+      verificarCampos();
+
+      document.getElementById('whatsapp-btn').addEventListener('click', () => {
+        if (!document.getElementById('whatsapp-btn').disabled) {
+          sendToWhatsApp();
+        }
+      });
+    };
+</script>
+</body>
+</html>

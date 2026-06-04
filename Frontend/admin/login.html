@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin - La Coccina</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/imagens/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/imagens/favicon-192.png">
+  <link rel="apple-touch-icon" href="../assets/imagens/apple-touch-icon.png">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://127.0.0.1:3001 http://localhost:3001; connect-src 'self' http://127.0.0.1:3001 http://localhost:3001; frame-ancestors 'none'; base-uri 'self';">
+
+  <style>
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .login-box {
+      background: #1f1f1f;
+      padding: 50px 40px;
+      border-radius: 16px;
+      width: 380px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .logo { font-size: 2.8rem; color: #ffcc00; margin-bottom: 8px; }
+    .subtitle { color: #aaa; margin-bottom: 35px; }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      margin: 12px 0;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    input:focus { outline: none; border-color: #ffcc00; }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.15rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .error { color: #ff4444; margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+
+    <div class="logo">La Coccina</div>
+    <p class="subtitle">🔐 Acesso Administrativo</p>
+
+    <input type="text" id="username" placeholder="Usuário" autocomplete="off">
+    <input type="password" id="password" placeholder="Senha" autocomplete="off">
+
+    <button onclick="login()">Entrar</button>
+    <p class="error" id="error-msg"></p>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/security.js"></script>
+  <script>
+    /* ==========================================================================
+       LOGIN ADMIN — La Coccina
+       ========================================================================== */
+    const API_BASE = LaCoccinaSecurity.API_BASE;
+
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('error-msg');
+
+      errorMsg.style.display = "none";
+
+      if (!username || !password) {
+        errorMsg.textContent = "Preencha usuário e senha";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        let data = {};
+        try { data = await res.json(); } catch { /* resposta não JSON */ }
+
+        if (res.ok && data.success && data.token) {
+          sessionStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminLogged', 'true');
+          window.location.href = 'dashboard.html';
+          return;
+        }
+
+        errorMsg.textContent = data.error || (res.status === 401
+          ? 'Usuário ou senha incorretos'
+          : `Erro no servidor (${res.status}). Verifique se "node server.js" está rodando.`);
+        errorMsg.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        errorMsg.textContent = `Sem conexão com a API (${API_BASE}). Rode o servidor: cd backend → npm start`;
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    window.onload = () => {
+      document.getElementById('username').value = "";
+      document.getElementById('password').value = "";
+    };
+  </script>
+</body>
+</html>

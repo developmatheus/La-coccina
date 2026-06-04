@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin - La Coccina</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/imagens/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/imagens/favicon-192.png">
+  <link rel="apple-touch-icon" href="../assets/imagens/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/CSS/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' http://127.0.0.1:3001 http://localhost:3001 https: data: blob:; connect-src 'self' http://127.0.0.1:3001 http://localhost:3001;">
+
+  <style>
+    .admin-panel { padding: 30px; max-width: 1250px; margin: 0 auto; }
+    .admin-header { background: #1a1a1a; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+    .admin-header h1 { margin: 0; font-size: 1.35rem; }
+    .grid-admin { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+    .card-admin { background: #1a1a1a; padding: 25px; border-radius: 16px; }
+    input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background:#2a2a2a; color:white; border:1px solid #444; }
+    button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
+    .btn-delete { background: #e74c3c; }
+    .btn-daily { background: #ffcc00; color: #000; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 14px; border-bottom: 1px solid #333; text-align: left; }
+    th { background: #252525; }
+    #btn-confirmar-corte { background: #2980b9; display: none; }
+    #crop-wrapper {
+      margin: 15px auto;
+      width: 100%;
+      max-width: 380px;
+      min-height: 520px;
+      max-height: 72vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      border-radius: 12px;
+      border: 1px solid #333;
+      overflow: hidden;
+    }
+    #imagePreview {
+      max-width: 100% !important;
+      max-height: 68vh !important;
+      min-height: 480px !important;
+      width: auto !important;
+      height: auto !important;
+      display: none;
+      border: none !important;
+      border-radius: 0 !important;
+    }
+    table img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="admin-panel">
+    <div class="admin-header">
+      <h1>Painel Administrativo — La Coccina</h1>
+      <button onclick="toggleRestaurantStatus()" id="status-btn" style="padding:12px 25px; font-weight:bold;">
+        🔄 Carregando...
+      </button>
+    </div>
+
+    <div class="grid-admin">
+      <div class="card-admin">
+        <h2>+ Adicionar Novo Prato</h2>
+        <input type="text" id="name" placeholder="Nome do prato">
+        <input type="number" id="price" placeholder="Preço" step="0.01">
+        <input type="text" id="desc" placeholder="Descrição">
+        <select id="category">
+          <option value="marmita">🍲 Marmita</option>
+          <option value="bebida">🥤 Bebida</option>
+        </select>
+
+        <label>Foto do Prato:</label>
+        <input type="file" id="imageUpload" accept="image/*" onchange="previewAndCrop(event)">
+
+        <div id="crop-wrapper">
+          <img id="imagePreview" alt="Pré-visualização para recorte">
+        </div>
+
+        <button id="btn-confirmar-corte" onclick="confirmarCorte()">✂️ Confirmar Corte</button>
+        <button onclick="addProduct()">Adicionar Prato</button>
+      </div>
+
+      <div class="card-admin">
+        <h2>Pratos Cadastrados</h2>
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th>Imagem</th>
+              <th>Prato</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/security.js"></script>
+  <script>
+    /* ==========================================================================
+       PAINEL ADMIN — La Coccina
+       ========================================================================== */
+    const API_BASE = LaCoccinaSecurity.API_BASE;
+    const esc = LaCoccinaSecurity.escapeHtml;
+    const imgUrl = LaCoccinaSecurity.uploadUrl;
+    let cropper = null;
+    let croppedBlob = null;
+
+    function getAdminToken() {
+      return sessionStorage.getItem('adminToken');
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('adminToken');
+      localStorage.removeItem('adminLogged');
+      window.location.href = 'login.html';
+    }
+
+    async function handleApiError(res, fallbackMsg) {
+      let msg = fallbackMsg;
+      try {
+        const data = await res.json();
+        if (data.error) msg = data.error;
+      } catch { /* ignore */ }
+      if (res.status === 401) {
+        alert('Sessão expirada. Faça login novamente.');
+        logoutAdmin();
+        return;
+      }
+      alert(msg + ' (código ' + res.status + ')');
+    }
+
+    function apiFetch(url, options = {}) {
+      const token = getAdminToken();
+      if (!token) {
+        logoutAdmin();
+        return Promise.reject(new Error('Sem token de admin'));
+      }
+      const headers = { ...(options.headers || {}), Authorization: `Bearer ${token}` };
+      return fetch(url, { ...options, headers });
+    }
+
+    if (!getAdminToken() || localStorage.getItem('adminLogged') !== 'true') {
+      window.location.href = 'login.html';
+    }
+
+    function previewAndCrop(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('imagePreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        croppedBlob = null;
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(preview, { aspectRatio: NaN, viewMode: 2 });
+        document.getElementById('btn-confirmar-corte').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function confirmarCorte() {
+      if (!cropper) return;
+      cropper.getCroppedCanvas().toBlob(blob => {
+        croppedBlob = blob;
+        const preview = document.getElementById('imagePreview');
+        cropper.destroy();
+        cropper = null;
+        preview.src = URL.createObjectURL(blob);
+        document.getElementById('btn-confirmar-corte').style.display = 'none';
+        alert('✅ Corte confirmado! Agora clique em "Adicionar Prato".');
+      }, 'image/jpeg', 0.9);
+    }
+
+    async function addProduct() {
+      const name = document.getElementById('name').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      const category = document.getElementById('category').value;
+
+      if (!name || !price) {
+        alert('Preencha pelo menos o nome e o preço do prato.');
+        return;
+      }
+
+      let imageUrl = '';
+
+      if (croppedBlob) {
+        const formData = new FormData();
+        formData.append('image', croppedBlob, 'prato.jpg');
+        try {
+          const uploadRes = await apiFetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+          const uploadData = await uploadRes.json();
+          if (uploadData.imageUrl) {
+            imageUrl = uploadData.imageUrl;
+          } else {
+            alert('Erro ao fazer upload da imagem.'); return;
+          }
+        } catch (e) {
+          console.error('Erro no upload:', e);
+          alert('Erro de conexão ao fazer upload da imagem.'); return;
+        }
+      }
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, desc, image: imageUrl, category })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ Prato adicionado com sucesso!');
+          document.getElementById('name').value = '';
+          document.getElementById('price').value = '';
+          document.getElementById('desc').value = '';
+          document.getElementById('imageUpload').value = '';
+          document.getElementById('imagePreview').style.display = 'none';
+          croppedBlob = null;
+          loadProducts();
+        } else {
+          alert('Erro ao adicionar prato.');
+        }
+      } catch (e) {
+        console.error('Erro ao adicionar produto:', e);
+        alert('Erro de conexão ao adicionar prato.');
+      }
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await apiFetch(`${API_BASE}/api/products/all`);
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao carregar produtos');
+          return;
+        }
+        const products = await res.json();
+        const tbody = document.querySelector('#products-table tbody');
+        tbody.innerHTML = '';
+        products.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><img src="${imgUrl(p.image)}" onerror="this.src='https://via.placeholder.com/70x70/333/fff?text=Sem+Foto'" width="70" height="70" alt=""></td>
+            <td>${esc(p.name)}</td>
+            <td>${esc(p.category || '-')}</td>
+            <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
+            <td>
+              <button onclick="toggleActive(${p.id})" style="background:${p.active == 1 ? '#27ae60' : '#e74c3c'}; color:white; padding:8px 14px; border:none; border-radius:6px; margin-right:6px;">
+                ${p.active == 1 ? '✅ Ativo' : '❌ Inativo'}
+              </button>
+              ${p.category === 'marmita' ? `
+                <button onclick="toggleDailySpecial(${p.id}, ${p.isDailySpecial == 1})" style="background:#ffcc00; color:#000; padding:8px 14px; border:none; border-radius:6px; margin-right:6px;">
+                  ${p.isDailySpecial == 1 ? '🌟 Remover do Dia' : '🌟 Prato do Dia'}
+                </button>
+              ` : ''}
+              <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px;">Excluir</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    async function toggleActive(id) {
+      try {
+        const res = await apiFetch(`${API_BASE}/api/products/toggle/${id}`, { method: 'PUT' });
+        if (res.ok) { loadProducts(); return; }
+        await handleApiError(res, 'Erro ao alterar status do prato');
+      } catch (e) {
+        if (e.message !== 'Sem token de admin') alert('Erro de conexão. Verifique se o servidor está rodando (node server.js).');
+      }
+    }
+
+    async function toggleDailySpecial(id, isCurrentlyDaily) {
+      try {
+        const method = isCurrentlyDaily ? 'DELETE' : 'PUT';
+        const res = await apiFetch(`${API_BASE}/api/products/daily/${id}`, { method });
+        if (res.ok) { loadProducts(); return; }
+        await handleApiError(res, isCurrentlyDaily ? 'Erro ao remover Prato do Dia' : 'Erro ao definir Prato do Dia');
+      } catch (e) {
+        if (e.message !== 'Sem token de admin') alert('Erro de conexão. Verifique se o servidor está rodando.');
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (confirm("Excluir este prato?")) {
+        const delRes = await apiFetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
+        if (!delRes.ok) { alert('Erro ao excluir prato.'); return; }
+        loadProducts();
+      }
+    }
+
+    async function loadRestaurantStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/products/status`);
+        const data = await res.json();
+        const btn = document.getElementById('status-btn');
+        if (data.isOpen) {
+          btn.textContent = '🟢 Restaurante ABERTO';
+          btn.style.background = '#27ae60';
+        } else {
+          btn.textContent = '🔴 Restaurante FECHADO';
+          btn.style.background = '#e74c3c';
+        }
+      } catch (e) {
+        document.getElementById('status-btn').textContent = '⚠️ Sem conexão';
+      }
+    }
+
+    async function toggleRestaurantStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/products/status`);
+        const data = await res.json();
+        await apiFetch(`${API_BASE}/api/products/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isOpen: !data.isOpen })
+        });
+        loadRestaurantStatus();
+      } catch (e) {
+        alert('Erro de conexão ao alterar status do restaurante.');
+      }
+    }
+
+    window.onload = () => {
+      loadProducts();
+      loadRestaurantStatus();
+    };
+  </script>
+</body>
+</html>

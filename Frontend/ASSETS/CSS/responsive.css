@@ -1,0 +1,196 @@
+/**
+ * ==========================================================================
+ * LA COCCINA — Responsivo (celular e tablet)
+ * ==========================================================================
+ */
+
+@media (min-width: 1025px) {
+  .hero-layout {
+    align-items: center;
+  }
+
+  .hero-left {
+    padding-top: 0.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hero-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-left {
+    max-width: 100%;
+  }
+
+  .hero-mascot {
+    max-width: min(520px, 95vw);
+  }
+
+  .hero-daily {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --site-width: 94%;
+  }
+
+  header {
+    padding: 0 3%;
+    gap: 0.5rem;
+  }
+
+  .btn-back {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  #status-bar {
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(var(--header-h) + 0.25rem);
+    font-size: 0.7rem;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .admin-btn {
+    display: none;
+  }
+
+  .cart-float {
+    right: 5%;
+    bottom: 2.85rem;
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .products-slider {
+    padding: 0 3.5rem;
+    margin: 0.75rem 0;
+  }
+
+  .slider-btn.prev {
+    left: 0.3rem;
+  }
+
+  .slider-btn.next {
+    right: 0.3rem;
+  }
+
+  .slider-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  .card {
+    width: min(80vw, 320px);
+  }
+
+  .card img {
+    height: clamp(160px, 38vw, 220px);
+  }
+
+  .menu-section {
+    padding: 1.5rem 4%;
+  }
+
+  .footer-overlay {
+    padding: 2rem 4%;
+  }
+
+  .footer-grid {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-col {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 87.5%;
+  }
+
+  .hero {
+    padding-top: calc(var(--header-h) + 2.5rem);
+  }
+
+  .hero-mascot {
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+  }
+
+  .hero-cta {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .section-title {
+    margin: 2.5rem 0 1.5rem;
+  }
+
+  .products-slider {
+    padding: 0 3rem;
+    margin: 0.5rem 0;
+  }
+
+  .products-row {
+    gap: 1.25rem;
+    padding: 1.25rem 0.5rem;
+  }
+
+  .card {
+    width: min(88vw, 300px);
+  }
+
+  .card-content p {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  .cart-container {
+    flex-direction: column;
+    padding: 0 3%;
+  }
+
+  .summary {
+    position: static;
+    width: 100%;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cart-item img {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+  }
+
+  .cart-page-title {
+    margin-top: 3rem;
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .card {
+    width: 92vw;
+  }
+}

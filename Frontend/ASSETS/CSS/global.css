@@ -1,0 +1,306 @@
+/**
+ * ==========================================================================
+ * LA COCCINA — Global (90% padrão + base do site)
+ * ==========================================================================
+ */
+
+@font-face {
+  font-family: 'SomeTimeLater';
+  src: url('../fonts/SOME TIME LATER.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --color-bg: #0d0d0d;
+  --color-header: #0b0b0b;
+  --color-card: #1a1a1a;
+  --color-gold: #ffcc00;
+  --color-gold-hover: #ffd633;
+  --color-text: #ffffff;
+  --color-muted: #cfcfcf;
+  --header-h: 4.5rem;
+  --site-width: 90%;
+  --site-max: 1680px;
+  --radius: 1rem;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+html {
+  font-size: 90%;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.site-wrap {
+  width: var(--site-width);
+  max-width: var(--site-max);
+  margin: 0 auto;
+}
+
+h1, h2, h3, .logo {
+  font-family: 'Poppins', sans-serif;
+}
+
+.logo,
+.footer-content h2 {
+  font-family: 'SomeTimeLater', 'Poppins', sans-serif !important;
+}
+
+/* Header */
+header {
+  width: 100%;
+  height: var(--header-h);
+  background: var(--color-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+  color: var(--color-gold);
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-weight: bold;
+}
+
+.admin-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: #111;
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 2px solid var(--color-gold);
+  z-index: 9999;
+  transition: 0.3s;
+  font-size: 1.1rem;
+}
+
+.admin-btn:hover {
+  transform: scale(1.08);
+  background: var(--color-gold);
+  color: #000;
+}
+
+#status-bar {
+  position: fixed;
+  top: var(--header-h);
+  left: 1rem;
+  z-index: 998;
+  padding: 0.6rem 1rem;
+  font-weight: bold;
+  font-size: clamp(0.75rem, 2.5vw, 1rem);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+  max-width: calc(100vw - 2rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Títulos de seção */
+.section-title {
+  text-align: center;
+  color: var(--color-gold);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  margin: 3rem 0 1.5rem;
+  font-weight: 800;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  width: 5rem;
+  height: 4px;
+  background: var(--color-gold);
+  position: absolute;
+  bottom: -0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 20px;
+}
+
+/* Carrinho flutuante — alinhado à margem do conteúdo (5%) */
+.cart-float {
+  position: fixed;
+  right: 5%;
+  bottom: 3.25rem;
+  width: 4.06rem;
+  height: 4.06rem;
+  background: var(--color-gold);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  z-index: 9999;
+  transition: 0.3s;
+}
+
+.cart-float:hover {
+  transform: scale(1.08);
+}
+
+.cart-float.disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+#cart-count-float {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-to-cart {
+  width: 100%;
+  background: var(--color-gold);
+  color: #000;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.add-to-cart:hover {
+  background: var(--color-gold-hover);
+}
+
+.add-to-cart.locked,
+.add-to-cart:disabled {
+  background: #444 !important;
+  color: #777 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* Rodapé */
+.footer {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+    url('../imagens/RODAPÉ.png');
+  background-size: 700px;
+  background-repeat: repeat;
+  background-position: center;
+}
+
+.footer-overlay {
+  padding: clamp(2.5rem, 8vw, 5rem) 5%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-content h2 {
+  color: var(--color-gold);
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  margin-bottom: 1rem;
+}
+
+.btn-back {
+  background: var(--color-gold);
+  color: #000;
+  padding: 0.65rem 1.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.footer-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+  text-align: left;
+}
+
+.footer-col {
+  flex: 1;
+  min-width: min(100%, 260px);
+}
+
+.footer-col--center {
+  text-align: center;
+}
+
+.footer-benefits {
+  width: min(520px, 100%);
+  height: auto;
+  margin-bottom: 0.75rem;
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1rem 0 0.75rem;
+}
+
+.footer-copy {
+  font-size: 0.82rem;
+  color: #777;
+}
+
+.cart-empty-msg {
+  text-align: center;
+  padding: clamp(2rem, 12vw, 5rem) 1rem;
+  color: #888;
+  line-height: 1.5;
+}

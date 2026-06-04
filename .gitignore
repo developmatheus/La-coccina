@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+backend/node_modules/
+
+# Segredos — nunca versionar
+backend/config/.env
+.env
+*.env.local
+
+# Uploads e cache
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+*.exe
