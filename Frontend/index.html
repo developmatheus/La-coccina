@@ -89,62 +89,20 @@
 <!-- HERO -->
 
 <section class="hero">
-  <div style="
-      width:100%;
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      padding:0 3%;
-      gap: 100px;
-  ">
+  <div class="hero-layout">
 
-    <!-- ESQUERDA -->
-    <div style="
-        display:flex;
-        flex-direction:column;
-        align-items:flex-start;
-        max-width:700px;
-        padding-top:40px;
-    ">
-      <img src="assets/imagens/Mascote 2.png"
-           alt="La Coccina"
-           style="
-             width:700px;
-             margin-bottom:10px;
-             transform:translateX(-52px);
-           ">
+    <div class="hero-left">
+      <img src="assets/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
 
-      <h1 style="
-    font-size:4.8rem;
-    line-height:1;
-    margin-bottom:40px;
-    text-align:left;
-    color:#ffcc00;
-">Comida Caseira<br><span style="margin-left: 8px; display:inline-block;">
-    Feita com Amor
-  </span></h1>
-<button
-  type="button"
-  class="hero-cta"
-  data-scroll-to="cardapio"
-  style="
-    margin-top:-20px;
-    margin-left:220px;
-  "
->
-  Ver Cardápio
-</button>
+      <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
 
+      <button type="button" class="hero-cta" data-scroll-to="cardapio">
+        Ver Cardápio
+      </button>
     </div>
 
-    <!--  Prato do Dia -->
-    <div id="daily-special-column" style="
-        display:none;
-        justify-content:flex-end;
-        width:100%;
-        max-width:780px;
-        padding-top: 40px;
-    ">
+    <!-- Prato do Dia -->
+    <div id="daily-special-column" class="hero-daily">
       <div style="width:100%;">
         <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
         <div id="daily-special" style="width:100%;"></div>
