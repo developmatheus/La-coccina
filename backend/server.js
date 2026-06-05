@@ -123,6 +123,11 @@ app.use('/api/products', productsRouter);
 // Site público + admin (mesmo servidor = todos veem as mesmas alterações)
 // ---------------------------------------------------------------------------
 if (serveFrontend && hasFrontend) {
+  const assetsDir = path.join(frontendDir, 'ASSETS');
+  if (fs.existsSync(assetsDir)) {
+    app.use('/assets', express.static(assetsDir, { maxAge: isProd ? '1h' : 0 }));
+    console.log(`📂 Assets (/assets → ASSETS): ${assetsDir}`);
+  }
   app.use(express.static(frontendDir, { index: 'index.html', maxAge: isProd ? '1h' : 0 }));
   app.get('/', (_req, res) => res.sendFile(frontendIndex));
   console.log(`📂 Site estático: ${frontendDir}`);

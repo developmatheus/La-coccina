@@ -101,6 +101,8 @@ Cole o hash em `ADMIN_PASSWORD`.
 
 O `Frontend/assets/js/config.js` deve continuar vazio (`window.__LA_COCCINA_API__ = ''`) — a API fica no mesmo domínio.
 
+**Após definir a URL:** em `Frontend/index.html`, troque `SEU-DOMINIO` nas tags `og:image` e `og:url` pela URL real (ex. `la-coccina.onrender.com`).
+
 ---
 
 ## Passo 4 — Testar no celular
