@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>La Coccina - Comida Caseira</title>
 
-  <!-- FAVICON -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/imagens/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="assets/imagens/favicon-192.png">
   <link rel="apple-touch-icon" href="assets/imagens/favicon-192.png">
@@ -18,519 +17,327 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
- .products-slider{
-    position:relative;
-    width:100%;
-    overflow:hidden;
-}
-
-.products-row{
-    display:flex;
-    gap:25px;
-
-    overflow-x:auto;
-    overflow-y:hidden;
-
-    width:100%;
-
-    padding:20px 10px;
-
-    -webkit-overflow-scrolling:touch;
-
-    scrollbar-width:none;
-}
-
-.card{
-    min-width:320px;
-    width:320px;
-    flex:none;
-
-    background:#1a1a1a;
-    border-radius:20px;
-
-    overflow:hidden;
-
-    transition:0.3s;
-}
+    .products-slider { position: relative; width: 100%; overflow: hidden; }
+    .products-row { display: flex; gap: 25px; overflow-x: auto; overflow-y: hidden; width: 100%; padding: 20px 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .products-row::-webkit-scrollbar { display: none; }
+    .card { min-width: 320px; width: 320px; flex: none; background: #1a1a1a; border-radius: 20px; overflow: hidden; transition: 0.3s; }
   </style>
-  
-  <!-- SEO -->
+
   <meta name="description" content="Marmitas caseiras deliciosas em Florianópolis. Comida feita com amor, ingredientes frescos e sabor autêntico. Entrega rápida em Cachoeira do Bom Jesus, Ingleses, Canasvieiras e região.">
-  
   <meta name="keywords" content="marmita florianopolis, comida caseira florianopolis, marmita delivery floripa, almoço marmita, comida feita em casa, marmita cachoeira do bom jesus, marmita ingleses, marmita canasvieiras, la coccina, prato do dia florianopolis">
-  
   <meta name="robots" content="index, follow">
   <meta name="language" content="pt-BR">
   <meta name="author" content="La Coccina">
   <meta name="geo.region" content="BR-SC">
   <meta name="geo.placename" content="Florianópolis">
-
-  <!-- Open Graph (para quando compartilhar no WhatsApp, Instagram, etc) -->
   <meta property="og:title" content="La Coccina - Marmitas Caseiras em Florianópolis">
   <meta property="og:description" content="Comida caseira deliciosa com entrega em Florianópolis. Marmitas, pratos do dia e muito sabor!">
-  <!-- Após publicar: troque SEU-DOMINIO pela URL real (ex. la-coccina.onrender.com) -->
-  <meta property="og:image" content="https://SEU-DOMINIO/assets/imagens/icons.png">
-  <meta property="og:url" content="https://SEU-DOMINIO/">
+  <meta property="og:image" content="https://developmatheus.github.io/La-coccina/Frontend/assets/imagens/icons.png">
+  <meta property="og:url" content="https://developmatheus.github.io/La-coccina/Frontend/index.html">
   <meta property="og:type" content="website">
-
 </head>
 
 <body>
+  <header>
+    <div class="logo">La Coccina</div>
+  </header>
 
-<header>
-  <div class="logo">La Coccina</div>
-</header>
+  <a href="admin/login.html" class="admin-btn">⚙️</a>
 
-<a href="admin/login.html" class="admin-btn">⚙️</a>
-  
-  <meta name="keywords" content="marmita florianopolis, comida caseira florianopolis, marmita delivery floripa, almoço marmita, comida feita em casa, marmita cachoeira do bom jesus, marmita ingleses, marmita canasvieiras, la coccina, prato do dia florianopolis">
-  
-  <meta name="robots" content="index, follow">
-  <meta name="language" content="pt-BR">
-  <meta name="author" content="La Coccina">
-  <meta name="geo.region" content="BR-SC">
-  <meta name="geo.placename" content="Florianópolis">
+  <div id="status-bar"></div>
 
+  <section class="hero">
+    <div class="hero-layout">
+      <div class="hero-left">
+        <img src="assets/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
+        <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
+        <button type="button" class="hero-cta" data-scroll-to="cardapio">Ver Cardápio</button>
+      </div>
 
-  <!-- Open Graph (para quando compartilhar no WhatsApp, Instagram, etc) -->
-  <meta property="og:title" content="La Coccina - Marmitas Caseiras em Florianópolis">
-  <meta property="og:description" content="Comida caseira deliciosa com entrega em Florianópolis. Marmitas, pratos do dia e muito sabor!">
-  <!-- Após publicar: troque SEU-DOMINIO pela URL real (ex. la-coccina.onrender.com) -->
-  <meta property="og:image" content="https://SEU-DOMINIO/assets/imagens/icons.png">
-  <meta property="og:url" content="https://SEU-DOMINIO/">
-  <meta property="og:type" content="website">
-
-
-</head>
-
-
-<body>
-
-
-<header>
-  <div class="logo">La Coccina</div>
-</header>
-
-
-<a href="admin/login.html" class="admin-btn">⚙️</a>
-
-
-<!-- STATUS -->
-<div id="status-bar"></div>
-
-
-<!-- HERO -->
-
-
-<section class="hero">
-  <div class="hero-layout">
-
-
-    <div class="hero-left">
-      <img src="assets/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
-
-
-      <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
-
-
-      <button type="button" class="hero-cta" data-scroll-to="cardapio">
-        Ver Cardápio
-      </button>
-    </div>
-
-
-    <!-- Prato do Dia -->
-    <div id="daily-special-column" class="hero-daily">
-      <div style="width:100%;">
-        <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
-        <div id="daily-special" style="width:100%;"></div>
+      <div id="daily-special-column" class="hero-daily">
+        <div style="width:100%;">
+          <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
+          <div id="daily-special" style="width:100%;"></div>
+        </div>
       </div>
     </div>
+  </section>
 
-
-  </div>
-</section>
-
-
-
-
-<div class="menu-section" id="cardapio">
-  <h2 class="section-title">🍲 Marmitas</h2>
-  <div class="products-slider">
-    <button type="button" class="slider-btn prev" data-slider="marmitas-grid" data-dir="-1" aria-label="Marmitas anteriores">❮</button>
-    <div class="products-row" id="marmitas-grid"></div>
-    <button type="button" class="slider-btn next" data-slider="marmitas-grid" data-dir="1" aria-label="Próximas marmitas">❯</button>
-  </div>
-</div>
-
-
-<div class="menu-section">
-  <h2 class="section-title">🥤 Bebidas</h2>
-  <div class="products-slider">
-    <button type="button" class="slider-btn prev" data-slider="bebidas-grid" data-dir="-1" aria-label="Bebidas anteriores">❮</button>
-    <div class="products-row" id="bebidas-grid"></div>
-    <button type="button" class="slider-btn next" data-slider="bebidas-grid" data-dir="1" aria-label="Próximas bebidas">❯</button>
-  </div>
-</div>
-
-
-
-
-<!-- CARRINHO FLUTUANTE -->
-<div id="cart-float-btn" class="cart-float" onclick="checkCartBeforeOpen()" title="Carrinho">
-  🛒
-  <span id="cart-count-float">0</span>
-</div>
-
-
-<script src="assets/js/config.js"></script>
-<script src="assets/js/security.js"></script>
-<script src="assets/js/scroll-smooth.js"></script>
-<script src="assets/js/script.js"></script>
-
-
-<script>
-/* ====LOJA — La Coccina ==== */
-const API_BASE = 'https://la-coccina-production.up.railway.app'
-const esc = LaCoccinaSecurity.escapeHtml;
-const safeJson = LaCoccinaSecurity.safeJsonForHtml;
-const imgUrl = LaCoccinaSecurity.uploadUrl;
-let menuEventSource = null;
-let refreshDebounceTimer = null;
-<!-- STATUS -->
-<div id="status-bar"></div>
-
-<!-- HERO -->
-
-<section class="hero">
-  <div class="hero-layout">
-
-    <div class="hero-left">
-      <img src="assets/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
-
-      <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
-
-      <button type="button" class="hero-cta" data-scroll-to="cardapio">
-        Ver Cardápio
-      </button>
+  <div class="menu-section" id="cardapio">
+    <h2 class="section-title">🍲 Marmitas</h2>
+    <div class="products-slider">
+      <button type="button" class="slider-btn prev" data-slider="marmitas-grid" data-dir="-1" aria-label="Marmitas anteriores">❮</button>
+      <div class="products-row" id="marmitas-grid"></div>
+      <button type="button" class="slider-btn next" data-slider="marmitas-grid" data-dir="1" aria-label="Próximas marmitas">❯</button>
     </div>
+  </div>
 
-    <!-- Prato do Dia -->
-    <div id="daily-special-column" class="hero-daily">
-      <div style="width:100%;">
-        <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
-        <div id="daily-special" style="width:100%;"></div>
-      </div>
+  <div class="menu-section">
+    <h2 class="section-title">🥤 Bebidas</h2>
+    <div class="products-slider">
+      <button type="button" class="slider-btn prev" data-slider="bebidas-grid" data-dir="-1" aria-label="Bebidas anteriores">❮</button>
+      <div class="products-row" id="bebidas-grid"></div>
+      <button type="button" class="slider-btn next" data-slider="bebidas-grid" data-dir="1" aria-label="Próximas bebidas">❯</button>
     </div>
-
   </div>
-</section>
 
-
-<div class="menu-section" id="cardapio">
-  <h2 class="section-title">🍲 Marmitas</h2>
-  <div class="products-slider">
-    <button type="button" class="slider-btn prev" data-slider="marmitas-grid" data-dir="-1" aria-label="Marmitas anteriores">❮</button>
-    <div class="products-row" id="marmitas-grid"></div>
-    <button type="button" class="slider-btn next" data-slider="marmitas-grid" data-dir="1" aria-label="Próximas marmitas">❯</button>
+  <div id="cart-float-btn" class="cart-float" onclick="checkCartBeforeOpen()" title="Carrinho">
+    🛒 <span id="cart-count-float">0</span>
   </div>
-</div>
 
-<div class="menu-section">
-  <h2 class="section-title">🥤 Bebidas</h2>
-  <div class="products-slider">
-    <button type="button" class="slider-btn prev" data-slider="bebidas-grid" data-dir="-1" aria-label="Bebidas anteriores">❮</button>
-    <div class="products-row" id="bebidas-grid"></div>
-    <button type="button" class="slider-btn next" data-slider="bebidas-grid" data-dir="1" aria-label="Próximas bebidas">❯</button>
-  </div>
-</div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/security.js"></script>
+  <script src="assets/js/scroll-smooth.js"></script>
+  <script src="assets/js/script.js"></script>
 
+  <script>
+    const API_BASE = 'https://la-coccina-production.up.railway.app';
+    const esc = LaCoccinaSecurity.escapeHtml;
+    const safeJson = LaCoccinaSecurity.safeJsonForHtml;
+    const imgUrl = LaCoccinaSecurity.uploadUrl;
+    let menuEventSource = null;
+    let refreshDebounceTimer = null;
+    let sseReconnectTimer = null;
 
-<!-- CARRINHO FLUTUANTE -->
-<div id="cart-float-btn" class="cart-float" onclick="checkCartBeforeOpen()" title="Carrinho">
-  🛒
-  <span id="cart-count-float">0</span>
-</div>
+    function isActive(product) {
+      return product.active === 1 || product.active === true;
+    }
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/security.js"></script>
-<script src="assets/js/scroll-smooth.js"></script>
-<script src="assets/js/script.js"></script>
+    async function fetchPublicMenu() {
+      const res = await fetch(`${API_BASE}/api/products/menu`);
+      if (!res.ok) throw new Error('Falha ao carregar cardápio');
+      return res.json();
+    }
 
-<script>
-/* ====LOJA — La Coccina ==== */
-const API_BASE = 'https://la-coccina-production.up.railway.app'
-const esc = LaCoccinaSecurity.escapeHtml;
-const safeJson = LaCoccinaSecurity.safeJsonForHtml;
-const imgUrl = LaCoccinaSecurity.uploadUrl;
-let menuEventSource = null;
-let refreshDebounceTimer = null;
-let sseReconnectTimer = null;
+    function scheduleSiteRefresh() {
+      clearTimeout(refreshDebounceTimer);
+      refreshDebounceTimer = setTimeout(refreshSiteData, 300);
+    }
 
-function isActive(product) {
-  return product.active === 1 || product.active === true;
-}
-
-async function fetchPublicMenu() {
-  const res = await fetch(`${API_BASE}/api/products/menu`);
-  if (!res.ok) throw new Error('Falha ao carregar cardápio');
-  return res.json();
-}
-
-function scheduleSiteRefresh() {
-  clearTimeout(refreshDebounceTimer);
-  refreshDebounceTimer = setTimeout(refreshSiteData, 300);
-}
-
-async function refreshSiteData() {
-  try {
-    const products = await fetchPublicMenu();
-    renderMenu(products);
-    renderDailySpecial(products);
-    pruneInactiveFromCart(products);
-    await updateClientStatusBar();
-  } catch (e) {
-    console.error('Erro ao atualizar site:', e);
-  }
-}
-
-function pruneInactiveFromCart(products) {
-  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-  if (!cart.length) return;
-  const activeIds = new Set(products.map((p) => p.id));
-  const filtered = cart.filter((item) => activeIds.has(item.id));
-  if (filtered.length !== cart.length) {
-    localStorage.setItem('cart', JSON.stringify(filtered));
-    updateCartCount();
-  }
-}
-
-function connectLiveUpdates() {
-  if (menuEventSource) {
-    menuEventSource.close();
-    menuEventSource = null;
-  }
-
-  menuEventSource = new EventSource(`${API_BASE}/api/products/stream`);
-
-  menuEventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type === 'connected') return;
-      if (data.type === 'menu-updated' || data.type === 'status-updated') {
-        scheduleSiteRefresh();
+    async function refreshSiteData() {
+      try {
+        const products = await fetchPublicMenu();
+        renderMenu(products);
+        renderDailySpecial(products);
+        pruneInactiveFromCart(products);
+        await updateClientStatusBar();
+      } catch (e) {
+        console.error('Erro ao atualizar site:', e);
       }
-    } catch {
-      scheduleSiteRefresh();
     }
-  };
 
-  menuEventSource.onerror = () => {
-    if (menuEventSource) {
-      menuEventSource.close();
-      menuEventSource = null;
+    function pruneInactiveFromCart(products) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (!cart.length) return;
+      const activeIds = new Set(products.map((p) => p.id));
+      const filtered = cart.filter((item) => activeIds.has(item.id));
+      if (filtered.length !== cart.length) {
+        localStorage.setItem('cart', JSON.stringify(filtered));
+        updateCartCount();
+      }
     }
-    clearTimeout(sseReconnectTimer);
-    sseReconnectTimer = setTimeout(connectLiveUpdates, 8000);
-  };
-}
 
+    function connectLiveUpdates() {
+      if (menuEventSource) {
+        menuEventSource.close();
+        menuEventSource = null;
+      }
 
-function renderDailySpecial(products) {
-  try {
-    const daily = products.find(p => (p.isDailySpecial === true || p.isDailySpecial == 1) && isActive(p));
+      menuEventSource = new EventSource(`${API_BASE}/api/products/stream`);
 
-    const column = document.getElementById('daily-special-column');
-    const title = document.getElementById('daily-title');
-    const container = document.getElementById('daily-special');
+      menuEventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'connected') return;
+          if (data.type === 'menu-updated' || data.type === 'status-updated') {
+            scheduleSiteRefresh();
+          }
+        } catch {
+          scheduleSiteRefresh();
+        }
+      };
 
-    if (daily) {
-      column.style.display = 'flex';
-      title.style.display = 'block';
-      const dailyBtn = `<button class="add-to-cart" onclick='addToCart(${safeJson(daily)})' style="background:#ffcc00;color:#000;padding:16px 40px;font-size:1.1rem;border:none;border-radius:50px;cursor:pointer;font-weight:bold;">Adicionar ao Carrinho</button>`;
+      menuEventSource.onerror = () => {
+        if (menuEventSource) {
+          menuEventSource.close();
+          menuEventSource = null;
+        }
+        clearTimeout(sseReconnectTimer);
+        sseReconnectTimer = setTimeout(connectLiveUpdates, 8000);
+      };
+    }
 
-      container.innerHTML = `
-        <div style="background: #1a1a1a; border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); max-width: 680px; margin: 0 auto; border: 1px solid #333;">
-          <h2 style="color:#ffcc00; text-align:center; margin:0 0 18px 0; font-size:2.1rem;">🌟 Prato do Dia</h2>
-          <img src="${imgUrl(daily.image)}" style="width:100%; max-height:420px; object-fit:cover; border-radius:18px; margin-bottom:20px; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
-          <h3 style="color:white; text-align:center; font-size:1.85rem; margin:15px 0 10px 0;">${esc(daily.name)}</h3>
-          <p style="color:#ccc; text-align:center; line-height:1.6; font-size:1.08rem; margin-bottom:20px;">${esc(daily.desc || '')}</p>
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
-            <strong style="font-size:2.4rem; color:#ffcc00;">R$ ${parseFloat(daily.price).toFixed(2)}</strong>
-            ${dailyBtn}
+    function renderDailySpecial(products) {
+      try {
+        const daily = products.find(p => (p.isDailySpecial === true || p.isDailySpecial == 1) && isActive(p));
+        const column = document.getElementById('daily-special-column');
+        const title = document.getElementById('daily-title');
+        const container = document.getElementById('daily-special');
+
+        if (daily) {
+          column.style.display = 'flex';
+          title.style.display = 'block';
+          const dailyBtn = `<button class="add-to-cart" onclick='addToCart(${safeJson(daily)})' style="background:#ffcc00;color:#000;padding:16px 40px;font-size:1.1rem;border:none;border-radius:50px;cursor:pointer;font-weight:bold;">Adicionar ao Carrinho</button>`;
+          container.innerHTML = `
+            <div style="background: #1a1a1a; border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); max-width: 680px; margin: 0 auto; border: 1px solid #333;">
+              <h2 style="color:#ffcc00; text-align:center; margin:0 0 18px 0; font-size:2.1rem;">🌟 Prato do Dia</h2>
+              <img src="${imgUrl(daily.image)}" style="width:100%; max-height:420px; object-fit:cover; border-radius:18px; margin-bottom:20px; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
+              <h3 style="color:white; text-align:center; font-size:1.85rem; margin:15px 0 10px 0;">${esc(daily.name)}</h3>
+              <p style="color:#ccc; text-align:center; line-height:1.6; font-size:1.08rem; margin-bottom:20px;">${esc(daily.desc || '')}</p>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap: 16px; flex-wrap: wrap;">
+                <strong style="font-size:2.4rem; color:#ffcc00;">R$ ${parseFloat(daily.price).toFixed(2)}</strong>
+                ${dailyBtn}
+              </div>
+            </div>`;
+        } else {
+          column.style.display = 'none';
+          title.style.display = 'none';
+          container.innerHTML = '';
+        }
+      } catch (e) {
+        console.error('Erro no Prato do Dia:', e);
+      }
+    }
+
+    function renderMenu(products) {
+      try {
+        const marmitasGrid = document.getElementById('marmitas-grid');
+        const bebidasGrid = document.getElementById('bebidas-grid');
+        marmitasGrid.innerHTML = '';
+        bebidasGrid.innerHTML = '';
+
+        products.filter(p => p.category === 'marmita' && isActive(p)).forEach(product => {
+          marmitasGrid.appendChild(createCard(product));
+        });
+
+        products.filter(p => p.category === 'bebida' && isActive(p)).forEach(product => {
+          bebidasGrid.appendChild(createCard(product));
+        });
+      } catch (e) {
+        console.error('Erro ao carregar cardápio:', e);
+      }
+    }
+
+    function createCard(product) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const cartButton = `<button class="add-to-cart" onclick='addToCart(${safeJson(product)})'>Adicionar ao Carrinho</button>`;
+      const imageHtml = product.image ? `<img src="${imgUrl(product.image)}" alt="${esc(product.name)}">` : '';
+      card.innerHTML = `
+        ${imageHtml}
+        <div class="card-content">
+          <h3>${esc(product.name)}</h3>
+          <p>${esc(product.desc || '')}</p>
+          <strong>R$ ${parseFloat(product.price).toFixed(2)}</strong>
+          ${cartButton}
+        </div>`;
+      return card;
+    }
+
+    async function isStoreOpen() {
+      try {
+        const res = await fetch(`${API_BASE}/api/products/status`);
+        const data = await res.json();
+        return data.isOpen;
+      } catch {
+        return false;
+      }
+    }
+
+    function updateClientStatusBar() {
+      const statusBar = document.getElementById('status-bar');
+      return fetch(`${API_BASE}/api/products/status`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.isOpen) {
+            statusBar.style.background = '#27ae60';
+            statusBar.innerHTML = '🟢 Restaurante Aberto';
+          } else {
+            statusBar.style.background = '#e74c3c';
+            statusBar.innerHTML = '🔴 Restaurante Fechado';
+          }
+        });
+    }
+
+    async function addToCart(product) {
+      if (!(await isStoreOpen())) {
+        alert('🔴 O restaurante está fechado no momento.');
+        return;
+      }
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.find(item => item.id === product.id);
+
+      if (existing) existing.quantity = (existing.quantity || 1) + 1;
+      else cart.push({ ...product, quantity: 1 });
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      showToast(`✅ ${product.name} adicionado!`);
+    }
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      document.getElementById('cart-count-float').textContent = count;
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#27ae60; color:white; padding:15px 30px; border-radius:50px; z-index:9999;';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 1800);
+    }
+
+    function checkCartBeforeOpen() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (cart.length === 0) {
+        alert('🛒 Seu carrinho está vazio!');
+        return;
+      }
+      window.location.href = 'cart.html';
+    }
+
+    window.onload = () => {
+      refreshSiteData();
+      updateCartCount();
+      connectLiveUpdates();
+    };
+
+    setInterval(refreshSiteData, 60000);
+  </script>
+
+  <footer class="footer">
+    <div class="footer-overlay">
+      <div class="footer-content" style="padding: 25px 5% 18px 5%;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 300px;">
+            <h2 style="margin-bottom: 8px;">La Coccina</h2>
+            <p style="margin-bottom: 8px;">Sabor que conquista todos os dias.</p>
+            <p style="margin:4px 0;">Endereço: Cachoeira do Bom Jesus, Florianópolis - SC</p>
+            <p style="margin:4px 0;">Horário: Terça a Domingo, 10:00 às 15:00</p>
+          </div>
+
+          <div style="flex: 1; text-align: center; min-width: 320px;">
+            <img src="assets/imagens/icons.png" alt="Benefícios" style="width: 520px; max-width: 100%; height: auto; margin-bottom: 15px;">
           </div>
         </div>
-      `;
-    } else {
-      column.style.display = 'none';
-      title.style.display = 'none';
-      container.innerHTML = '';
-    }
-  } catch (e) {
-    console.error("Erro no Prato do Dia:", e);
-  }
-}
 
-// ==================== CARREGAR CARDÁPIO ====================
-function renderMenu(products) {
-  try {
-    const marmitasGrid = document.getElementById('marmitas-grid');
-    const bebidasGrid = document.getElementById('bebidas-grid');
-
-    marmitasGrid.innerHTML = '';
-    bebidasGrid.innerHTML = '';
-
-    products.filter(p => p.category === 'marmita').forEach(product => {
-      marmitasGrid.appendChild(createCard(product));
-    });
-
-    products.filter(p => p.category === 'bebida').forEach(product => {
-      bebidasGrid.appendChild(createCard(product));
-    });
-
-  } catch (e) {
-    console.error("Erro ao carregar cardápio:", e);
-  }
-}
-
-function createCard(product) {
-  const card = document.createElement('div');
-  card.className = 'card';
-  const cartButton = `<button class="add-to-cart" onclick='addToCart(${safeJson(product)})'>Adicionar ao Carrinho</button>`;
-
-  card.innerHTML = `
-    <img src="${imgUrl(product.image)}" alt="${esc(product.name)}">
-    <div class="card-content">
-      <h3>${esc(product.name)}</h3>
-      <p>${esc(product.desc || '')}</p>
-      <strong>R$ ${parseFloat(product.price).toFixed(2)}</strong>
-      ${cartButton}
-    </div>
-  `;
-  return card;
-}
-
-// ==================== STATUS & CARRINHO 
-async function isStoreOpen() {
-  try {
-    const res = await fetch(`${API_BASE}/api/products/status`);
-    const data = await res.json();
-    return data.isOpen;
-  } catch {
-    return false;
-  }
-}
-
-function updateClientStatusBar() {
-  const statusBar = document.getElementById('status-bar');
-  return fetch(`${API_BASE}/api/products/status`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.isOpen) {
-        statusBar.style.background = "#27ae60";
-        statusBar.innerHTML = "🟢 Restaurante Aberto";
-      } else {
-        statusBar.style.background = "#e74c3c";
-        statusBar.innerHTML = "🔴 Restaurante Fechado";
-      }
-    });
-}
-
-async function addToCart(product) {
-  if (!(await isStoreOpen())) {
-    alert("🔴 O restaurante está fechado no momento.");
-    return;
-  }
-
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const existing = cart.find(item => item.id === product.id);
-
-  if (existing) existing.quantity = (existing.quantity || 1) + 1;
-  else cart.push({ ...product, quantity: 1 });
-
-  localStorage.setItem('cart', JSON.stringify(cart));
-  updateCartCount();
-  showToast(`✅ ${product.name} adicionado!`);
-}
-
-function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  document.getElementById('cart-count-float').textContent = count;
-}
-
-function showToast(message) {
-  const toast = document.createElement('div');
-  toast.style = `position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#27ae60; color:white; padding:15px 30px; border-radius:50px; z-index:9999;`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 1800);
-}
-
-function checkCartBeforeOpen() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  if (cart.length === 0) {
-    alert("🛒 Seu carrinho está vazio!");
-    return;
-  }
-  window.location.href = 'cart.html';
-}
-
-
-// ==================== INIT ====================
-window.onload = () => {
-  refreshSiteData();
-  updateCartCount();
-  connectLiveUpdates();
-};
-
-setInterval(refreshSiteData, 60000);
-</script>
-
-<footer class="footer">
-  <div class="footer-overlay">
-    <div class="footer-content" style="padding: 25px 5% 18px 5%;">
-
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
-
-        <!-- ESQUERDA - TEXTOS -->
-        <div style="flex: 1; min-width: 300px;">
-          <h2 style="margin-bottom: 8px;">La Coccina</h2>
-          <p style="margin-bottom: 8px;">Sabor que conquista todos os dias.</p>
-          
-          <p style="margin:4px 0;">Endereço: Cachoeira do Bom Jesus, Florianópolis - SC</p>
-          <p style="margin:4px 0;">Horário: Terça a Domingo, 10:00 às 15:00</p>
+        <div style="display: flex; justify-content: center; gap: 25px; margin: 15px 0 12px 0;">
+          <a href="https://www.instagram.com/lacoccinarestaurante/" target="_blank" style="color:white; text-decoration:none;">
+            <img src="assets/imagens/instagram.png" width="40" height="40" alt="Instagram">
+          </a>
+          <a href="https://wa.me/5548984138554" target="_blank" style="color:white; text-decoration:none;">
+            <img src="assets/imagens/whatsapp.png" width="40" height="40" alt="WhatsApp">
+          </a>
         </div>
 
-        <!-- DIREITA - ÍCONES PRINCIPAIS -->
-        <div style="flex: 1; text-align: center; min-width: 320px;">
-          <img src="assets/imagens/icons.png" 
-               alt="Benefícios" 
-               style="width: 520px; max-width: 100%; height: auto; margin-bottom: 15px;">
+        <div style="text-align:center; margin-top: 12px;">
+          <span style="font-size:0.82rem; color:#777;">© 2026 La Coccina - Todos os direitos reservados</span>
         </div>
-
       </div>
-
-      <!-- INSTAGRAM E WHATSAPP -->
-      <div style="display: flex; justify-content: center; gap: 25px; margin: 15px 0 12px 0;">
-        <a href="https://www.instagram.com/lacoccinarestaurante/" target="_blank" style="color:white; text-decoration:none;">
-          <img src="assets/imagens/instagram.png" width="40" height="40" alt="Instagram">
-        </a>
-        <a href="https://wa.me/5548984138554" target="_blank" style="color:white; text-decoration:none;">
-          <img src="assets/imagens/whatsapp.png" width="40" height="40" alt="WhatsApp">
-        </a>
-      </div>
-
-      <!-- COPYRIGHT -->
-      <div style="text-align:center; margin-top: 12px;">
-        <span style="font-size:0.82rem; color:#777;">© 2026 La Coccina - Todos os direitos reservados</span>
-      </div>
-
     </div>
-  </div>
-</footer>
+  </footer>
 </body>
 </html>
-
-
-
