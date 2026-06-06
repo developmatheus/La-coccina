@@ -82,7 +82,121 @@
 </header>
 
 <a href="admin/login.html" class="admin-btn">⚙️</a>
+  
+  <meta name="keywords" content="marmita florianopolis, comida caseira florianopolis, marmita delivery floripa, almoço marmita, comida feita em casa, marmita cachoeira do bom jesus, marmita ingleses, marmita canasvieiras, la coccina, prato do dia florianopolis">
+  
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="pt-BR">
+  <meta name="author" content="La Coccina">
+  <meta name="geo.region" content="BR-SC">
+  <meta name="geo.placename" content="Florianópolis">
 
+
+  <!-- Open Graph (para quando compartilhar no WhatsApp, Instagram, etc) -->
+  <meta property="og:title" content="La Coccina - Marmitas Caseiras em Florianópolis">
+  <meta property="og:description" content="Comida caseira deliciosa com entrega em Florianópolis. Marmitas, pratos do dia e muito sabor!">
+  <!-- Após publicar: troque SEU-DOMINIO pela URL real (ex. la-coccina.onrender.com) -->
+  <meta property="og:image" content="https://SEU-DOMINIO/assets/imagens/icons.png">
+  <meta property="og:url" content="https://SEU-DOMINIO/">
+  <meta property="og:type" content="website">
+
+
+</head>
+
+
+<body>
+
+
+<header>
+  <div class="logo">La Coccina</div>
+</header>
+
+
+<a href="admin/login.html" class="admin-btn">⚙️</a>
+
+
+<!-- STATUS -->
+<div id="status-bar"></div>
+
+
+<!-- HERO -->
+
+
+<section class="hero">
+  <div class="hero-layout">
+
+
+    <div class="hero-left">
+      <img src="assets/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
+
+
+      <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
+
+
+      <button type="button" class="hero-cta" data-scroll-to="cardapio">
+        Ver Cardápio
+      </button>
+    </div>
+
+
+    <!-- Prato do Dia -->
+    <div id="daily-special-column" class="hero-daily">
+      <div style="width:100%;">
+        <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
+        <div id="daily-special" style="width:100%;"></div>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+
+
+
+<div class="menu-section" id="cardapio">
+  <h2 class="section-title">🍲 Marmitas</h2>
+  <div class="products-slider">
+    <button type="button" class="slider-btn prev" data-slider="marmitas-grid" data-dir="-1" aria-label="Marmitas anteriores">❮</button>
+    <div class="products-row" id="marmitas-grid"></div>
+    <button type="button" class="slider-btn next" data-slider="marmitas-grid" data-dir="1" aria-label="Próximas marmitas">❯</button>
+  </div>
+</div>
+
+
+<div class="menu-section">
+  <h2 class="section-title">🥤 Bebidas</h2>
+  <div class="products-slider">
+    <button type="button" class="slider-btn prev" data-slider="bebidas-grid" data-dir="-1" aria-label="Bebidas anteriores">❮</button>
+    <div class="products-row" id="bebidas-grid"></div>
+    <button type="button" class="slider-btn next" data-slider="bebidas-grid" data-dir="1" aria-label="Próximas bebidas">❯</button>
+  </div>
+</div>
+
+
+
+
+<!-- CARRINHO FLUTUANTE -->
+<div id="cart-float-btn" class="cart-float" onclick="checkCartBeforeOpen()" title="Carrinho">
+  🛒
+  <span id="cart-count-float">0</span>
+</div>
+
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/security.js"></script>
+<script src="assets/js/scroll-smooth.js"></script>
+<script src="assets/js/script.js"></script>
+
+
+<script>
+/* ====LOJA — La Coccina ==== */
+const API_BASE = 'https://la-coccina-production.up.railway.app'
+const esc = LaCoccinaSecurity.escapeHtml;
+const safeJson = LaCoccinaSecurity.safeJsonForHtml;
+const imgUrl = LaCoccinaSecurity.uploadUrl;
+let menuEventSource = null;
+let refreshDebounceTimer = null;
 <!-- STATUS -->
 <div id="status-bar"></div>
 
