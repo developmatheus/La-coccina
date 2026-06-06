@@ -18,21 +18,21 @@
       const { protocol, hostname, port, origin } = window.location;
 
       if (protocol === 'file:') {
-        return 'http://127.0.0.1:3001';
+        return 'https://la-coccina-production.up.railway.app';
       }
 
       if (port === '3001') {
         return origin.replace(/\/$/, '');
       }
 
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://127.0.0.1:3001';
+      if (hostname === 'https://la-coccina-production.up.railway.app' || hostname === 'https://la-coccina-production.up.railway.app') {
+        return 'https://la-coccina-production.up.railway.app';
       }
 
       return origin.replace(/\/$/, '');
     }
 
-    return 'http://127.0.0.1:3001';
+    return 'https://la-coccina-production.up.railway.app';
   }
 
   const API_BASE = getApiBase();
