@@ -40,7 +40,7 @@ if (isProd) {
   app.set('trust proxy', 1);
 }
 
-const corsList = process.env.CORS_ORIGINS || 'http://127.0.0.1:5500,http://localhost:5500,null';
+const corsList = process.env.CORS_ORIGINS || 'la-coccina-production.up.railway.app';
 const allowedOrigins = corsList.split(',').map((o) => o.trim()).filter(Boolean);
 
 if (process.env.PUBLIC_URL) {
