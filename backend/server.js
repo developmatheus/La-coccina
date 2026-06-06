@@ -4,6 +4,90 @@
  * ============================================================================
  */
 
+
+const fs = require('fs');
+const path = require('path');
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+
+require('dotenv').config({
+  path: path.join(__dirname, 'config', '.env')
+});
+
+
+const productsRouter = require('./routes/products');
+const authRouter = require('./routes/auth');
+const { requireAdmin } = require('./middleware/auth');
+const { upload } = require('./middleware/upload');
+
+
+const app = express();
+
+
+const PORT = Number(process.env.PORT) || 3001;
+const isProd = process.env.NODE_ENV === 'production';
+
+
+const frontendDir = path.join(__dirname, '..', 'Frontend');
+const frontendIndex = path.join(frontendDir, 'index.html');
+
+
+const hasFrontend = fs.existsSync(frontendIndex);
+
+
+const serveFrontend =
+  process.env.SERVE_FRONTEND !== 'false' &&
+  (isProd || process.env.SERVE_FRONTEND === 'true' || hasFrontend);
+
+
+// -----------------------------------------------------------------------------
+// TRUST PROXY
+// -----------------------------------------------------------------------------
+
+
+if (isProd) {
+  app.set('trust proxy', 1);
+}
+
+
+// -----------------------------------------------------------------------------
+// CORS
+// -----------------------------------------------------------------------------
+
+
+const allowedOrigins = [
+  'https://la-coccina.netlify.app',
+  'https://developmatheus.github.io',
+  'https://la-coccina.netlify.app/',
+  'https://la-coccina-production.up.railway.app',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001'
+];
+
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+
+    callback(new Error('Origem não permitida pelo CORS'));
+  },
+
+
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']/**
+ * ============================================================================
+ * LA COCCINA — Servidor API
+ * ============================================================================
+ */
+
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
