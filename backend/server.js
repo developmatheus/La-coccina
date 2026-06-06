@@ -47,7 +47,8 @@ if (isProd) {
 // -----------------------------------------------------------------------------
 
 const allowedOrigins = [
-  'https://la-coccina-production.up.railway.app',
+  'https://la-coccina.netlify.app',
+  'https://la-coccina.netlify.app/',
   'https://la-coccina-production.up.railway.app',
   'http://localhost:3001',
   'http://127.0.0.1:3001'
@@ -194,16 +195,14 @@ app.use((err, _req, res, _next) => {
 
   if (err.message === 'Origem não permitida pelo CORS') {
     return res.status(403).json({
-      error: 'Acesso negado'
+      error: 'CORS Error: Origem não permitida'
     });
   }
 
-  console.error('Erro:', err.message);
+  console.error('🔥 Erro no servidor:', err);
 
   res.status(500).json({
-    error: isProd
-      ? 'Erro interno do servidor'
-      : err.message
+    error: 'Erro interno no servidor'
   });
 });
 
@@ -211,34 +210,13 @@ app.use((err, _req, res, _next) => {
 // START
 // -----------------------------------------------------------------------------
 
-const server = app.listen(PORT, () => {
-
-  const publicUrl =
-    process.env.PUBLIC_URL ||
-    `http://localhost:${PORT}`;
-
-  console.log(`🚀 Servidor iniciado`);
-  console.log(`📍 Local: ${publicUrl}`);
-
-  if (serveFrontend && hasFrontend) {
-    console.log(`🛒 Loja: ${publicUrl}/index.html`);
-    console.log(`🔐 Admin: ${publicUrl}/admin/login.html`);
-  }
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`
+  🚀 LA COCCINA — API ONLINE
+  -----------------------------------------
+  URL:  http://localhost:${PORT}
+  Ambiente: ${isProd ? 'Produção' : 'Desenvolvimento'}
+  Frontend: ${serveFrontend ? 'Ativado' : 'Desativado'}
+  -----------------------------------------
+  `);
 });
-
-server.on('error', (err) => {
-
-  if (err.code === 'EADDRINUSE') {
-
-    console.error(
-      `❌ Porta ${PORT} em uso`
-    );
-
-    process.exit(1);
-  }
-
-  console.error(err);
-  process.exit(1);
-});
-
-module.exports = app;
