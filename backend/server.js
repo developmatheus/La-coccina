@@ -10,7 +10,14 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const cors = require('cors');
+app.use(cors({
+  origin: [
+    'https://la-coccina.netlify.app',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001'
+  ],
+  credentials: true
+}));
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
