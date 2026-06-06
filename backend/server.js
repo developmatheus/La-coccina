@@ -47,7 +47,7 @@ if (isProd) {
 // -----------------------------------------------------------------------------
 
 const allowedOrigins = [
-  'https://la-coccina.netlify.app',
+  'https://https://la-coccina-production.up.railway.app',
   'https://la-coccina-production.up.railway.app',
   'http://localhost:3001',
   'http://127.0.0.1:3001'
