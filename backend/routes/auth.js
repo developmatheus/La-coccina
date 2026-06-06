@@ -14,8 +14,8 @@ router.post('/', async (req, res) => {
     const username = trimString(req.body.username, 80);
     const password = String(req.body.password || '');
 
-    const adminUser = process.env.ADMIN_USERNAME;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+const adminUser = process.env.ADMIN_USERNAME;
+const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!adminUser || !adminPassword) {
       return res.status(500).json({
