@@ -15,7 +15,8 @@ require('dotenv').config({
   path: path.join(__dirname, 'config', '.env')
 });
 
-const productsRouter = require('./routes/products');
+const productsRouter      = require('./routes/products');
+const ordersRouter        = require('./routes/orders');
 const accompanimentsRouter = require('./routes/accompaniments');
 const authRouter = require('./routes/auth');
 const { requireAdmin } = require('./middleware/auth');
@@ -118,6 +119,7 @@ app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
 });
 
 app.use('/api/products', productsRouter);
+app.use('/api/orders', ordersRouter);
 app.use('/api/accompaniments', accompanimentsRouter);
 
 if (serveFrontend && hasFrontend) {

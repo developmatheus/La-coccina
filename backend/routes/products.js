@@ -39,15 +39,24 @@ router.get('/stream', (req, res) => {
 // ---------------------------------------------------------------------------
 function mergeDetails(row) {
   const details = row.category === 'marmita'
-    ? { protein: row.protein ?? '', sides: row.sides ?? '' }
-    : { volume: row.volume ?? '', serve_type: row.serve_type ?? '' };
-  const { protein, sides, volume, serve_type, ...base } = row;
+    ? {
+        protein:         row.protein          ?? '',
+        sides:           row.sides            ?? '',
+        is_customizable: row.is_customizable  ? 1 : 0,
+        min_sides:       row.min_sides        ?? 0,
+        max_sides:       row.max_sides        ?? 0,
+      }
+    : {
+        volume:     row.volume     ?? '',
+        serve_type: row.serve_type ?? '',
+      };
+  const { protein, sides, is_customizable, min_sides, max_sides, volume, serve_type, ...base } = row;
   return { ...base, details };
 }
 
 const MENU_JOIN = `
   SELECT p.id, p.name, p.price, p.\`desc\`, p.image, p.category, p.active, p.isDailySpecial,
-         md.protein, md.sides,
+         md.protein, md.sides, md.is_customizable, md.min_sides, md.max_sides,
          bd.volume, bd.serve_type
   FROM products p
   LEFT JOIN marmita_details md ON md.product_id = p.id AND p.category = 'marmita'

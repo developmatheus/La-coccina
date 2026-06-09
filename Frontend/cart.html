@@ -285,26 +285,64 @@
       return message;
     }
 
-    function sendToWhatsApp() {
+    async function sendToWhatsApp() {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const name = document.getElementById('customer-name').value.trim();
+      const name    = document.getElementById('customer-name').value.trim();
       const address = document.getElementById('address').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const bairro = document.getElementById('bairro').value;
+      const phone   = document.getElementById('phone').value.trim();
+      const bairro  = document.getElementById('bairro').value;
+      const payment = document.getElementById('payment').value;
+      const obs     = document.getElementById('obs').value.trim();
+      const bairroText = document.getElementById('bairro').options[document.getElementById('bairro').selectedIndex].text;
+      const frete   = parseFloat(document.getElementById('frete').textContent) || 0;
 
-      if (cart.length === 0) {
-        alert('🛒 Seu carrinho está vazio!');
-        return;
-      }
-
+      if (cart.length === 0) { alert('🛒 Seu carrinho está vazio!'); return; }
       if (!name || !address || !phone || bairro === '0') {
         alert('⚠️ Preencha nome, local de entrega, endereço e WhatsApp.');
         return;
       }
 
-      const message = buildWhatsAppMessage();
-      const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
+      // Salvar pedido no banco e obter o token de rastreio
+      const items = cart.map(item => ({
+        id:    item.id,
+        name:  item.name,
+        price: parseFloat(item.price),
+        qty:   item.quantity || 1,
+        accompaniments: item.accompaniments || [],
+      }));
 
+      const subtotal = cart.reduce((s, i) => s + parseFloat(i.price) * (i.quantity || 1), 0);
+      const total    = subtotal + frete;
+
+      let orderToken = null;
+      let orderId    = null;
+      try {
+        const res  = await fetch(`${LaCoccinaSecurity.API_BASE}/api/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer: name, address: `${bairroText} - ${address}`, phone, payment, obs, total, items }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          orderToken = data.token;
+          orderId    = data.id;
+          // Guardar para rastreio
+          const history = JSON.parse(localStorage.getItem('lc_orders') || '[]');
+          history.unshift({ id: orderId, token: orderToken, name, createdAt: Date.now() });
+          localStorage.setItem('lc_orders', JSON.stringify(history.slice(0, 20)));
+        }
+      } catch (e) {
+        console.warn('Não foi possível registrar pedido no sistema:', e.message);
+      }
+
+      // Montar mensagem WhatsApp — inclui link de rastreio se tiver token
+      let message = buildWhatsAppMessage();
+      if (orderToken) {
+        const trackUrl = `${window.location.origin}/track.html?token=${orderToken}`;
+        message += `\n🔍 *Rastrear pedido:* ${trackUrl}\n`;
+      }
+
+      const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
       localStorage.removeItem('cart');
       window.location.href = whatsappUrl;
     }

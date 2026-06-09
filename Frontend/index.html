@@ -114,6 +114,7 @@
   </header>
 
   <a href="admin/login.html" class="admin-btn">⚙️</a>
+  <a href="track.html" id="track-btn" title="Rastrear meu pedido" style="display:none; position:fixed; bottom:6rem; right:1.5rem; background:#1a2a3a; color:#5dade2; border:1px solid #1e3a5a; border-radius:50px; padding:0.55rem 1rem; font-size:0.78rem; font-weight:600; text-decoration:none; z-index:999; box-shadow:0 4px 16px rgba(0,0,0,0.4);">🔍 Pedido</a>
 
   <div id="status-bar"></div>
 
@@ -559,6 +560,14 @@
       updateCartCount();
       connectLiveUpdates();
       scheduleFallbackPoll();
+      // Mostrar botão de rastreio se houver pedido recente (últimas 4h)
+      const orders = JSON.parse(localStorage.getItem('lc_orders') || '[]');
+      const recent = orders.find(o => Date.now() - o.createdAt < 4 * 60 * 60 * 1000);
+      if (recent) {
+        const btn = document.getElementById('track-btn');
+        btn.style.display = 'flex';
+        btn.href = `track.html?token=${recent.token}`;
+      }
     };
   </script>
 
