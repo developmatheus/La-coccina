@@ -117,6 +117,32 @@
        ========================================================================== */
     let cartSubtotal = 0;
 
+    // Modos de exibição de acompanhamentos: 'tags' | 'text' | 'edit'
+    const ACC_DISPLAY_MODE = localStorage.getItem('lc_acc_display_mode') || 'tags';
+
+    function esc(s) { return LaCoccinaSecurity.escapeHtml(s); }
+
+    function renderAccompaniments(item, index) {
+      const acc = item.accompaniments;
+      if (!acc || !acc.length) return '';
+
+      if (ACC_DISPLAY_MODE === 'tags') {
+        const tags = acc.map(a =>
+          `<span class="acc-tag">${esc(a.name)}${a.extra_price > 0 ? ` <em>+R$${parseFloat(a.extra_price).toFixed(2)}</em>` : ''}</span>`
+        ).join('');
+        return `<div class="acc-tags-row">${tags}</div>`;
+      }
+
+      if (ACC_DISPLAY_MODE === 'edit') {
+        const names = acc.map(a => esc(a.name)).join(', ');
+        return `<div class="acc-text-row">${names} <button type="button" class="acc-edit-btn" onclick="editAccompaniments(${index})">✏️ editar</button></div>`;
+      }
+
+      // 'text' (default fallback)
+      const names = acc.map(a => esc(a.name)).join(', ');
+      return `<div class="acc-text-row">com: ${names}</div>`;
+    }
+
     function loadCart() {
       localStorage.removeItem('laCoccinaCartLocked');
 
@@ -144,7 +170,8 @@
         div.innerHTML = `
           <img src="${LaCoccinaSecurity.uploadUrl(item.image)}" alt="">
           <div class="cart-item-info">
-            <strong>${item.name}</strong><br>
+            <strong>${item.name}</strong>
+            ${renderAccompaniments(item, index)}
             <small>R$ ${parseFloat(item.price).toFixed(2)} × ${qty}</small>
           </div>
           <div class="cart-item-actions">
@@ -235,6 +262,10 @@
         const itemTotal = parseFloat(item.price) * qty;
         subtotal += itemTotal;
         itemsText += `• ${qty}x ${item.name} → R$ ${itemTotal.toFixed(2)}\n`;
+        if (item.accompaniments && item.accompaniments.length) {
+          const accLine = item.accompaniments.map(a => a.name).join(', ');
+          itemsText += `   ↳ com: ${accLine}\n`;
+        }
       });
 
       const frete = parseFloat(document.getElementById('frete').textContent) || 0;

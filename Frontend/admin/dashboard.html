@@ -19,8 +19,9 @@
     .admin-header h1 { margin: 0; font-size: 1.35rem; }
     .grid-admin { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
     .card-admin { background: #1a1a1a; padding: 25px; border-radius: 16px; }
-    input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background:#2a2a2a; color:white; border:1px solid #444; }
-    button { background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
+    input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background:#2a2a2a; color:white; border:1px solid #444; }
+    button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
+    td button, .btn-action { width: auto; padding: 8px 14px; margin: 2px; border-radius: 6px; font-size: 0.85rem; }
     .btn-delete { background: #e74c3c; }
     .btn-daily { background: #ffcc00; color: #000; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -209,6 +210,22 @@
         <button onclick="resetConfig()" style="width:auto; padding:14px 24px; background:#555;">Restaurar padrão</button>
       </div>
       <p id="cfg-msg" style="margin-top:10px; font-size:0.85rem; color:#27ae60; display:none;"></p>
+
+      <hr style="border-color:#2a2a2a; margin:20px 0;">
+
+      <label style="display:block; margin:0 0 8px; color:#ccc; font-size:0.9rem;">
+        Exibição de acompanhamentos no carrinho do cliente
+        <small style="color:#666; display:block; margin-top:3px;">Como os acompanhamentos escolhidos aparecem para o cliente dentro do carrinho.</small>
+      </label>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <select id="cfg-acc-display" style="width:auto; min-width:220px;">
+          <option value="tags">🏷️ Tags coloridas (padrão)</option>
+          <option value="text">📝 Linha de texto discreta</option>
+          <option value="edit">✏️ Texto com botão Editar</option>
+        </select>
+        <button onclick="saveAccDisplayMode()" style="width:auto; padding:14px 24px; background:#2980b9;">💾 Salvar</button>
+      </div>
+      <p id="cfg-acc-msg" style="margin-top:10px; font-size:0.85rem; color:#27ae60; display:none;"></p>
     </div>
   </div>
 
@@ -801,10 +818,27 @@
       if (e.target === this) closeAccModal();
     });
 
+    const ACC_DISPLAY_KEY = 'lc_acc_display_mode';
+
+    function loadAccDisplayMode() {
+      const val = localStorage.getItem(ACC_DISPLAY_KEY) || 'tags';
+      document.getElementById('cfg-acc-display').value = val;
+    }
+
+    function saveAccDisplayMode() {
+      const val = document.getElementById('cfg-acc-display').value;
+      localStorage.setItem(ACC_DISPLAY_KEY, val);
+      const msg = document.getElementById('cfg-acc-msg');
+      msg.textContent = '✅ Modo salvo — recarregue o carrinho para aplicar.';
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
     window.onload = () => {
       loadProducts();
       loadRestaurantStatus();
       loadConfig();
+      loadAccDisplayMode();
       loadAccompanimentsCatalog();
     };
   </script>

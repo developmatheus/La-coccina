@@ -30,16 +30,68 @@
       padding: 20px;
     }
     #acc-sel-box {
-      background: #1a1a1a; border-radius: 20px; padding: 28px;
-      width: 100%; max-width: 440px; max-height: 80vh;
-      overflow-y: auto; position: relative;
+      background: #1a1a1a; border-radius: 20px; padding: 0;
+      width: 100%; max-width: 460px; max-height: 88vh;
+      display: flex; flex-direction: column; position: relative;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7);
     }
-    #acc-sel-box h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
-    #acc-sel-msg { color: #ffcc00; font-size: 0.85rem; margin-bottom: 14px; display: block; }
-    #acc-sel-box .acc-actions { display: flex; gap: 10px; margin-top: 18px; }
-    #acc-sel-box .acc-actions button { flex: 1; padding: 14px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    .acc-modal-header {
+      padding: 22px 24px 14px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .acc-modal-header h3 { margin: 0 0 2px; font-size: 1.1rem; color: #fff; }
+    .acc-modal-header .acc-subtitle { color: #888; font-size: 0.82rem; margin: 0 0 8px; }
+    .acc-counter-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #111; border-radius: 8px; padding: 8px 12px; margin-top: 8px;
+    }
+    .acc-counter-bar span { font-size: 0.85rem; color: #ccc; }
+    .acc-counter-val { font-weight: 700; color: #ffcc00; font-size: 1rem; }
+    .acc-counter-bar .acc-extra-total { color: #ffcc00; font-size: 0.85rem; font-weight: 600; }
+    #acc-sel-list {
+      overflow-y: auto; padding: 8px 0; flex: 1;
+    }
+    .acc-check-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 24px; cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid #222;
+    }
+    .acc-check-item:last-child { border-bottom: none; }
+    .acc-check-item:hover { background: #222; }
+    .acc-check-item.is-selected { background: #1e2e1e; }
+    .acc-check-item input[type=checkbox] { display: none; }
+    .acc-checkmark {
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid #444; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; background: #2a2a2a;
+    }
+    .acc-check-item.is-selected .acc-checkmark {
+      background: #27ae60; border-color: #27ae60;
+    }
+    .acc-checkmark::after { content: '✓'; color: #fff; font-size: 0.85rem; display: none; }
+    .acc-check-item.is-selected .acc-checkmark::after { display: block; }
+    .acc-check-label { flex: 1; }
+    .acc-check-label strong { display: block; font-size: 0.95rem; color: #fff; font-weight: 500; }
+    .acc-check-label .acc-price-tag {
+      font-size: 0.78rem; color: #ffcc00; font-weight: 600; margin-top: 1px;
+    }
+    .acc-check-label .acc-default-tag {
+      font-size: 0.7rem; background: #1a4a2a; color: #4caf50;
+      padding: 1px 7px; border-radius: 50px; margin-left: 6px;
+    }
+    .acc-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #2a2a2a;
+      display: flex; gap: 10px;
+    }
+    .acc-modal-footer button {
+      flex: 1; padding: 14px; border: none; border-radius: 50px;
+      font-weight: bold; cursor: pointer; font-size: 1rem; transition: opacity 0.2s;
+    }
     #btn-acc-confirm { background: #ffcc00; color: #000; }
-    #btn-acc-cancel  { background: #333; color: #fff; }
+    #btn-acc-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+    #btn-acc-cancel  { background: #2a2a2a; color: #fff; flex: 0 0 auto; padding: 14px 22px; }
   </style>
 
   <meta name="description" content="Marmitas caseiras deliciosas em Florianópolis. Comida feita com amor, ingredientes frescos e sabor autêntico. Entrega rápida em Cachoeira do Bom Jesus, Ingleses, Canasvieiras e região.">
@@ -303,62 +355,114 @@
     // Modal de seleção de acompanhamentos (pratos personalizáveis)
     let _accModalProduct = null;
 
+    let _accModalMin = 0;
+    let _accModalMax = 0;
+
     async function openAccompanimentsModal(product) {
       if (!(await isStoreOpen())) { alert('🔴 O restaurante está fechado no momento.'); return; }
       _accModalProduct = product;
 
       document.getElementById('acc-sel-title').textContent = product.name;
-      document.getElementById('acc-sel-list').innerHTML = '<p style="color:#888">Carregando...</p>';
-      document.getElementById('acc-sel-msg').textContent = '';
+      document.getElementById('acc-sel-subtitle').textContent = product.desc || '';
+      document.getElementById('acc-sel-list').innerHTML = '<p style="padding:24px; color:#888">Carregando...</p>';
       document.getElementById('acc-sel-overlay').style.display = 'flex';
+      document.getElementById('btn-acc-confirm').disabled = true;
 
       try {
         const res = await fetch(`${API_BASE}/api/accompaniments/product/${product.id}`);
         const items = await res.json();
 
         const cfg = items[0] || {};
-        const min = cfg.min_sides || 0;
-        const max = cfg.max_sides || 0;
-        document.getElementById('acc-sel-msg').textContent =
-          max > 0 ? `Escolha entre ${min} e ${max} acompanhamento(s).` : '';
+        _accModalMin = cfg.min_sides || 0;
+        _accModalMax = cfg.max_sides || 0;
 
-        document.getElementById('acc-sel-list').innerHTML = items.length ? items.map(a => {
-          const extraLabel = a.extra_price > 0 ? `<span style="color:#ffcc00; font-size:0.8rem"> +R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : '';
+        document.getElementById('acc-sel-list').dataset.min = _accModalMin;
+        document.getElementById('acc-sel-list').dataset.max = _accModalMax;
+
+        if (!items.length) {
+          document.getElementById('acc-sel-list').innerHTML =
+            '<p style="padding:24px; color:#888; font-size:0.9rem">Nenhum acompanhamento disponível para este prato.</p>';
+          _updateAccCounter();
+          return;
+        }
+
+        document.getElementById('acc-sel-list').innerHTML = items.map(a => {
+          const priceTag = a.extra_price > 0
+            ? `<span class="acc-price-tag">+ R$ ${parseFloat(a.extra_price).toFixed(2)}</span>`
+            : '';
+          const defaultTag = a.is_default
+            ? `<span class="acc-default-tag">padrão</span>` : '';
           return `
-            <label style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #2a2a2a; cursor:pointer;">
-              <input type="checkbox" name="acc-sel" value="${a.id}"
-                data-price="${a.extra_price}"
-                data-name="${esc(a.name)}"
-                ${a.is_default ? 'checked' : ''}>
-              <span>${esc(a.name)}${extraLabel}</span>
-            </label>`;
-        }).join('') : '<p style="color:#888; font-size:0.9rem">Nenhum acompanhamento disponível.</p>';
+            <div class="acc-check-item${a.is_default ? ' is-selected' : ''}"
+                 onclick="_toggleAccItem(this)"
+                 data-id="${a.id}"
+                 data-price="${a.extra_price}"
+                 data-name="${esc(a.name)}"
+                 data-selected="${a.is_default ? '1' : '0'}">
+              <div class="acc-checkmark"></div>
+              <div class="acc-check-label">
+                <strong>${esc(a.name)}${defaultTag}</strong>
+                ${priceTag}
+              </div>
+            </div>`;
+        }).join('');
 
-        // Salvar config de min/max no elemento para usar no confirm
-        document.getElementById('acc-sel-list').dataset.min = min;
-        document.getElementById('acc-sel-list').dataset.max = max;
+        _updateAccCounter();
       } catch (e) {
-        document.getElementById('acc-sel-list').innerHTML = '<p style="color:#e74c3c">Erro ao carregar opções.</p>';
+        document.getElementById('acc-sel-list').innerHTML =
+          '<p style="padding:24px; color:#e74c3c">Erro ao carregar opções.</p>';
       }
     }
 
-    function confirmAccompaniments() {
-      const list = document.getElementById('acc-sel-list');
-      const min = Number(list.dataset.min || 0);
-      const max = Number(list.dataset.max || 0);
-      const checked = Array.from(list.querySelectorAll('input[name="acc-sel"]:checked'));
+    function _toggleAccItem(el) {
+      const isSelected = el.dataset.selected === '1';
+      el.dataset.selected = isSelected ? '0' : '1';
+      el.classList.toggle('is-selected', !isSelected);
+      _updateAccCounter();
+    }
 
-      if (max > 0 && (checked.length < min || checked.length > max)) {
-        alert(`Escolha entre ${min} e ${max} acompanhamento(s). Você marcou ${checked.length}.`);
-        return;
+    function _updateAccCounter() {
+      const selected = document.querySelectorAll('.acc-check-item[data-selected="1"]');
+      const count = selected.length;
+      const extraTotal = Array.from(selected).reduce((s, el) => s + parseFloat(el.dataset.price || 0), 0);
+
+      const min = _accModalMin, max = _accModalMax;
+      const hasLimit = max > 0;
+
+      let label = `${count} selecionado${count !== 1 ? 's' : ''}`;
+      if (hasLimit) label += ` de ${max}`;
+      document.getElementById('acc-count-label').textContent = label;
+
+      const extraEl = document.getElementById('acc-extra-label');
+      extraEl.textContent = extraTotal > 0 ? `+ R$ ${extraTotal.toFixed(2)}` : '';
+
+      const hint = document.getElementById('acc-limit-hint');
+      if (hasLimit) {
+        hint.textContent = `Mín: ${min} · Máx: ${max}`;
+        hint.style.color = (count < min || count > max) ? '#e74c3c' : '#4caf50';
+      } else {
+        hint.textContent = 'Selecione à vontade';
+        hint.style.color = '#888';
       }
 
-      const selectedAcc = checked.map(cb => ({
-        id: Number(cb.value),
-        name: cb.dataset.name,
-        extra_price: parseFloat(cb.dataset.price || 0),
-      }));
+      const confirmBtn = document.getElementById('btn-acc-confirm');
+      const valid = !hasLimit || (count >= min && count <= max);
+      confirmBtn.disabled = !valid;
 
+      const base = parseFloat(_accModalProduct?.price || 0);
+      const total = base + extraTotal;
+      confirmBtn.textContent = valid
+        ? `✅ Adicionar — R$ ${total.toFixed(2)}`
+        : `Escolha entre ${min} e ${max}`;
+    }
+
+    function confirmAccompaniments() {
+      const selected = Array.from(document.querySelectorAll('.acc-check-item[data-selected="1"]'));
+      const selectedAcc = selected.map(el => ({
+        id: Number(el.dataset.id),
+        name: el.dataset.name,
+        extra_price: parseFloat(el.dataset.price || 0),
+      }));
       closeAccSel();
       addToCart(_accModalProduct, selectedAcc);
     }
@@ -493,12 +597,19 @@
   <!-- Modal de seleção de acompanhamentos -->
   <div id="acc-sel-overlay" onclick="if(event.target===this) closeAccSel()">
     <div id="acc-sel-box">
-      <h3 id="acc-sel-title"></h3>
-      <span id="acc-sel-msg"></span>
+      <div class="acc-modal-header">
+        <h3 id="acc-sel-title"></h3>
+        <p class="acc-subtitle" id="acc-sel-subtitle"></p>
+        <div class="acc-counter-bar">
+          <span id="acc-count-label">0 selecionados</span>
+          <span id="acc-limit-hint" style="color:#888; font-size:0.8rem"></span>
+          <span id="acc-extra-label" class="acc-extra-total"></span>
+        </div>
+      </div>
       <div id="acc-sel-list"></div>
-      <div class="acc-actions">
-        <button id="btn-acc-confirm" onclick="confirmAccompaniments()">✅ Adicionar ao Carrinho</button>
-        <button id="btn-acc-cancel"  onclick="closeAccSel()">Cancelar</button>
+      <div class="acc-modal-footer">
+        <button id="btn-acc-cancel" onclick="closeAccSel()">Voltar</button>
+        <button id="btn-acc-confirm" onclick="confirmAccompaniments()" disabled>Adicionar</button>
       </div>
     </div>
   </div>

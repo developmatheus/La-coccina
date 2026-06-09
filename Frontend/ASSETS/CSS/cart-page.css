@@ -177,3 +177,50 @@ body.cart-page {
   gap: 0.5rem;
   width: 100%;
 }
+
+/* Acompanhamentos no carrinho */
+.acc-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.3rem 0 0.4rem;
+}
+
+.acc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #1e2e1e;
+  color: #4caf50;
+  border: 1px solid #2a4a2a;
+  padding: 2px 9px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.acc-tag em {
+  font-style: normal;
+  color: #ffcc00;
+  font-size: 0.7rem;
+}
+
+.acc-text-row {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.25rem 0 0.35rem;
+  line-height: 1.4;
+}
+
+.acc-edit-btn {
+  background: none;
+  border: none;
+  color: #ffcc00;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  text-decoration: underline;
+  font-weight: 600;
+}
