@@ -231,7 +231,7 @@
         <span class="admin-brand-tag">Painel Administrativo</span>
       </div>
       <div class="admin-header-actions">
-        <a href="kanban.html" style="background:#1a2a3a; color:#5dade2; border:1px solid #1e3a5a; border-radius:8px; padding:10px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; white-space:nowrap;">📋 Kanban</a>
+        <a id="btn-kanban-link" href="kanban.html" style="display:none; background:#1a2a3a; color:#5dade2; border:1px solid #1e3a5a; border-radius:8px; padding:10px 16px; font-size:0.85rem; font-weight:600; text-decoration:none; white-space:nowrap;">📋 Kanban</a>
         <button id="btn-novo-prato" onclick="openDrawer()">＋ Novo Prato</button>
         <button onclick="toggleRestaurantStatus()" id="status-btn" style="width:auto; padding:10px 20px;">
           🔄 Carregando...
@@ -1042,14 +1042,17 @@
     const KANBAN_KEY = 'lc_kanban_enabled';
 
     function loadKanbanEnabled() {
-      document.getElementById('cfg-kanban-enabled').checked = localStorage.getItem(KANBAN_KEY) === 'true';
+      const enabled = localStorage.getItem(KANBAN_KEY) === 'true';
+      document.getElementById('cfg-kanban-enabled').checked = enabled;
+      document.getElementById('btn-kanban-link').style.display = enabled ? 'inline-flex' : 'none';
     }
 
     function saveKanbanEnabled() {
       const val = document.getElementById('cfg-kanban-enabled').checked;
       localStorage.setItem(KANBAN_KEY, String(val));
+      document.getElementById('btn-kanban-link').style.display = val ? 'inline-flex' : 'none';
       const msg = document.getElementById('cfg-kanban-msg');
-      msg.textContent = val ? '✅ Kanban ativado — rastreamento de pedidos habilitado.' : '✅ Kanban desativado — pedidos apenas via WhatsApp.';
+      msg.textContent = val ? '✅ Kanban ativado — link disponível no header.' : '✅ Kanban desativado — pedidos apenas via WhatsApp.';
       setTimeout(() => { msg.textContent = ''; }, 3000);
     }
 

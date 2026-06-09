@@ -429,28 +429,24 @@
         saveAddressHistory(bairroText, address);
       }
 
-      // Salvar resumo do pedido no localStorage para a tela de tracking
-      const orderSummary = {
-        items: cart.map(i => ({ name: i.name, qty: i.quantity || 1, price: parseFloat(i.price), accompaniments: i.accompaniments || [] })),
-        customer: name,
-        address: `${bairroText} - ${address}`,
-        phone,
-        payment,
-        total,
-        subtotal,
-        frete,
-        obs,
-      };
-      localStorage.setItem('lc_last_order_summary', JSON.stringify(orderSummary));
       localStorage.removeItem('cart');
 
-      // Sempre abre WhatsApp em nova aba
-      window.open(whatsappUrl, '_blank', 'noopener');
+      if (kanbanEnabled && orderToken) {
+        // Kanban ATIVO: salva resumo, abre WhatsApp em _blank e redireciona para tracking
+        const orderSummary = {
+          items: cart.map(i => ({ name: i.name, qty: i.quantity || 1, price: parseFloat(i.price), accompaniments: i.accompaniments || [] })),
+          customer: name,
+          address: `${bairroText} - ${address}`,
+          phone, payment, total, subtotal, frete, obs,
+        };
+        localStorage.setItem('lc_last_order_summary', JSON.stringify(orderSummary));
 
-      // Sempre redireciona para a tela de acompanhamento
-      const trackBase = `${window.location.origin}/track.html`;
-      const trackUrl = orderToken ? `${trackBase}?token=${orderToken}` : trackBase;
-      window.location.href = trackUrl;
+        window.open(whatsappUrl, '_blank', 'noopener');
+        window.location.href = `${window.location.origin}/track.html?token=${orderToken}`;
+      } else {
+        // Kanban DESATIVADO: comportamento original — redireciona para WhatsApp na mesma aba
+        window.location.href = whatsappUrl;
+      }
     }
 
     // -----------------------------------------------------------------------

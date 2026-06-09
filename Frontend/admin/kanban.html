@@ -492,6 +492,10 @@
   // ---- Init ----
   if (!sessionStorage.getItem('adminToken') || localStorage.getItem('adminLogged') !== 'true') {
     window.location.href = 'login.html';
+  } else if (localStorage.getItem('lc_kanban_enabled') !== 'true') {
+    // Kanban desabilitado — redireciona de volta ao dashboard com aviso
+    alert('O Kanban está desabilitado. Ative-o em ⚙️ Configurações no painel administrativo.');
+    window.location.href = 'dashboard.html';
   } else {
     loadOrders();
     connectSSE();
