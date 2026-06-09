@@ -31,7 +31,9 @@ const db = {
       return [rows, {}];
     }
     const result = await conn.run(sql, params);
-    return [[], { insertId: result.lastID, affectedRows: result.changes }];
+    const meta = { insertId: result.lastID, affectedRows: result.changes };
+    // Retorna [meta, meta] para que tanto [result] quanto [, meta] funcionem
+    return [meta, meta];
   },
 
   // Acesso direto à instância sqlite para migrations e scripts
