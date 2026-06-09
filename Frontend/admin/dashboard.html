@@ -388,7 +388,7 @@
         </div>
       </div>
 
-      <label>Foto do Prato</label>
+      <label>Foto do Prato <span id="drawer-img-hint" style="color:#555; font-size:0.72rem; text-transform:none; font-weight:400;"></span></label>
       <input type="file" id="imageUpload" accept="image/*" onchange="previewAndCrop(event)">
       <div id="drawer-crop-wrapper">
         <img id="drawer-image-preview" alt="Pré-visualização">
@@ -563,7 +563,10 @@
       if (cropper) { cropper.destroy(); cropper = null; }
       croppedBlob = null;
       document.getElementById('drawer-btn-crop').style.display = 'none';
+      delete document.getElementById('drawer-crop-wrapper').dataset.currentImage;
+      document.getElementById('drawer-img-hint').textContent = '';
       editingProductId = null;
+      drawerMode = 'new';
       document.getElementById('category').value = 'marmita';
       toggleDetailFields('category', 'detail-fields');
     }
@@ -674,7 +677,8 @@
                 data-desc="${esc(p.desc || '')}"
                 data-category="${esc(p.category)}"
                 data-details="${esc(JSON.stringify(p.details || {}))}"
-                onclick="openEditModalFromBtn(this)">✏️ Editar</button>
+                data-image="${esc(p.image || '')}"
+                onclick="openDrawerForEdit(this)">✏️ Editar</button>
               <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">Excluir</button>
             </td>
           `;
@@ -704,19 +708,35 @@
       }
     }
 
-    function openEditModalFromBtn(btn) {
+    function openDrawerForEdit(btn) {
       const ds = btn.dataset;
-      editingProductId = Number(ds.id);
       const decode = s => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-      document.getElementById('edit-name').value  = decode(ds.name);
-      document.getElementById('edit-price').value = ds.price;
-      document.getElementById('edit-desc').value  = decode(ds.desc);
+
+      editingProductId = Number(ds.id);
+      openDrawer('edit');
+
+      // Preencher campos
+      document.getElementById('name').value  = decode(ds.name);
+      document.getElementById('price').value = ds.price;
+      document.getElementById('desc').value  = decode(ds.desc);
       const category = decode(ds.category);
       const details  = JSON.parse(ds.details || '{}');
-      fillDetailFields('edit-', category, details);
-      document.getElementById('edit-modal-overlay').classList.add('active');
-      document.body.style.overflow = 'hidden';
-      document.getElementById('edit-name').focus();
+      fillDetailFields('', category, details);
+
+      // Mostrar imagem atual como preview
+      const currentImage = ds.image || '';
+      const prev = document.getElementById('drawer-image-preview');
+      const hint = document.getElementById('drawer-img-hint');
+      if (currentImage) {
+        prev.src = imgUrl(currentImage);
+        prev.style.display = 'block';
+        document.getElementById('drawer-crop-wrapper').dataset.currentImage = currentImage;
+        hint.textContent = '— imagem atual exibida. Escolha um novo arquivo para substituir.';
+      } else {
+        hint.textContent = '';
+      }
+
+      document.getElementById('name').focus();
     }
 
     function closeEditModal() {
