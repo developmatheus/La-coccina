@@ -35,14 +35,46 @@ router.get('/stream', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function mergeDetails(row) {
+  const details = row.category === 'marmita'
+    ? { protein: row.protein ?? '', sides: row.sides ?? '' }
+    : { volume: row.volume ?? '', serve_type: row.serve_type ?? '' };
+  const { protein, sides, volume, serve_type, ...base } = row;
+  return { ...base, details };
+}
+
+const MENU_JOIN = `
+  SELECT p.id, p.name, p.price, p.\`desc\`, p.image, p.category, p.active, p.isDailySpecial,
+         md.protein, md.sides,
+         bd.volume, bd.serve_type
+  FROM products p
+  LEFT JOIN marmita_details md ON md.product_id = p.id AND p.category = 'marmita'
+  LEFT JOIN bebida_details  bd ON bd.product_id = p.id AND p.category = 'bebida'
+`;
+
+async function upsertDetails(id, category, details) {
+  if (category === 'marmita') {
+    await db.execute(
+      'INSERT OR REPLACE INTO marmita_details (product_id, protein, sides) VALUES (?, ?, ?)',
+      [id, details.protein ?? '', details.sides ?? '']
+    );
+  } else {
+    await db.execute(
+      'INSERT OR REPLACE INTO bebida_details (product_id, volume, serve_type) VALUES (?, ?, ?)',
+      [id, details.volume ?? '', details.serve_type ?? '']
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Público — cardápio e status (sem dados sensíveis)
 // ---------------------------------------------------------------------------
 router.get('/menu', async (_req, res) => {
   try {
-    const [rows] = await db.execute(
-      'SELECT id, name, price, `desc`, image, category, active, isDailySpecial FROM products WHERE active = 1 ORDER BY created_at DESC'
-    );
-    res.json(rows);
+    const [rows] = await db.execute(MENU_JOIN + ' WHERE p.active = 1 ORDER BY p.created_at DESC');
+    res.json(rows.map(mergeDetails));
   } catch (err) {
     console.error('Erro ao buscar cardápio:', err.message);
     res.status(500).json({ error: 'Erro ao buscar cardápio' });
@@ -91,8 +123,8 @@ router.post('/orders', async (req, res) => {
 // ---------------------------------------------------------------------------
 router.get('/all', requireAdmin, async (_req, res) => {
   try {
-    const [rows] = await db.execute('SELECT * FROM products ORDER BY created_at DESC');
-    res.json(rows);
+    const [rows] = await db.execute(MENU_JOIN + ' ORDER BY p.created_at DESC');
+    res.json(rows.map(mergeDetails));
   } catch (err) {
     console.error('Erro ao buscar produtos:', err.message);
     res.status(500).json({ error: 'Erro ao buscar produtos' });
@@ -119,7 +151,9 @@ router.post('/', requireAdmin, async (req, res) => {
       'INSERT INTO products (name, price, `desc`, image, category, active, isDailySpecial) VALUES (?, ?, ?, ?, ?, 1, 0)',
       [parsed.name, parsed.price, parsed.desc, parsed.image, parsed.category]
     );
-    res.json({ success: true, id: result.insertId });
+    const newId = result.insertId;
+    await upsertDetails(newId, parsed.category, parsed.details);
+    res.json({ success: true, id: newId });
     notifyClients('menu-updated');
   } catch (err) {
     console.error('Erro ao adicionar produto:', err.message);
@@ -222,6 +256,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Produto não encontrado' });
     }
+    await upsertDetails(id, parsed.category, parsed.details);
     res.json({ success: true });
     notifyClients('menu-updated');
   } catch (err) {

@@ -96,10 +96,21 @@
         <input type="text" id="name" placeholder="Nome do prato">
         <input type="number" id="price" placeholder="Preço" step="0.01">
         <input type="text" id="desc" placeholder="Descrição">
-        <select id="category">
+        <select id="category" onchange="toggleDetailFields('category', 'detail-fields')">
           <option value="marmita">🍲 Marmita</option>
           <option value="bebida">🥤 Bebida</option>
         </select>
+
+        <div id="detail-fields">
+          <div id="fields-marmita">
+            <input type="text" id="protein" placeholder="Proteína principal (ex: Frango, Carne, Peixe)">
+            <input type="text" id="sides" placeholder="Acompanhamentos (ex: Arroz, Feijão, Salada)">
+          </div>
+          <div id="fields-bebida" style="display:none">
+            <input type="text" id="volume" placeholder="Volume (ex: 350ml, 500ml, 1L)">
+            <input type="text" id="serve_type" placeholder="Tipo de serviço (ex: Gelada, Natural, Quente)">
+          </div>
+        </div>
 
         <label>Foto do Prato:</label>
         <input type="file" id="imageUpload" accept="image/*" onchange="previewAndCrop(event)">
@@ -140,10 +151,22 @@
       <input type="text" id="edit-name" placeholder="Nome do prato">
       <input type="number" id="edit-price" placeholder="Preço" step="0.01">
       <input type="text" id="edit-desc" placeholder="Descrição">
-      <select id="edit-category">
+      <select id="edit-category" onchange="toggleDetailFields('edit-category', 'edit-detail-fields')">
         <option value="marmita">🍲 Marmita</option>
         <option value="bebida">🥤 Bebida</option>
       </select>
+
+      <div id="edit-detail-fields">
+        <div id="edit-fields-marmita">
+          <input type="text" id="edit-protein" placeholder="Proteína principal (ex: Frango, Carne, Peixe)">
+          <input type="text" id="edit-sides" placeholder="Acompanhamentos (ex: Arroz, Feijão, Salada)">
+        </div>
+        <div id="edit-fields-bebida" style="display:none">
+          <input type="text" id="edit-volume" placeholder="Volume (ex: 350ml, 500ml, 1L)">
+          <input type="text" id="edit-serve_type" placeholder="Tipo de serviço (ex: Gelada, Natural, Quente)">
+        </div>
+      </div>
+
       <small style="color:#888; display:block; margin-top:4px;">Deixe a imagem em branco para manter a atual.</small>
       <div class="modal-actions">
         <button onclick="saveEditProduct()" style="background:#27ae60;">💾 Salvar</button>
@@ -164,6 +187,40 @@
     let cropper = null;
     let croppedBlob = null;
     let editingProductId = null;
+
+    function toggleDetailFields(selectId, containerId) {
+      const cat = document.getElementById(selectId).value;
+      const prefix = containerId === 'edit-detail-fields' ? 'edit-' : '';
+      document.getElementById(`${prefix}fields-marmita`).style.display = cat === 'marmita' ? '' : 'none';
+      document.getElementById(`${prefix}fields-bebida`).style.display  = cat === 'bebida'  ? '' : 'none';
+    }
+
+    function readDetails(prefix) {
+      const cat = document.getElementById(`${prefix}category`).value;
+      if (cat === 'marmita') {
+        return {
+          protein: document.getElementById(`${prefix}protein`).value.trim(),
+          sides:   document.getElementById(`${prefix}sides`).value.trim(),
+        };
+      }
+      return {
+        volume:     document.getElementById(`${prefix}volume`).value.trim(),
+        serve_type: document.getElementById(`${prefix}serve_type`).value.trim(),
+      };
+    }
+
+    function fillDetailFields(prefix, category, details) {
+      document.getElementById(`${prefix}category`).value = category;
+      toggleDetailFields(`${prefix}category`, prefix === 'edit-' ? 'edit-detail-fields' : 'detail-fields');
+      const d = details || {};
+      if (category === 'marmita') {
+        document.getElementById(`${prefix}protein`).value = d.protein || '';
+        document.getElementById(`${prefix}sides`).value   = d.sides   || '';
+      } else {
+        document.getElementById(`${prefix}volume`).value     = d.volume     || '';
+        document.getElementById(`${prefix}serve_type`).value = d.serve_type || '';
+      }
+    }
 
     function getAdminToken() {
       return sessionStorage.getItem('adminToken');
@@ -266,7 +323,7 @@
         const res = await apiFetch(`${API_BASE}/api/products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, price, desc, image: imageUrl, category })
+          body: JSON.stringify({ name, price, desc, image: imageUrl, category, ...readDetails('') })
         });
         const data = await res.json();
         if (data.success) {
@@ -299,9 +356,16 @@
         tbody.innerHTML = '';
         products.forEach(p => {
           const tr = document.createElement('tr');
+          const d = p.details || {};
+          const detailText = p.category === 'marmita'
+            ? [d.protein, d.sides].filter(Boolean).join(' · ')
+            : [d.volume, d.serve_type].filter(Boolean).join(' · ');
           tr.innerHTML = `
             <td><img src="${imgUrl(p.image)}" onerror="this.src='https://via.placeholder.com/70x70/333/fff?text=Sem+Foto'" width="70" height="70" alt=""></td>
-            <td>${esc(p.name)}</td>
+            <td>
+              ${esc(p.name)}
+              ${detailText ? `<br><small style="color:#888">${esc(detailText)}</small>` : ''}
+            </td>
             <td>${esc(p.category || '-')}</td>
             <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
             <td>
@@ -319,6 +383,7 @@
                 data-price="${p.price}"
                 data-desc="${esc(p.desc || '')}"
                 data-category="${esc(p.category)}"
+                data-details="${esc(JSON.stringify(p.details || {}))}"
                 onclick="openEditModalFromBtn(this)">✏️ Editar</button>
               <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">Excluir</button>
             </td>
@@ -352,12 +417,13 @@
     function openEditModalFromBtn(btn) {
       const ds = btn.dataset;
       editingProductId = Number(ds.id);
-      // data-* attributes already HTML-encoded; decode for input values
       const decode = s => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-      document.getElementById('edit-name').value = decode(ds.name);
+      document.getElementById('edit-name').value  = decode(ds.name);
       document.getElementById('edit-price').value = ds.price;
-      document.getElementById('edit-desc').value = decode(ds.desc);
-      document.getElementById('edit-category').value = decode(ds.category);
+      document.getElementById('edit-desc').value  = decode(ds.desc);
+      const category = decode(ds.category);
+      const details  = JSON.parse(ds.details || '{}');
+      fillDetailFields('edit-', category, details);
       document.getElementById('edit-modal-overlay').classList.add('active');
       document.getElementById('edit-name').focus();
     }
@@ -383,7 +449,7 @@
         const res = await apiFetch(`${API_BASE}/api/products/${editingProductId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, price, desc, category, image: '' })
+          body: JSON.stringify({ name, price, desc, category, image: '', ...readDetails('edit-') })
         });
         if (res.ok) {
           closeEditModal();

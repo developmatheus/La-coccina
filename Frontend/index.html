@@ -218,6 +218,22 @@
       }
     }
 
+    function buildDetailTags(product) {
+      const d = product.details || {};
+      const tags = [];
+      if (product.category === 'marmita') {
+        if (d.protein)  tags.push({ label: d.protein,  color: '#c0392b' });
+        if (d.sides)    d.sides.split(',').forEach(s => s.trim() && tags.push({ label: s.trim(), color: '#2c7a4b' }));
+      } else {
+        if (d.volume)     tags.push({ label: d.volume,     color: '#1a6fa8' });
+        if (d.serve_type) tags.push({ label: d.serve_type, color: '#6c3483' });
+      }
+      if (!tags.length) return '';
+      return `<div class="product-tags">${tags.map(t =>
+        `<span class="product-tag" style="background:${t.color}">${esc(t.label)}</span>`
+      ).join('')}</div>`;
+    }
+
     function createCard(product) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -227,6 +243,7 @@
         ${imageHtml}
         <div class="card-content">
           <h3>${esc(product.name)}</h3>
+          ${buildDetailTags(product)}
           <p>${esc(product.desc || '')}</p>
           <strong>R$ ${parseFloat(product.price).toFixed(2)}</strong>
           ${cartButton}

@@ -43,7 +43,18 @@ function sanitizeProductInput(body) {
     return { error: 'URL de imagem inválida' };
   }
 
-  return { name, price, desc, category, image };
+  // Detalhes por categoria
+  const details = category === 'marmita'
+    ? {
+        protein: trimString(body.protein, 80),
+        sides:   trimString(body.sides, 200),
+      }
+    : {
+        volume:     trimString(body.volume, 30),
+        serve_type: trimString(body.serve_type, 30),
+      };
+
+  return { name, price, desc, category, image, details };
 }
 
 function sanitizeOrderInput(body) {
