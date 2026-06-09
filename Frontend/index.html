@@ -430,7 +430,6 @@
               <div class="acc-checkmark" onclick="_toggleAccItem(this.parentElement)"></div>
               <div class="acc-check-label">
                 <strong onclick="_toggleAccItem(this.closest('.acc-check-item'))">${esc(a.name)}${defaultTag}</strong>
-                ${priceTag}
                 <div class="acc-qty-wrap">
                   <span class="acc-qty-label">+ extra${a.extra_price > 0 ? ` (R$&nbsp;${parseFloat(a.extra_price).toFixed(2)}/un)` : ' (incluso)'}:</span>
                   <button type="button" class="acc-qty-btn" onclick="_accQtyChange(this.closest('.acc-check-item'), -1)">−</button>
