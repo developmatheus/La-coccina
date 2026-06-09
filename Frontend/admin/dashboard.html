@@ -3,56 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Admin - La Coccina</title>
+  <title>La Coccina — Painel Admin</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/imagens/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="../assets/imagens/favicon-192.png">
   <link rel="apple-touch-icon" href="../assets/imagens/apple-touch-icon.png">
   <link rel="stylesheet" href="../assets/CSS/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
 
   <style>
-    .admin-panel { padding: 30px; max-width: 1250px; margin: 0 auto; }
-    .admin-header { background: #1a1a1a; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
-    .admin-header h1 { margin: 0; font-size: 1.35rem; }
-    .grid-admin { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
-    .card-admin { background: #1a1a1a; padding: 25px; border-radius: 16px; }
-    input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background:#2a2a2a; color:white; border:1px solid #444; }
-    button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; background: #27ae60; color: white; border: none; cursor: pointer; font-weight: bold; }
-    td button, .btn-action { width: auto; padding: 8px 14px; margin: 2px; border-radius: 6px; font-size: 0.85rem; }
-    .btn-delete { background: #e74c3c; }
-    .btn-daily { background: #ffcc00; color: #000; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 14px; border-bottom: 1px solid #333; text-align: left; }
-    th { background: #252525; }
-    #btn-confirmar-corte { background: #2980b9; display: none; }
-    #crop-wrapper {
-      margin: 15px auto;
-      width: 100%;
-      max-width: 380px;
-      min-height: 520px;
-      max-height: 72vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-      border-radius: 12px;
-      border: 1px solid #333;
-      overflow: hidden;
+    @font-face {
+      font-family: 'SomeTimeLater';
+      src: url('../assets/fonts/Some Time Later.otf') format('opentype');
+      font-weight: normal;
     }
-    #imagePreview {
-      max-width: 100% !important;
-      max-height: 68vh !important;
-      min-height: 480px !important;
-      width: auto !important;
-      height: auto !important;
-      display: none;
-      border: none !important;
-      border-radius: 0 !important;
+    * { box-sizing: border-box; }
+    body { background: #0d0d0d; color: #fff; font-family: 'Inter', sans-serif; margin: 0; }
+    .admin-panel { padding: 24px; width: 100%; }
+
+    /* Header */
+    .admin-header { background: #1a1a1a; padding: 14px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid #222; }
+    .admin-brand { display: flex; flex-direction: column; gap: 1px; }
+    .admin-brand-logo { font-family: 'SomeTimeLater', cursive; font-size: 1.5rem; color: #ffcc00; line-height: 1; letter-spacing: 0.02em; }
+    .admin-brand-tag { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; }
+    .admin-header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    /* Botões do header */
+    #btn-novo-prato { background: #ffcc00; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; cursor: pointer; font-size: 0.9rem; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+    #btn-novo-prato:hover { background: #ffd633; }
+    #btn-tool-panel { background: transparent; border: 1px solid #333; color: #666; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 1.1rem; width: auto; margin: 0; transition: all 0.15s; }
+    #btn-tool-panel:hover { border-color: #555; color: #aaa; background: #1a1a1a; }
+    #btn-tool-panel.active { border-color: #ffcc00; color: #ffcc00; background: #1a1505; }
+
+    /* Painel da ferramenta */
+    #tool-panel { background: #0a0a0a; border-top: 2px solid #ffcc00; margin-top: 32px; }
+    .tool-panel-inner { max-width: 100%; padding: 28px 24px; }
+    .tool-panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; }
+    .tool-panel-title { margin: 0 0 4px; font-size: 1.1rem; color: #ffcc00; }
+    .tool-panel-desc { margin: 0; font-size: 0.82rem; color: #555; }
+    .tool-panel-close { background: none; border: 1px solid #333; color: #666; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem; width: auto; margin: 0; flex-shrink: 0; }
+    .tool-panel-close:hover { border-color: #555; color: #aaa; }
+    .tool-section { background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .tool-section h3 { margin: 0 0 4px; font-size: 0.95rem; color: #ccc; }
+    .tool-section-desc { margin: 0 0 16px; font-size: 0.8rem; color: #555; }
+    .tool-cfg-row { padding: 14px 0; border-bottom: 1px solid #1e1e1e; display: flex; flex-direction: column; gap: 8px; }
+    .tool-cfg-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tool-cfg-label strong { display: block; font-size: 0.88rem; color: #bbb; margin-bottom: 2px; }
+    .tool-cfg-label span { font-size: 0.78rem; color: #555; }
+    .tool-cfg-control { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+    .tool-cfg-control input, .tool-cfg-control select { margin: 0; padding: 8px 12px; font-size: 0.85rem; }
+    .btn-tool-save { background: #1a3a5a; color: #5ca8e0; border: 1px solid #1e4a7a; border-radius: 6px; padding: 8px 16px; font-size: 0.82rem; cursor: pointer; width: auto; margin: 0; font-weight: 600; }
+    .btn-tool-save:hover { background: #1e4a7a; }
+    .btn-tool-reset { background: #1e1e1e; color: #666; border: 1px solid #2a2a2a; border-radius: 6px; padding: 8px 14px; font-size: 0.82rem; cursor: pointer; width: auto; margin: 0; }
+    .btn-tool-reset:hover { color: #aaa; }
+    .tool-cfg-msg { margin: 0; font-size: 0.78rem; color: #27ae60; min-height: 1em; }
+
+    /* Catálogo de acompanhamentos (dentro do painel) */
+    .acc-add-form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .acc-add-form input { margin: 0; padding: 9px 12px; font-size: 0.85rem; flex: 1; min-width: 120px; }
+    .acc-add-form input:first-child { flex: 2; min-width: 180px; }
+    .acc-add-form input[type=number] { max-width: 120px; }
+    .btn-tool-add { background: #27ae60; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; width: auto; margin: 0; font-weight: 600; }
+    .btn-tool-add:hover { background: #2ecc71; }
+    .acc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .acc-table th { background: #0d0d0d; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid #1e1e1e; }
+    .acc-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; vertical-align: middle; }
+    .acc-table tr:last-child td { border-bottom: none; }
+    .acc-table .acc-empty { color: #444; text-align: center; padding: 20px; font-style: italic; }
+    .acc-badge-active { display: inline-flex; align-items: center; gap: 4px; background: #1a3a2a; color: #4caf50; border: 1px solid #2a5a3a; border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+    .acc-badge-inactive { display: inline-flex; align-items: center; gap: 4px; background: #1e1e1e; color: #555; border: 1px solid #2a2a2a; border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
+    .acc-badge-del { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; padding: 4px 6px; border-radius: 4px; }
+    .acc-badge-del:hover { color: #e74c3c; background: #1a0a0a; }
+
+    /* Tabela principal */
+    .card-admin { background: #1a1a1a; padding: 22px; border-radius: 16px; }
+    .card-admin + .card-admin { margin-top: 24px; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid #2a2a2a; text-align: left; font-size: 0.9rem; }
+    th { background: #222; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #888; }
+    td:nth-child(2), td:nth-child(3) { white-space: normal; max-width: 200px; }
+
+    /* Inputs e selects globais */
+    input, select { width: 100%; padding: 11px 14px; margin: 6px 0; border-radius: 8px; background: #2a2a2a; color: white; border: 1px solid #3a3a3a; font-size: 0.9rem; }
+    input:focus, select:focus { outline: none; border-color: #ffcc00; }
+    button { width: 100%; padding: 12px 14px; margin: 6px 0; border-radius: 8px; background: #27ae60; color: white; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    td button { width: auto; padding: 7px 12px; margin: 2px; border-radius: 6px; font-size: 0.8rem; }
+
+    /* Drawer de novo/editar prato */
+    #drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; }
+    #drawer-overlay.open { display: block; }
+    #product-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 420px; max-width: 100vw;
+      background: #161616; z-index: 901;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+      box-shadow: -8px 0 40px rgba(0,0,0,0.6);
     }
-    table img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; }
+    #product-drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .drawer-header h2 { margin: 0; font-size: 1.05rem; }
+    #btn-close-drawer { background: none; border: none; color: #888; font-size: 1.4rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; width: auto; margin: 0; line-height: 1; }
+    #btn-close-drawer:hover { color: #fff; background: #2a2a2a; }
+    .drawer-body { overflow-y: auto; flex: 1; padding: 16px 20px; }
+    .drawer-body label { display: block; font-size: 0.78rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 2px; }
+    .drawer-body label:first-child { margin-top: 0; }
+    .drawer-footer { padding: 14px 20px; border-top: 1px solid #2a2a2a; display: flex; gap: 10px; flex-shrink: 0; }
+    .drawer-footer button { margin: 0; flex: 1; }
+    #drawer-crop-wrapper {
+      margin: 10px 0; width: 100%; background: #111;
+      border-radius: 10px; border: 1px solid #333; overflow: hidden;
+      min-height: 220px; max-height: 50vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #drawer-image-preview {
+      max-width: 100% !important; max-height: 48vh !important;
+      width: auto !important; height: auto !important;
+      display: none; border: none !important; border-radius: 0 !important;
+    }
+    #drawer-btn-crop { background: #2980b9; display: none; }
+
+    /* Botões de ação na tabela */
+    .btn-toggle-on  { background: #27ae60; }
+    .btn-toggle-off { background: #555; }
+    .btn-daily-on   { background: #ffcc00; color: #000; }
+    .btn-daily-off  { background: #7a6500; color: #ffcc00; }
+    .btn-edit-p     { background: #2980b9; }
+    .btn-acc        { background: #8e44ad; }
+    .btn-del        { background: #e74c3c; }
+
+    table img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table td, table th { white-space: nowrap; }
     table td:nth-child(2), table td:nth-child(3) { white-space: normal; max-width: 180px; }
@@ -83,37 +175,49 @@
 
     /* Modal de acompanhamentos */
     #acc-modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8); z-index: 1100;
-      align-items: flex-start; justify-content: center;
-      padding: 40px 16px; overflow-y: auto;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 1100;
     }
-    #acc-modal-overlay.active { display: flex; }
+    #acc-modal-overlay.active { display: block; }
     #acc-modal {
-      background: #1a1a1a; border-radius: 16px; padding: 30px;
-      width: 100%; max-width: 620px; position: relative;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #1a1a1a; border-radius: 16px;
+      width: calc(100% - 32px); max-width: 560px;
+      max-height: 90vh; display: flex; flex-direction: column;
     }
-    #acc-modal h3 { margin: 0 0 6px; font-size: 1.1rem; }
-    #acc-modal .sub { color: #888; font-size: 0.85rem; margin-bottom: 18px; }
+    .acc-modal-top {
+      padding: 24px 24px 16px; border-bottom: 1px solid #2a2a2a; flex-shrink: 0;
+    }
+    .acc-modal-top h3 { margin: 0 32px 4px 0; font-size: 1.1rem; }
+    .acc-modal-top .sub { color: #888; font-size: 0.82rem; margin: 0 0 14px; }
+    .acc-config { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .acc-config label { color: #ccc; font-size: 0.88rem; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+    .acc-config input[type=number] { width: 70px; padding: 8px; margin: 0; }
+    .acc-config input[type=checkbox] { width: auto; margin: 0; }
+    #acc-modal-items { overflow-y: auto; flex: 1; padding: 8px 0; }
     .acc-item {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 0; border-bottom: 1px solid #2a2a2a;
+      padding: 11px 24px; border-bottom: 1px solid #222; cursor: pointer;
     }
     .acc-item:last-child { border-bottom: none; }
-    .acc-item label { flex: 1; cursor: pointer; }
-    .acc-item .extra { color: #ffcc00; font-size: 0.8rem; white-space: nowrap; }
+    .acc-item:hover { background: #222; }
+    .acc-item label { flex: 1; cursor: pointer; font-size: 0.9rem; }
+    .acc-item input[type=checkbox] { width: auto; margin: 0; cursor: pointer; }
+    .acc-item .extra { color: #ffcc00; font-size: 0.78rem; white-space: nowrap; }
     .acc-item .tag-default {
-      font-size: 0.72rem; background: #27ae60; color: #fff;
+      font-size: 0.7rem; background: #1a3a2a; color: #4caf50;
       padding: 2px 8px; border-radius: 50px; white-space: nowrap;
     }
-    .acc-config { display: flex; gap: 8px; align-items: center; margin: 16px 0 0; flex-wrap: wrap; }
-    .acc-config label { color: #ccc; font-size: 0.88rem; white-space: nowrap; }
-    .acc-config input[type=number] { width: 70px; }
+    .acc-modal-bottom {
+      padding: 16px 24px; border-top: 1px solid #2a2a2a;
+      display: flex; gap: 10px; flex-shrink: 0;
+    }
+    .acc-modal-bottom button { margin: 0; }
     #btn-close-acc {
       position: absolute; top: 14px; right: 16px;
       background: none; border: none; color: #aaa;
       font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
-      border-radius: 6px; width: auto;
+      border-radius: 6px; width: auto; margin: 0;
     }
     #btn-close-acc:hover { color: #fff; background: #333; }
     .btn-accompaniments { background: #8e44ad; color: white; padding: 8px 14px; border: none; border-radius: 6px; margin-right: 6px; cursor: pointer; font-weight: bold; }
@@ -122,132 +226,180 @@
 <body>
   <div class="admin-panel">
     <div class="admin-header">
-      <h1>Painel Administrativo — La Coccina</h1>
-      <button onclick="toggleRestaurantStatus()" id="status-btn" style="padding:12px 25px; font-weight:bold;">
-        🔄 Carregando...
-      </button>
+      <div class="admin-brand">
+        <span class="admin-brand-logo">La Coccina</span>
+        <span class="admin-brand-tag">Painel Administrativo</span>
+      </div>
+      <div class="admin-header-actions">
+        <button id="btn-novo-prato" onclick="openDrawer()">＋ Novo Prato</button>
+        <button onclick="toggleRestaurantStatus()" id="status-btn" style="width:auto; padding:10px 20px;">
+          🔄 Carregando...
+        </button>
+        <button id="btn-tool-panel" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
+      </div>
     </div>
 
-    <div class="grid-admin">
-      <div class="card-admin">
-        <h2>+ Adicionar Novo Prato</h2>
-        <input type="text" id="name" placeholder="Nome do prato">
-        <input type="number" id="price" placeholder="Preço" step="0.01">
-        <input type="text" id="desc" placeholder="Descrição">
-        <select id="category" onchange="toggleDetailFields('category', 'detail-fields')">
-          <option value="marmita">🍲 Marmita</option>
-          <option value="bebida">🥤 Bebida</option>
-        </select>
+    <div class="card-admin">
+      <div class="table-scroll">
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th style="width:80px">Foto</th>
+              <th>Prato</th>
+              <th>Categoria</th>
+              <th>Preço</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
 
-        <div id="detail-fields">
-          <div id="fields-marmita">
-            <input type="text" id="protein" placeholder="Proteína principal (ex: Frango, Carne, Peixe)">
-            <input type="text" id="sides" placeholder="Acompanhamentos (ex: Arroz, Feijão, Salada)">
-          </div>
-          <div id="fields-bebida" style="display:none">
-            <input type="text" id="volume" placeholder="Volume (ex: 350ml, 500ml, 1L)">
-            <input type="text" id="serve_type" placeholder="Tipo de serviço (ex: Gelada, Natural, Quente)">
-          </div>
+  </div><!-- /.admin-panel -->
+
+  <!-- ================================================================
+       PAINEL DA FERRAMENTA — visível apenas via botão ⚙️
+       Antecipa o nível "Admin da ferramenta" (roles futuros)
+  ================================================================ -->
+  <div id="tool-panel" hidden>
+    <div class="tool-panel-inner">
+
+      <div class="tool-panel-header">
+        <div>
+          <h2 class="tool-panel-title">⚙️ Painel da Ferramenta</h2>
+          <p class="tool-panel-desc">Configurações globais do sistema. Acesso restrito ao administrador da ferramenta.</p>
         </div>
-
-        <label>Foto do Prato:</label>
-        <input type="file" id="imageUpload" accept="image/*" onchange="previewAndCrop(event)">
-
-        <div id="crop-wrapper">
-          <img id="imagePreview" alt="Pré-visualização para recorte">
-        </div>
-
-        <button id="btn-confirmar-corte" onclick="confirmarCorte()">✂️ Confirmar Corte</button>
-        <button onclick="addProduct()">Adicionar Prato</button>
+        <button class="tool-panel-close" onclick="toggleToolPanel()" aria-label="Fechar painel">✕</button>
       </div>
 
-      <div class="card-admin">
-        <h2>Pratos Cadastrados</h2>
-        <div class="table-scroll">
-          <table id="products-table">
+      <!-- Catálogo de Acompanhamentos -->
+      <div class="tool-section">
+        <h3>🥗 Catálogo de Acompanhamentos</h3>
+        <p class="tool-section-desc">Registros globais reutilizáveis. Associe ao prato pelo botão 🥗 na tabela de produtos.</p>
+
+        <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
+          <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
+          <input type="number" id="acc-extra-price"  placeholder="Preço extra" step="0.01" min="0" value="0">
+          <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
+          <button type="submit" class="btn-tool-add">＋ Adicionar</button>
+        </form>
+
+        <div class="table-scroll" style="margin-top:12px;">
+          <table class="acc-table">
             <thead>
-              <tr>
-                <th>Imagem</th>
-                <th>Prato</th>
-                <th>Categoria</th>
-                <th>Preço</th>
-                <th>Ações</th>
-              </tr>
+              <tr><th>Nome</th><th>Preço extra</th><th>Ordem</th><th>Status</th><th style="width:40px"></th></tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="acc-catalog-body">
+              <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
-    </div>
 
-    <!-- Catálogo de Acompanhamentos -->
-    <div class="card-admin" style="margin-top:30px;">
-      <h2>🥗 Catálogo de Acompanhamentos</h2>
-      <p style="color:#888; font-size:0.85rem; margin-bottom:16px;">
-        Registros globais reutilizáveis. Associe acompanhamentos a pratos individuais usando o botão 🥗 na tabela acima.
-      </p>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-        <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)"  style="flex:2; min-width:160px;">
-        <input type="number" id="acc-extra-price"  placeholder="Preço extra (0 = incluso)" step="0.01" min="0" style="flex:1; min-width:120px;">
-        <input type="number" id="acc-sort"         placeholder="Ordem" min="0" style="width:80px; flex:none;">
-        <button onclick="addAccompaniment()" style="width:auto; padding:14px 20px; background:#27ae60; flex:none;">+ Adicionar</button>
+      <!-- Configurações de UX -->
+      <div class="tool-section">
+        <h3>🎨 Configurações de UX</h3>
+
+        <div class="tool-cfg-row">
+          <div class="tool-cfg-label">
+            <strong>Debounce do cardápio (ms)</strong>
+            <span>Intervalo mínimo entre atualizações automáticas após alterações. Padrão: 1000ms.</span>
+          </div>
+          <div class="tool-cfg-control">
+            <input type="number" id="cfg-debounce" min="200" max="10000" step="100" style="width:100px;">
+            <button onclick="saveConfig()" class="btn-tool-save">Salvar</button>
+            <button onclick="resetConfig()" class="btn-tool-reset">Padrão</button>
+          </div>
+          <p id="cfg-msg" class="tool-cfg-msg"></p>
+        </div>
+
+        <div class="tool-cfg-row">
+          <div class="tool-cfg-label">
+            <strong>Exibição de acompanhamentos no carrinho</strong>
+            <span>Como os acompanhamentos escolhidos aparecem para o cliente.</span>
+          </div>
+          <div class="tool-cfg-control">
+            <select id="cfg-acc-display" style="width:auto; min-width:200px;">
+              <option value="tags">🏷️ Tags coloridas (padrão)</option>
+              <option value="text">📝 Texto discreto</option>
+              <option value="edit">✏️ Texto com botão Editar</option>
+            </select>
+            <button onclick="saveAccDisplayMode()" class="btn-tool-save">Salvar</button>
+          </div>
+          <p id="cfg-acc-msg" class="tool-cfg-msg"></p>
+        </div>
       </div>
-      <div id="acc-catalog-list"></div>
-    </div>
 
-    <!-- Configurações do site -->
-    <div class="card-admin" style="margin-top:30px;">
-      <h2>⚙️ Configurações do Site</h2>
-      <label style="display:block; margin:12px 0 6px; color:#ccc; font-size:0.9rem;">
-        Tempo de debounce do cardápio (ms)
-        <small style="color:#666; display:block;">Intervalo mínimo entre atualizações automáticas do cardápio quando o admin faz alterações. Padrão: 1000ms.</small>
-      </label>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <input type="number" id="cfg-debounce" min="200" max="10000" step="100"
-          style="width:140px; flex:none;"
-          value="">
-        <button onclick="saveConfig()" style="width:auto; padding:14px 24px; background:#2980b9;">💾 Salvar</button>
-        <button onclick="resetConfig()" style="width:auto; padding:14px 24px; background:#555;">Restaurar padrão</button>
-      </div>
-      <p id="cfg-msg" style="margin-top:10px; font-size:0.85rem; color:#27ae60; display:none;"></p>
-
-      <hr style="border-color:#2a2a2a; margin:20px 0;">
-
-      <label style="display:block; margin:0 0 8px; color:#ccc; font-size:0.9rem;">
-        Exibição de acompanhamentos no carrinho do cliente
-        <small style="color:#666; display:block; margin-top:3px;">Como os acompanhamentos escolhidos aparecem para o cliente dentro do carrinho.</small>
-      </label>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <select id="cfg-acc-display" style="width:auto; min-width:220px;">
-          <option value="tags">🏷️ Tags coloridas (padrão)</option>
-          <option value="text">📝 Linha de texto discreta</option>
-          <option value="edit">✏️ Texto com botão Editar</option>
-        </select>
-        <button onclick="saveAccDisplayMode()" style="width:auto; padding:14px 24px; background:#2980b9;">💾 Salvar</button>
-      </div>
-      <p id="cfg-acc-msg" style="margin-top:10px; font-size:0.85rem; color:#27ae60; display:none;"></p>
     </div>
   </div>
+
+  <!-- Drawer: Novo / Editar Prato -->
+  <div id="drawer-overlay" onclick="closeDrawer()"></div>
+  <aside id="product-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-header">
+      <h2 id="drawer-title">＋ Novo Prato</h2>
+      <button id="btn-close-drawer" onclick="closeDrawer()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="drawer-body">
+      <label>Nome</label>
+      <input type="text" id="name" placeholder="Ex: Frango Grelhado com Legumes">
+
+      <label>Preço (R$)</label>
+      <input type="number" id="price" placeholder="0.00" step="0.01" min="0">
+
+      <label>Descrição</label>
+      <input type="text" id="desc" placeholder="Breve descrição do prato">
+
+      <label>Categoria</label>
+      <select id="category" onchange="toggleDetailFields('category', 'detail-fields')">
+        <option value="marmita">🍲 Marmita</option>
+        <option value="bebida">🥤 Bebida</option>
+      </select>
+
+      <div id="detail-fields">
+        <div id="fields-marmita">
+          <label>Proteína principal</label>
+          <input type="text" id="protein" placeholder="Ex: Frango, Carne, Peixe, Vegano">
+          <label>Acompanhamentos fixos</label>
+          <input type="text" id="sides" placeholder="Ex: Arroz, Feijão, Salada">
+        </div>
+        <div id="fields-bebida" style="display:none">
+          <label>Volume</label>
+          <input type="text" id="volume" placeholder="Ex: 350ml, 500ml, 1L">
+          <label>Tipo de serviço</label>
+          <input type="text" id="serve_type" placeholder="Ex: Gelada, Natural, Quente">
+        </div>
+      </div>
+
+      <label>Foto do Prato</label>
+      <input type="file" id="imageUpload" accept="image/*" onchange="previewAndCrop(event)">
+      <div id="drawer-crop-wrapper">
+        <img id="drawer-image-preview" alt="Pré-visualização">
+      </div>
+      <button id="drawer-btn-crop" onclick="confirmarCorte()">✂️ Confirmar Corte</button>
+    </div>
+    <div class="drawer-footer">
+      <button id="drawer-btn-save" onclick="saveDrawerProduct()" style="background:#27ae60;">💾 Salvar</button>
+      <button onclick="closeDrawer()" style="background:#333; flex:0 0 auto; width:auto; padding:12px 20px;">Cancelar</button>
+    </div>
+  </aside>
 
   <!-- Modal de acompanhamentos por prato -->
   <div id="acc-modal-overlay" role="dialog" aria-modal="true">
     <div id="acc-modal">
-      <button id="btn-close-acc" onclick="closeAccModal()" aria-label="Fechar">✕</button>
-      <h3 id="acc-modal-title">🥗 Acompanhamentos</h3>
-      <p class="sub" id="acc-modal-sub"></p>
-
-      <div class="acc-config">
-        <label><input type="checkbox" id="acc-customizable"> Prato personalizável</label>
-        <label>Mín: <input type="number" id="acc-min" min="0" max="20" value="0"></label>
-        <label>Máx: <input type="number" id="acc-max" min="0" max="20" value="0"></label>
+      <div class="acc-modal-top">
+        <button id="btn-close-acc" onclick="closeAccModal()" aria-label="Fechar">✕</button>
+        <h3 id="acc-modal-title">🥗 Acompanhamentos</h3>
+        <p class="sub" id="acc-modal-sub"></p>
+        <div class="acc-config">
+          <label><input type="checkbox" id="acc-customizable"> Prato personalizável</label>
+          <label>Mín: <input type="number" id="acc-min" min="0" max="20" value="0"></label>
+          <label>Máx: <input type="number" id="acc-max" min="0" max="20" value="0"></label>
+        </div>
       </div>
-
-      <p style="color:#888; font-size:0.8rem; margin: 12px 0 6px;">
-        Marque os disponíveis e defina quais vêm marcados por padrão:
-      </p>
       <div id="acc-modal-items"></div>
-
-      <div style="display:flex; gap:10px; margin-top:20px;">
+      <div class="acc-modal-bottom">
         <button onclick="saveAccompaniments()" style="background:#27ae60; flex:1;">💾 Salvar</button>
         <button onclick="closeAccModal()" style="background:#555; width:auto; padding:14px 22px;">Cancelar</button>
       </div>
@@ -371,18 +523,83 @@
       window.location.href = 'login.html';
     }
 
+    // --- Drawer ---
+    let drawerMode = 'new'; // 'new' | 'edit'
+
+    function openDrawer(mode = 'new') {
+      drawerMode = mode;
+      document.getElementById('drawer-title').textContent = mode === 'edit' ? '✏️ Editar Prato' : '＋ Novo Prato';
+      document.getElementById('drawer-btn-save').textContent = mode === 'edit' ? '💾 Salvar Edição' : '💾 Adicionar Prato';
+      document.getElementById('drawer-overlay').classList.add('open');
+      document.getElementById('product-drawer').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('name').focus();
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer-overlay').classList.remove('open');
+      document.getElementById('product-drawer').classList.remove('open');
+      document.body.style.overflow = '';
+      // Limpar form
+      ['name','price','desc','imageUpload'].forEach(id => { document.getElementById(id).value = ''; });
+      const prev = document.getElementById('drawer-image-preview');
+      prev.style.display = 'none'; prev.src = '';
+      if (cropper) { cropper.destroy(); cropper = null; }
+      croppedBlob = null;
+      document.getElementById('drawer-btn-crop').style.display = 'none';
+      editingProductId = null;
+      document.getElementById('category').value = 'marmita';
+      toggleDetailFields('category', 'detail-fields');
+    }
+
+    async function saveDrawerProduct() {
+      const name = document.getElementById('name').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      const category = document.getElementById('category').value;
+
+      if (!name || !price) { alert('Nome e preço são obrigatórios.'); return; }
+
+      let imageUrl = '';
+      if (croppedBlob) {
+        const formData = new FormData();
+        formData.append('image', croppedBlob, 'prato.jpg');
+        try {
+          const uploadRes = await apiFetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+          const uploadData = await uploadRes.json();
+          if (!uploadData.imageUrl) { alert('Erro ao fazer upload da imagem.'); return; }
+          imageUrl = uploadData.imageUrl;
+        } catch { alert('Erro de conexão ao fazer upload.'); return; }
+      }
+
+      const body = { name, price, desc, category, image: imageUrl, ...readDetails('') };
+      const isEdit = drawerMode === 'edit' && editingProductId;
+      const url = isEdit ? `${API_BASE}/api/products/${editingProductId}` : `${API_BASE}/api/products`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      try {
+        const res = await apiFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (res.ok) {
+          closeDrawer();
+          loadProducts();
+        } else {
+          await handleApiError(res, isEdit ? 'Erro ao salvar edição' : 'Erro ao adicionar prato');
+        }
+      } catch { alert('Erro de conexão.'); }
+    }
+
     function previewAndCrop(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = e => {
-        const preview = document.getElementById('imagePreview');
+        const preview = document.getElementById('drawer-image-preview');
         preview.src = e.target.result;
         preview.style.display = 'block';
         croppedBlob = null;
         if (cropper) cropper.destroy();
         cropper = new Cropper(preview, { aspectRatio: NaN, viewMode: 2 });
-        document.getElementById('btn-confirmar-corte').style.display = 'block';
+        document.getElementById('drawer-btn-crop').style.display = 'block';
       };
       reader.readAsDataURL(file);
     }
@@ -391,68 +608,11 @@
       if (!cropper) return;
       cropper.getCroppedCanvas().toBlob(blob => {
         croppedBlob = blob;
-        const preview = document.getElementById('imagePreview');
-        cropper.destroy();
-        cropper = null;
+        const preview = document.getElementById('drawer-image-preview');
+        cropper.destroy(); cropper = null;
         preview.src = URL.createObjectURL(blob);
-        document.getElementById('btn-confirmar-corte').style.display = 'none';
-        alert('✅ Corte confirmado! Agora clique em "Adicionar Prato".');
+        document.getElementById('drawer-btn-crop').style.display = 'none';
       }, 'image/jpeg', 0.9);
-    }
-
-    async function addProduct() {
-      const name = document.getElementById('name').value.trim();
-      const price = document.getElementById('price').value.trim();
-      const desc = document.getElementById('desc').value.trim();
-      const category = document.getElementById('category').value;
-
-      if (!name || !price) {
-        alert('Preencha pelo menos o nome e o preço do prato.');
-        return;
-      }
-
-      let imageUrl = '';
-
-      if (croppedBlob) {
-        const formData = new FormData();
-        formData.append('image', croppedBlob, 'prato.jpg');
-        try {
-          const uploadRes = await apiFetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
-          const uploadData = await uploadRes.json();
-          if (uploadData.imageUrl) {
-            imageUrl = uploadData.imageUrl;
-          } else {
-            alert('Erro ao fazer upload da imagem.'); return;
-          }
-        } catch (e) {
-          console.error('Erro no upload:', e);
-          alert('Erro de conexão ao fazer upload da imagem.'); return;
-        }
-      }
-
-      try {
-        const res = await apiFetch(`${API_BASE}/api/products`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, price, desc, image: imageUrl, category, ...readDetails('') })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert('✅ Prato adicionado com sucesso!');
-          document.getElementById('name').value = '';
-          document.getElementById('price').value = '';
-          document.getElementById('desc').value = '';
-          document.getElementById('imageUpload').value = '';
-          document.getElementById('imagePreview').style.display = 'none';
-          croppedBlob = null;
-          loadProducts();
-        } else {
-          alert('Erro ao adicionar prato.');
-        }
-      } catch (e) {
-        console.error('Erro ao adicionar produto:', e);
-        alert('Erro de conexão ao adicionar prato.');
-      }
     }
 
     async function loadProducts() {
@@ -539,12 +699,14 @@
       const details  = JSON.parse(ds.details || '{}');
       fillDetailFields('edit-', category, details);
       document.getElementById('edit-modal-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
       document.getElementById('edit-name').focus();
     }
 
     function closeEditModal() {
       editingProductId = null;
       document.getElementById('edit-modal-overlay').classList.remove('active');
+      document.body.style.overflow = '';
     }
 
     async function saveEditProduct() {
@@ -624,6 +786,17 @@
       }
     }
 
+    function toggleToolPanel() {
+      const panel = document.getElementById('tool-panel');
+      const btn   = document.getElementById('btn-tool-panel');
+      const isOpen = !panel.hidden;
+      panel.hidden = isOpen;
+      btn.classList.toggle('active', !isOpen);
+      if (!isOpen) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
     const CONFIG_KEY = 'lc_refresh_debounce';
     const CONFIG_DEFAULT = 1000;
 
@@ -639,8 +812,7 @@
       document.getElementById('cfg-debounce').value = val;
       const msg = document.getElementById('cfg-msg');
       msg.textContent = `✅ Salvo: ${val}ms — recarregue o cardápio para aplicar.`;
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      setTimeout(() => { msg.textContent = ''; }, 3000);
     }
 
     function resetConfig() {
@@ -648,8 +820,7 @@
       document.getElementById('cfg-debounce').value = CONFIG_DEFAULT;
       const msg = document.getElementById('cfg-msg');
       msg.textContent = `✅ Restaurado para ${CONFIG_DEFAULT}ms.`;
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      setTimeout(() => { msg.textContent = ''; }, 3000);
     }
 
     // -----------------------------------------------------------------------
@@ -666,21 +837,19 @@
     }
 
     function renderCatalog() {
-      const list = document.getElementById('acc-catalog-list');
+      const tbody = document.getElementById('acc-catalog-body');
       if (!catalogCache.length) {
-        list.innerHTML = '<p style="color:#666; font-size:0.85rem;">Nenhum acompanhamento cadastrado ainda.</p>';
+        tbody.innerHTML = '<tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>';
         return;
       }
-      list.innerHTML = catalogCache.map(a => `
-        <div class="acc-item">
-          <span style="flex:1; ${!a.active ? 'color:#666; text-decoration:line-through;' : ''}">${esc(a.name)}</span>
-          ${a.extra_price > 0 ? `<span class="extra">+R$ ${a.extra_price.toFixed(2)}</span>` : '<span style="color:#666;font-size:0.8rem">incluso</span>'}
-          <span style="color:#555; font-size:0.8rem">ord:${a.sort_order}</span>
-          <button onclick="toggleAccActive(${a.id}, ${a.active})" style="background:${a.active ? '#27ae60' : '#555'}; color:#fff; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:0.8rem;">
-            ${a.active ? 'Ativo' : 'Inativo'}
-          </button>
-          <button onclick="deleteAccompaniment(${a.id})" style="background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:6px 10px; cursor:pointer;">✕</button>
-        </div>
+      tbody.innerHTML = catalogCache.map(a => `
+        <tr style="${!a.active ? 'opacity:0.45' : ''}">
+          <td><strong style="color:${a.active ? '#ddd' : '#666'}">${esc(a.name)}</strong></td>
+          <td>${a.extra_price > 0 ? `<span style="color:#ffcc00;font-weight:600">+ R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : '<span style="color:#444">incluso</span>'}</td>
+          <td><span style="color:#555">${a.sort_order}</span></td>
+          <td><span onclick="toggleAccActive(${a.id}, ${a.active})" class="${a.active ? 'acc-badge-active' : 'acc-badge-inactive'}">${a.active ? '● Ativo' : '○ Inativo'}</span></td>
+          <td><button class="acc-badge-del" onclick="deleteAccompaniment(${a.id})" title="Remover">✕</button></td>
+        </tr>
       `).join('');
     }
 
@@ -733,9 +902,14 @@
       accModalProductId = productId;
       document.getElementById('acc-modal-title').textContent = `🥗 Acompanhamentos — ${productName}`;
       document.getElementById('acc-modal-sub').textContent = 'Marque os disponíveis para este prato e os que vêm selecionados por padrão.';
+      document.getElementById('acc-customizable').checked = false;
+      document.getElementById('acc-min').value = 0;
+      document.getElementById('acc-max').value = 0;
+      document.getElementById('acc-modal-items').innerHTML =
+        '<p style="padding:20px 24px; color:#888; font-size:0.9rem">Carregando...</p>';
       document.getElementById('acc-modal-overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
 
-      // Buscar catálogo + associações atuais
       try {
         const [catRes, prodRes] = await Promise.all([
           apiFetch(`${API_BASE}/api/accompaniments/admin`),
@@ -744,42 +918,51 @@
         const catalog = await catRes.json();
         const current = await prodRes.json();
 
-        // Configurações do prato
         const cfg = current[0] || {};
         document.getElementById('acc-customizable').checked = !!cfg.is_customizable;
         document.getElementById('acc-min').value = cfg.min_sides || 0;
         document.getElementById('acc-max').value = cfg.max_sides || 0;
 
         const currentMap = Object.fromEntries(current.map(r => [r.id, r]));
+        const activeItems = catalog.filter(a => a.active);
 
-        document.getElementById('acc-modal-items').innerHTML = catalog
-          .filter(a => a.active)
-          .map(a => {
-            const linked = currentMap[a.id];
-            const isAvail   = linked ? linked.is_available : false;
-            const isDefault = linked ? linked.is_default   : false;
-            return `
-              <div class="acc-item">
-                <input type="checkbox" id="acc-avail-${a.id}" ${isAvail ? 'checked' : ''}
-                  onchange="document.getElementById('acc-default-${a.id}').disabled = !this.checked">
-                <label for="acc-avail-${a.id}">${esc(a.name)}</label>
-                ${a.extra_price > 0 ? `<span class="extra">+R$ ${a.extra_price.toFixed(2)}</span>` : ''}
-                <span class="tag-default" style="display:${isDefault ? 'inline' : 'none'}" id="acc-default-tag-${a.id}">padrão</span>
-                <label style="font-size:0.8rem; color:#888; white-space:nowrap;">
-                  <input type="checkbox" id="acc-default-${a.id}" ${isDefault ? 'checked' : ''} ${!isAvail ? 'disabled' : ''}
-                    onchange="document.getElementById('acc-default-tag-${a.id}').style.display = this.checked ? 'inline' : 'none'">
-                  padrão
-                </label>
-              </div>`;
-          }).join('');
+        if (!activeItems.length) {
+          document.getElementById('acc-modal-items').innerHTML =
+            '<p style="padding:20px 24px; color:#888; font-size:0.9rem">Nenhum acompanhamento cadastrado no catálogo ainda.</p>';
+          return;
+        }
+
+        document.getElementById('acc-modal-items').innerHTML = activeItems.map(a => {
+          const linked     = currentMap[a.id];
+          const isAvail    = linked ? !!linked.is_available : false;
+          const isDefault  = linked ? !!linked.is_default   : false;
+          const extraLabel = a.extra_price > 0 ? `<span class="extra">+R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : '';
+          const defaultTag = `<span class="tag-default" id="acc-default-tag-${a.id}" style="display:${isDefault ? 'inline' : 'none'}">padrão</span>`;
+          return `
+            <div class="acc-item">
+              <input type="checkbox" id="acc-avail-${a.id}" ${isAvail ? 'checked' : ''}
+                onchange="document.getElementById('acc-default-${a.id}').disabled=!this.checked; if(!this.checked){document.getElementById('acc-default-${a.id}').checked=false; document.getElementById('acc-default-tag-${a.id}').style.display='none';}">
+              <label for="acc-avail-${a.id}">${esc(a.name)}</label>
+              ${extraLabel}
+              ${defaultTag}
+              <label style="font-size:0.78rem; color:#666; white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <input type="checkbox" id="acc-default-${a.id}" ${isDefault ? 'checked' : ''} ${!isAvail ? 'disabled' : ''}
+                  style="width:auto; margin:0;"
+                  onchange="document.getElementById('acc-default-tag-${a.id}').style.display=this.checked?'inline':'none'">
+                padrão
+              </label>
+            </div>`;
+        }).join('');
       } catch (e) {
-        document.getElementById('acc-modal-items').innerHTML = '<p style="color:#e74c3c">Erro ao carregar dados.</p>';
+        document.getElementById('acc-modal-items').innerHTML =
+          '<p style="padding:20px 24px; color:#e74c3c">Erro ao carregar dados.</p>';
       }
     }
 
     function closeAccModal() {
       accModalProductId = null;
       document.getElementById('acc-modal-overlay').classList.remove('active');
+      document.body.style.overflow = '';
     }
 
     async function saveAccompaniments() {
@@ -830,8 +1013,7 @@
       localStorage.setItem(ACC_DISPLAY_KEY, val);
       const msg = document.getElementById('cfg-acc-msg');
       msg.textContent = '✅ Modo salvo — recarregue o carrinho para aplicar.';
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      setTimeout(() => { msg.textContent = ''; }, 3000);
     }
 
     window.onload = () => {
