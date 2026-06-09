@@ -108,7 +108,7 @@
       </div>
     </div>
 
-    <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos(); autoSaveClient()">
+    <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos()">
 
     <!-- Histórico de endereços -->
     <div id="address-history-bar" style="display:none">
@@ -116,7 +116,7 @@
       <div id="address-history-chips"></div>
     </div>
 
-    <select id="bairro" onchange="habilitarEndereco(); autoSaveClient()">
+    <select id="bairro" onchange="habilitarEndereco()">
       <option value="0">Locais de entrega...</option>
       <option value="0.0">Cachoeira do Bom Jesus</option>
       <option value="8.99">Ingleses</option>
@@ -126,10 +126,10 @@
       <option value="12.99">Canasvieiras</option>
     </select>
 
-    <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos(); autoSaveClient()">
-    <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos(); autoSaveClient()">
+    <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos()">
+    <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos()">
 
-    <select id="payment" onchange="autoSaveClient()">
+    <select id="payment">
       <option value="pix">PIX</option>
       <option value="dinheiro">Dinheiro</option>
       <option value="cartao">Cartão</option>
@@ -422,6 +422,13 @@
       }
 
       const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
+
+      // Persistir dados do cliente e salvar endereço no histórico apenas no envio
+      autoSaveClient();
+      if (bairroText !== 'Locais de entrega...' && address) {
+        saveAddressHistory(bairroText, address);
+      }
+
       localStorage.removeItem('cart');
 
       if (kanbanEnabled && orderToken) {
@@ -487,9 +494,6 @@
       };
       localStorage.setItem(CLIENT_KEY, JSON.stringify(data));
 
-      // Salvar no histórico de endereços se bairro + endereço preenchidos
-      if (data.bairro && data.address) saveAddressHistory(data.bairro, data.address);
-
       if (data.name) {
         document.getElementById('client-saved-bar').style.display = 'flex';
         document.getElementById('client-saved-label').textContent = `👋 Olá, ${data.name.split(' ')[0]}`;
@@ -532,7 +536,6 @@
       document.getElementById('address').value = address;
       updateTotal(cartSubtotal);
       verificarCampos();
-      autoSaveClient();
     }
 
     function renderAddressHistory() {
