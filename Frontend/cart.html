@@ -36,6 +36,17 @@
     .addr-chip-del { color:#444; font-size:0.8rem; margin-left:2px; }
     .addr-chip:hover .addr-chip-del { color:#e74c3c; }
 
+    /* Obs com botão de limpar */
+    .obs-wrap { position:relative; }
+    .obs-wrap textarea { width:100%; padding-right:30px; }
+    .obs-clear-btn {
+      position:absolute; top:12px; right:8px;
+      background:none; border:none; color:#444; font-size:0.85rem;
+      cursor:pointer; padding:2px 5px; border-radius:4px;
+      width:auto; margin:0; line-height:1;
+    }
+    .obs-clear-btn:hover { color:#e74c3c; background:#1a0a0a; }
+
     /* Modal de edição de acompanhamentos no carrinho */
     #cart-acc-overlay {
       display:none; position:fixed; inset:0;
@@ -110,9 +121,9 @@
 
     <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos()">
 
-    <!-- Histórico de endereços -->
+    <!-- Dados anteriores -->
     <div id="address-history-bar" style="display:none">
-      <span class="addr-hist-label">Endereços anteriores:</span>
+      <span class="addr-hist-label">Dados anteriores:</span>
       <div id="address-history-chips"></div>
     </div>
 
@@ -135,7 +146,10 @@
       <option value="cartao">Cartão</option>
     </select>
 
-    <textarea id="obs" placeholder="Observações do pedido" oninput="verificarCampos()"></textarea>
+    <div class="obs-wrap">
+      <textarea id="obs" placeholder="Observações do pedido" oninput="verificarCampos()"></textarea>
+      <button type="button" class="obs-clear-btn" onclick="document.getElementById('obs').value=''; verificarCampos()" title="Limpar observações">✕</button>
+    </div>
 
     <div class="cart-totals-row">
       <span>Subtotal</span>
@@ -414,7 +428,7 @@
 
       const kanbanEnabled = localStorage.getItem('lc_kanban_enabled') === 'true';
 
-      // Montar mensagem WhatsApp — inclui link de rastreio se Kanban ativo e token disponível
+      // Montar mensagem — inclui link de rastreio se Kanban ativo e token disponível
       let message = buildWhatsAppMessage();
       if (kanbanEnabled && orderToken) {
         const trackUrl = `${window.location.origin}/track.html?token=${orderToken}`;
@@ -423,30 +437,26 @@
 
       const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
 
-      // Persistir dados do cliente e endereço no histórico
+      // Persistir dados do cliente (snapshot completo) no momento do envio
       autoSaveClient();
-      if (bairroText !== 'Locais de entrega...' && address) {
-        saveAddressHistory(bairroText, address);
-      }
+      saveClientSnapshot();
 
+      // Salvar resumo para a tela de tracking
+      const orderSummary = {
+        items: cart.map(i => ({ name: i.name, qty: i.quantity || 1, price: parseFloat(i.price), accompaniments: i.accompaniments || [] })),
+        customer: name,
+        address: `${bairroText} - ${address}`,
+        phone, payment, total, subtotal, frete, obs,
+      };
+      localStorage.setItem('lc_last_order_summary', JSON.stringify(orderSummary));
       localStorage.removeItem('cart');
 
-      if (kanbanEnabled && orderToken) {
-        // Kanban ATIVO: salva resumo, abre WhatsApp em _blank e redireciona para tracking
-        const orderSummary = {
-          items: cart.map(i => ({ name: i.name, qty: i.quantity || 1, price: parseFloat(i.price), accompaniments: i.accompaniments || [] })),
-          customer: name,
-          address: `${bairroText} - ${address}`,
-          phone, payment, total, subtotal, frete, obs,
-        };
-        localStorage.setItem('lc_last_order_summary', JSON.stringify(orderSummary));
+      // SEMPRE abre WhatsApp em nova aba — cliente nunca sai do sistema
+      window.open(whatsappUrl, '_blank', 'noopener');
 
-        window.open(whatsappUrl, '_blank', 'noopener');
-        window.location.href = `${window.location.origin}/track.html?token=${orderToken}`;
-      } else {
-        // Kanban DESATIVADO: comportamento original — redireciona para WhatsApp na mesma aba
-        window.location.href = whatsappUrl;
-      }
+      // SEMPRE redireciona internamente para o tracking
+      const trackBase = `${window.location.origin}/track.html`;
+      window.location.href = orderToken ? `${trackBase}?token=${orderToken}` : trackBase;
     }
 
     // -----------------------------------------------------------------------
@@ -515,30 +525,62 @@
       verificarCampos();
     }
 
-    // --- Histórico de endereços ---
+    // --- Histórico de dados completos do cliente (snapshot) ---
     function getAddressHistory() {
       return JSON.parse(localStorage.getItem(ADDR_KEY) || '[]');
     }
 
-    function saveAddressHistory(bairro, address) {
-      const hist = getAddressHistory().filter(e => !(e.bairro === bairro && e.address === address));
-      hist.unshift({ bairro, address });
+    function saveClientSnapshot() {
+      const bairroSel  = document.getElementById('bairro');
+      const bairroText = bairroSel.options[bairroSel.selectedIndex]?.text || '';
+      const snap = {
+        name:    document.getElementById('customer-name').value.trim(),
+        bairro:  bairroText !== 'Locais de entrega...' ? bairroText : '',
+        address: document.getElementById('address').value.trim(),
+        phone:   document.getElementById('phone').value.trim(),
+        payment: document.getElementById('payment').value,
+        obs:     document.getElementById('obs').value.trim(),
+      };
+      if (!snap.bairro || !snap.address) return; // só salva se endereço válido
+      // Deduplica por bairro+address
+      const hist = getAddressHistory().filter(e => !(e.bairro === snap.bairro && e.address === snap.address));
+      hist.unshift(snap);
       localStorage.setItem(ADDR_KEY, JSON.stringify(hist.slice(0, 5)));
       renderAddressHistory();
     }
 
-    function deleteAddressHistory(bairro, address) {
-      const hist = getAddressHistory().filter(e => !(e.bairro === bairro && e.address === address));
+    function deleteClientSnapshot(index) {
+      const hist = getAddressHistory();
+      hist.splice(index, 1);
       localStorage.setItem(ADDR_KEY, JSON.stringify(hist));
       renderAddressHistory();
     }
 
-    function applyAddress(bairro, address) {
-      const sel = document.getElementById('bairro');
-      Array.from(sel.options).forEach(opt => { if (opt.text === bairro) sel.value = opt.value; });
-      document.getElementById('address').disabled = false;
-      document.getElementById('address').value = address;
-      updateTotal(cartSubtotal);
+    function applyClientSnapshot(index) {
+      const snap = getAddressHistory()[index];
+      if (!snap) return;
+
+      document.getElementById('customer-name').value = snap.name    || '';
+      document.getElementById('phone').value          = snap.phone   || '';
+      document.getElementById('payment').value        = snap.payment || 'pix';
+      document.getElementById('obs').value            = snap.obs     || '';
+
+      if (snap.bairro) {
+        const sel = document.getElementById('bairro');
+        Array.from(sel.options).forEach(opt => { if (opt.text === snap.bairro) sel.value = opt.value; });
+        if (sel.value !== '0') {
+          document.getElementById('address').disabled = false;
+          document.getElementById('address').value = snap.address || '';
+          updateTotal(cartSubtotal);
+        }
+      }
+
+      // Atualiza barra de saudação
+      if (snap.name) {
+        document.getElementById('client-saved-bar').style.display = 'flex';
+        document.getElementById('client-saved-label').textContent = `👋 Olá, ${snap.name.split(' ')[0]}`;
+      }
+
       verificarCampos();
     }
 
@@ -548,10 +590,10 @@
       const chips = document.getElementById('address-history-chips');
       if (!hist.length) { bar.style.display = 'none'; return; }
       bar.style.display = 'block';
-      chips.innerHTML = hist.map(e => `
-        <span class="addr-chip" onclick="applyAddress('${e.bairro.replace(/'/g,"\\'")}', '${e.address.replace(/'/g,"\\'")}')">
-          📍 ${e.bairro} — ${e.address}
-          <span class="addr-chip-del" onclick="event.stopPropagation(); deleteAddressHistory('${e.bairro.replace(/'/g,"\\'")}', '${e.address.replace(/'/g,"\\'")}')">✕</span>
+      chips.innerHTML = hist.map((e, i) => `
+        <span class="addr-chip" onclick="applyClientSnapshot(${i})">
+          👤 ${e.name ? e.name.split(' ')[0] + ' — ' : ''}📍 ${e.bairro}
+          <span class="addr-chip-del" onclick="event.stopPropagation(); deleteClientSnapshot(${i})">✕</span>
         </span>
       `).join('');
     }

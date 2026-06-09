@@ -62,12 +62,6 @@
     .payment-badge { display:inline-block; background:#1e1e1e; border:1px solid #2a2a2a; border-radius:6px; padding:4px 12px; font-size:0.8rem; color:#bbb; }
 
     /* Busca manual */
-    .track-search { margin-top:4px; }
-    .track-search-row { display:flex; gap:8px; }
-    .track-search-row input { flex:1; background:#1e1e1e; border:1px solid #2a2a2a; color:#fff; border-radius:8px; padding:10px 14px; font-size:0.88rem; outline:none; }
-    .track-search-row input:focus { border-color:#ffcc00; }
-    .track-search-row button { background:#ffcc00; color:#000; border:none; border-radius:8px; padding:10px 16px; font-weight:700; cursor:pointer; font-size:0.88rem; white-space:nowrap; }
-    .track-search-label { font-size:0.75rem; color:#444; margin-bottom:8px; }
 
     /* Nav */
     .nav-links { display:flex; gap:16px; justify-content:center; margin-top:20px; }
@@ -120,14 +114,14 @@
     </div>
   </div>
 
-  <!-- Busca por código -->
-  <div class="section track-search" id="search-section">
-    <div class="section-title">🔍 Buscar pedido por código</div>
-    <div class="track-search-label">Cole o código enviado no WhatsApp:</div>
-    <div class="track-search-row">
-      <input type="text" id="token-input" placeholder="Ex: 12-a3b4c5d6" maxlength="40">
-      <button onclick="searchByToken()">Buscar</button>
+  <!-- Código do pedido (referência discreta) -->
+  <div class="section" id="order-code-section" style="display:none">
+    <div class="section-title">🔑 Código do pedido</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <code id="order-code-display" style="flex:1; background:#0f0f0f; border:1px solid #1e1e1e; border-radius:8px; padding:10px 14px; font-size:0.85rem; color:#5ca8e0; word-break:break-all;"></code>
+      <button onclick="copyOrderCode()" style="background:none; border:1px solid #2a2a2a; color:#666; border-radius:8px; padding:8px 12px; font-size:0.82rem; cursor:pointer; white-space:nowrap; width:auto; margin:0;" title="Copiar código">📋 Copiar</button>
     </div>
+    <p style="font-size:0.72rem; color:#444; margin-top:6px;">Guarde este código para consultar seu pedido futuramente.</p>
   </div>
 
   <div class="nav-links">
@@ -233,20 +227,35 @@
   function loadFromToken(token) {
     if (!token) return;
     currentToken = token;
-    document.getElementById('token-input').value = token;
     document.getElementById('track-loading').style.display = 'block';
     document.getElementById('status-wrap').style.display = 'none';
     document.getElementById('error-msg').style.display = 'none';
+    // Exibir código do pedido discretamente
+    const codeSection = document.getElementById('order-code-section');
+    const codeDisplay = document.getElementById('order-code-display');
+    if (codeSection && codeDisplay) {
+      codeDisplay.textContent = token;
+      codeSection.style.display = 'block';
+    }
     fetchStatus(token);
     startPolling(token);
     connectSSE(token);
   }
 
-  function searchByToken() {
-    const token = document.getElementById('token-input').value.trim();
-    if (!token) return;
-    window.history.replaceState(null, '', `?token=${encodeURIComponent(token)}`);
-    loadFromToken(token);
+  function copyOrderCode() {
+    const code = document.getElementById('order-code-display').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = event.currentTarget;
+      btn.textContent = '✅ Copiado!';
+      setTimeout(() => { btn.textContent = '📋 Copiar'; }, 2000);
+    }).catch(() => {});
+  }
+
+  function showNoOrder() {
+    document.getElementById('track-loading').style.display = 'none';
+    const el = document.getElementById('error-msg');
+    el.innerHTML = 'Nenhum pedido encontrado.<br><a href="index.html" style="color:#ffcc00; text-decoration:none; font-size:0.85rem; display:inline-block; margin-top:10px;">← Fazer um pedido</a>';
+    el.style.display = 'block';
   }
 
   // ---- Resumo do pedido (localStorage) ----
@@ -290,18 +299,21 @@
   }
 
   // ---- Init ----
-  const params        = new URLSearchParams(window.location.search);
-  const tokenFromUrl  = params.get('token');
+  const params       = new URLSearchParams(window.location.search);
+  const tokenFromUrl = params.get('token');
 
   renderOrderSummary();
 
   if (tokenFromUrl) {
     loadFromToken(tokenFromUrl);
   } else {
-    document.getElementById('track-loading').style.display = 'none';
-    // Tentar carregar último pedido do histórico
+    // Tentar carregar último pedido do histórico local
     const history = JSON.parse(localStorage.getItem('lc_orders') || '[]');
-    if (history.length) loadFromToken(history[0].token);
+    if (history.length && history[0].token) {
+      loadFromToken(history[0].token);
+    } else {
+      showNoOrder();
+    }
   }
 </script>
 </body>
