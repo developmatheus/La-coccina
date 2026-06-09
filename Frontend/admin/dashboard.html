@@ -79,6 +79,11 @@
     .acc-badge-inactive { display: inline-flex; align-items: center; gap: 4px; background: #1e1e1e; color: #555; border: 1px solid #2a2a2a; border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
     .acc-badge-del { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; padding: 4px 6px; border-radius: 4px; }
     .acc-badge-del:hover { color: #e74c3c; background: #1a0a0a; }
+    .acc-drag-handle { color: #333; cursor: grab; font-size: 1rem; padding: 4px 8px; user-select: none; }
+    .acc-drag-handle:hover { color: #888; }
+    #acc-catalog-body tr { transition: opacity 0.15s; }
+    #acc-catalog-body tr.dragging { opacity: 0.3; }
+    #acc-catalog-body tr.drag-over { outline: 2px solid #ffcc00; outline-offset: -2px; border-radius: 4px; }
 
     /* Tabela principal */
     .card-admin { background: #1a1a1a; padding: 22px; border-radius: 16px; }
@@ -289,7 +294,7 @@
         <div class="table-scroll" style="margin-top:12px;">
           <table class="acc-table">
             <thead>
-              <tr><th>Nome</th><th>Preço extra</th><th>Ordem</th><th>Status</th><th style="width:40px"></th></tr>
+              <tr><th style="width:32px"></th><th>Nome</th><th>Preço extra</th><th>Status</th><th style="width:40px"></th></tr>
             </thead>
             <tbody id="acc-catalog-body">
               <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
@@ -875,18 +880,75 @@
     function renderCatalog() {
       const tbody = document.getElementById('acc-catalog-body');
       if (!catalogCache.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>';
         return;
       }
       tbody.innerHTML = catalogCache.map(a => `
-        <tr style="${!a.active ? 'opacity:0.45' : ''}">
+        <tr draggable="true" data-id="${a.id}" style="${!a.active ? 'opacity:0.45' : ''}">
+          <td><span class="acc-drag-handle" title="Arrastar para reordenar">⠿</span></td>
           <td><strong style="color:${a.active ? '#ddd' : '#666'}">${esc(a.name)}</strong></td>
           <td>${a.extra_price > 0 ? `<span style="color:#ffcc00;font-weight:600">+ R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : '<span style="color:#444">incluso</span>'}</td>
-          <td><span style="color:#555">${a.sort_order}</span></td>
           <td><span onclick="toggleAccActive(${a.id}, ${a.active})" class="${a.active ? 'acc-badge-active' : 'acc-badge-inactive'}">${a.active ? '● Ativo' : '○ Inativo'}</span></td>
           <td><button class="acc-badge-del" onclick="deleteAccompaniment(${a.id})" title="Remover">✕</button></td>
         </tr>
       `).join('');
+      bindAccDragDrop();
+    }
+
+    // --- Drag & Drop do catálogo de acompanhamentos ---
+    let _accDragSrcId = null;
+
+    function bindAccDragDrop() {
+      const tbody = document.getElementById('acc-catalog-body');
+      tbody.querySelectorAll('tr[data-id]').forEach(row => {
+        row.addEventListener('dragstart', e => {
+          _accDragSrcId = Number(row.dataset.id);
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => row.classList.add('dragging'), 0);
+        });
+        row.addEventListener('dragend', () => {
+          row.classList.remove('dragging');
+          tbody.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+        });
+        row.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          tbody.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+          row.classList.add('drag-over');
+        });
+        row.addEventListener('drop', e => {
+          e.preventDefault();
+          row.classList.remove('drag-over');
+          const targetId = Number(row.dataset.id);
+          if (_accDragSrcId === null || _accDragSrcId === targetId) return;
+
+          // Reordenar catalogCache localmente
+          const srcIdx = catalogCache.findIndex(a => a.id === _accDragSrcId);
+          const tgtIdx = catalogCache.findIndex(a => a.id === targetId);
+          if (srcIdx === -1 || tgtIdx === -1) return;
+          const [moved] = catalogCache.splice(srcIdx, 1);
+          catalogCache.splice(tgtIdx, 0, moved);
+
+          // Atualizar sort_order sequencialmente
+          catalogCache.forEach((a, i) => { a.sort_order = i; });
+
+          renderCatalog();
+          saveAccOrder();
+        });
+      });
+    }
+
+    async function saveAccOrder() {
+      // Salva a nova ordem persitindo sort_order de cada item
+      try {
+        await Promise.all(catalogCache.map(a =>
+          apiFetch(`${API_BASE}/api/accompaniments/${a.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: a.active }),
+          })
+        ));
+      } catch (e) { console.error('Erro ao salvar ordem:', e); }
     }
 
     async function addAccompaniment() {
