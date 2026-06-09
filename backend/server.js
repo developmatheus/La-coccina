@@ -16,6 +16,7 @@ require('dotenv').config({
 });
 
 const productsRouter = require('./routes/products');
+const accompanimentsRouter = require('./routes/accompaniments');
 const authRouter = require('./routes/auth');
 const { requireAdmin } = require('./middleware/auth');
 const { upload } = require('./middleware/upload');
@@ -117,6 +118,7 @@ app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
 });
 
 app.use('/api/products', productsRouter);
+app.use('/api/accompaniments', accompanimentsRouter);
 
 if (serveFrontend && hasFrontend) {
   const assetsDir = path.join(frontendDir, 'ASSETS');

@@ -79,6 +79,43 @@
       border-radius: 6px; width: auto;
     }
     #btn-close-modal:hover { color: #fff; background: #333; }
+
+    /* Modal de acompanhamentos */
+    #acc-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8); z-index: 1100;
+      align-items: flex-start; justify-content: center;
+      padding: 40px 16px; overflow-y: auto;
+    }
+    #acc-modal-overlay.active { display: flex; }
+    #acc-modal {
+      background: #1a1a1a; border-radius: 16px; padding: 30px;
+      width: 100%; max-width: 620px; position: relative;
+    }
+    #acc-modal h3 { margin: 0 0 6px; font-size: 1.1rem; }
+    #acc-modal .sub { color: #888; font-size: 0.85rem; margin-bottom: 18px; }
+    .acc-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid #2a2a2a;
+    }
+    .acc-item:last-child { border-bottom: none; }
+    .acc-item label { flex: 1; cursor: pointer; }
+    .acc-item .extra { color: #ffcc00; font-size: 0.8rem; white-space: nowrap; }
+    .acc-item .tag-default {
+      font-size: 0.72rem; background: #27ae60; color: #fff;
+      padding: 2px 8px; border-radius: 50px; white-space: nowrap;
+    }
+    .acc-config { display: flex; gap: 8px; align-items: center; margin: 16px 0 0; flex-wrap: wrap; }
+    .acc-config label { color: #ccc; font-size: 0.88rem; white-space: nowrap; }
+    .acc-config input[type=number] { width: 70px; }
+    #btn-close-acc {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; color: #aaa;
+      font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
+      border-radius: 6px; width: auto;
+    }
+    #btn-close-acc:hover { color: #fff; background: #333; }
+    .btn-accompaniments { background: #8e44ad; color: white; padding: 8px 14px; border: none; border-radius: 6px; margin-right: 6px; cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -139,6 +176,63 @@
             <tbody></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- Catálogo de Acompanhamentos -->
+    <div class="card-admin" style="margin-top:30px;">
+      <h2>🥗 Catálogo de Acompanhamentos</h2>
+      <p style="color:#888; font-size:0.85rem; margin-bottom:16px;">
+        Registros globais reutilizáveis. Associe acompanhamentos a pratos individuais usando o botão 🥗 na tabela acima.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)"  style="flex:2; min-width:160px;">
+        <input type="number" id="acc-extra-price"  placeholder="Preço extra (0 = incluso)" step="0.01" min="0" style="flex:1; min-width:120px;">
+        <input type="number" id="acc-sort"         placeholder="Ordem" min="0" style="width:80px; flex:none;">
+        <button onclick="addAccompaniment()" style="width:auto; padding:14px 20px; background:#27ae60; flex:none;">+ Adicionar</button>
+      </div>
+      <div id="acc-catalog-list"></div>
+    </div>
+
+    <!-- Configurações do site -->
+    <div class="card-admin" style="margin-top:30px;">
+      <h2>⚙️ Configurações do Site</h2>
+      <label style="display:block; margin:12px 0 6px; color:#ccc; font-size:0.9rem;">
+        Tempo de debounce do cardápio (ms)
+        <small style="color:#666; display:block;">Intervalo mínimo entre atualizações automáticas do cardápio quando o admin faz alterações. Padrão: 1000ms.</small>
+      </label>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="number" id="cfg-debounce" min="200" max="10000" step="100"
+          style="width:140px; flex:none;"
+          value="">
+        <button onclick="saveConfig()" style="width:auto; padding:14px 24px; background:#2980b9;">💾 Salvar</button>
+        <button onclick="resetConfig()" style="width:auto; padding:14px 24px; background:#555;">Restaurar padrão</button>
+      </div>
+      <p id="cfg-msg" style="margin-top:10px; font-size:0.85rem; color:#27ae60; display:none;"></p>
+    </div>
+  </div>
+
+  <!-- Modal de acompanhamentos por prato -->
+  <div id="acc-modal-overlay" role="dialog" aria-modal="true">
+    <div id="acc-modal">
+      <button id="btn-close-acc" onclick="closeAccModal()" aria-label="Fechar">✕</button>
+      <h3 id="acc-modal-title">🥗 Acompanhamentos</h3>
+      <p class="sub" id="acc-modal-sub"></p>
+
+      <div class="acc-config">
+        <label><input type="checkbox" id="acc-customizable"> Prato personalizável</label>
+        <label>Mín: <input type="number" id="acc-min" min="0" max="20" value="0"></label>
+        <label>Máx: <input type="number" id="acc-max" min="0" max="20" value="0"></label>
+      </div>
+
+      <p style="color:#888; font-size:0.8rem; margin: 12px 0 6px;">
+        Marque os disponíveis e defina quais vêm marcados por padrão:
+      </p>
+      <div id="acc-modal-items"></div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button onclick="saveAccompaniments()" style="background:#27ae60; flex:1;">💾 Salvar</button>
+        <button onclick="closeAccModal()" style="background:#555; width:auto; padding:14px 22px;">Cancelar</button>
       </div>
     </div>
   </div>
@@ -361,7 +455,7 @@
             ? [d.protein, d.sides].filter(Boolean).join(' · ')
             : [d.volume, d.serve_type].filter(Boolean).join(' · ');
           tr.innerHTML = `
-            <td><img src="${imgUrl(p.image)}" onerror="this.src='https://via.placeholder.com/70x70/333/fff?text=Sem+Foto'" width="70" height="70" alt=""></td>
+            <td><img src="${imgUrl(p.image)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2270%22 height=%2270%22%3E%3Crect width=%2270%22 height=%2270%22 fill=%22%23333%22/%3E%3Ctext x=%2235%22 y=%2238%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%23888%22%3ESem foto%3C/text%3E%3C/svg%3E'" width="70" height="70" alt=""></td>
             <td>
               ${esc(p.name)}
               ${detailText ? `<br><small style="color:#888">${esc(detailText)}</small>` : ''}
@@ -376,6 +470,9 @@
                 <button onclick="toggleDailySpecial(${p.id}, ${p.isDailySpecial == 1})" style="background:#ffcc00; color:#000; padding:8px 14px; border:none; border-radius:6px; margin-right:6px; cursor:pointer;">
                   ${p.isDailySpecial == 1 ? '🌟 Remover do Dia' : '🌟 Prato do Dia'}
                 </button>
+              ` : ''}
+              ${p.category === 'marmita' ? `
+                <button class="btn-accompaniments" onclick="openAccModal(${p.id}, '${esc(p.name)}')">🥗 Acomp.</button>
               ` : ''}
               <button class="btn-edit"
                 data-id="${p.id}"
@@ -510,9 +607,205 @@
       }
     }
 
+    const CONFIG_KEY = 'lc_refresh_debounce';
+    const CONFIG_DEFAULT = 1000;
+
+    function loadConfig() {
+      const val = Number(localStorage.getItem(CONFIG_KEY) || CONFIG_DEFAULT);
+      document.getElementById('cfg-debounce').value = val;
+    }
+
+    function saveConfig() {
+      const raw = Number(document.getElementById('cfg-debounce').value);
+      const val = Math.max(200, Math.min(10000, raw || CONFIG_DEFAULT));
+      localStorage.setItem(CONFIG_KEY, val);
+      document.getElementById('cfg-debounce').value = val;
+      const msg = document.getElementById('cfg-msg');
+      msg.textContent = `✅ Salvo: ${val}ms — recarregue o cardápio para aplicar.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    function resetConfig() {
+      localStorage.removeItem(CONFIG_KEY);
+      document.getElementById('cfg-debounce').value = CONFIG_DEFAULT;
+      const msg = document.getElementById('cfg-msg');
+      msg.textContent = `✅ Restaurado para ${CONFIG_DEFAULT}ms.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    // -----------------------------------------------------------------------
+    // Catálogo global de acompanhamentos
+    // -----------------------------------------------------------------------
+    let catalogCache = [];
+
+    async function loadAccompanimentsCatalog() {
+      try {
+        const res = await apiFetch(`${API_BASE}/api/accompaniments/admin`);
+        catalogCache = await res.json();
+        renderCatalog();
+      } catch (e) { console.error('Erro ao carregar catálogo:', e); }
+    }
+
+    function renderCatalog() {
+      const list = document.getElementById('acc-catalog-list');
+      if (!catalogCache.length) {
+        list.innerHTML = '<p style="color:#666; font-size:0.85rem;">Nenhum acompanhamento cadastrado ainda.</p>';
+        return;
+      }
+      list.innerHTML = catalogCache.map(a => `
+        <div class="acc-item">
+          <span style="flex:1; ${!a.active ? 'color:#666; text-decoration:line-through;' : ''}">${esc(a.name)}</span>
+          ${a.extra_price > 0 ? `<span class="extra">+R$ ${a.extra_price.toFixed(2)}</span>` : '<span style="color:#666;font-size:0.8rem">incluso</span>'}
+          <span style="color:#555; font-size:0.8rem">ord:${a.sort_order}</span>
+          <button onclick="toggleAccActive(${a.id}, ${a.active})" style="background:${a.active ? '#27ae60' : '#555'}; color:#fff; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:0.8rem;">
+            ${a.active ? 'Ativo' : 'Inativo'}
+          </button>
+          <button onclick="deleteAccompaniment(${a.id})" style="background:#e74c3c; color:#fff; border:none; border-radius:6px; padding:6px 10px; cursor:pointer;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    async function addAccompaniment() {
+      const name = document.getElementById('acc-name').value.trim();
+      const extra_price = document.getElementById('acc-extra-price').value || 0;
+      const sort_order = document.getElementById('acc-sort').value || 0;
+      if (!name) { alert('Informe o nome do acompanhamento.'); return; }
+      try {
+        const res = await apiFetch(`${API_BASE}/api/accompaniments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, extra_price, sort_order })
+        });
+        if (!res.ok) { await handleApiError(res, 'Erro ao adicionar'); return; }
+        document.getElementById('acc-name').value = '';
+        document.getElementById('acc-extra-price').value = '';
+        document.getElementById('acc-sort').value = '';
+        await loadAccompanimentsCatalog();
+      } catch (e) { alert('Erro de conexão.'); }
+    }
+
+    async function toggleAccActive(id, current) {
+      const a = catalogCache.find(x => x.id === id);
+      if (!a) return;
+      try {
+        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: !current })
+        });
+        await loadAccompanimentsCatalog();
+      } catch (e) { alert('Erro de conexão.'); }
+    }
+
+    async function deleteAccompaniment(id) {
+      if (!confirm('Remover este acompanhamento do catálogo?')) return;
+      try {
+        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, { method: 'DELETE' });
+        await loadAccompanimentsCatalog();
+      } catch (e) { alert('Erro de conexão.'); }
+    }
+
+    // -----------------------------------------------------------------------
+    // Modal de associação de acompanhamentos por prato
+    // -----------------------------------------------------------------------
+    let accModalProductId = null;
+
+    async function openAccModal(productId, productName) {
+      accModalProductId = productId;
+      document.getElementById('acc-modal-title').textContent = `🥗 Acompanhamentos — ${productName}`;
+      document.getElementById('acc-modal-sub').textContent = 'Marque os disponíveis para este prato e os que vêm selecionados por padrão.';
+      document.getElementById('acc-modal-overlay').classList.add('active');
+
+      // Buscar catálogo + associações atuais
+      try {
+        const [catRes, prodRes] = await Promise.all([
+          apiFetch(`${API_BASE}/api/accompaniments/admin`),
+          fetch(`${API_BASE}/api/accompaniments/product/${productId}`)
+        ]);
+        const catalog = await catRes.json();
+        const current = await prodRes.json();
+
+        // Configurações do prato
+        const cfg = current[0] || {};
+        document.getElementById('acc-customizable').checked = !!cfg.is_customizable;
+        document.getElementById('acc-min').value = cfg.min_sides || 0;
+        document.getElementById('acc-max').value = cfg.max_sides || 0;
+
+        const currentMap = Object.fromEntries(current.map(r => [r.id, r]));
+
+        document.getElementById('acc-modal-items').innerHTML = catalog
+          .filter(a => a.active)
+          .map(a => {
+            const linked = currentMap[a.id];
+            const isAvail   = linked ? linked.is_available : false;
+            const isDefault = linked ? linked.is_default   : false;
+            return `
+              <div class="acc-item">
+                <input type="checkbox" id="acc-avail-${a.id}" ${isAvail ? 'checked' : ''}
+                  onchange="document.getElementById('acc-default-${a.id}').disabled = !this.checked">
+                <label for="acc-avail-${a.id}">${esc(a.name)}</label>
+                ${a.extra_price > 0 ? `<span class="extra">+R$ ${a.extra_price.toFixed(2)}</span>` : ''}
+                <span class="tag-default" style="display:${isDefault ? 'inline' : 'none'}" id="acc-default-tag-${a.id}">padrão</span>
+                <label style="font-size:0.8rem; color:#888; white-space:nowrap;">
+                  <input type="checkbox" id="acc-default-${a.id}" ${isDefault ? 'checked' : ''} ${!isAvail ? 'disabled' : ''}
+                    onchange="document.getElementById('acc-default-tag-${a.id}').style.display = this.checked ? 'inline' : 'none'">
+                  padrão
+                </label>
+              </div>`;
+          }).join('');
+      } catch (e) {
+        document.getElementById('acc-modal-items').innerHTML = '<p style="color:#e74c3c">Erro ao carregar dados.</p>';
+      }
+    }
+
+    function closeAccModal() {
+      accModalProductId = null;
+      document.getElementById('acc-modal-overlay').classList.remove('active');
+    }
+
+    async function saveAccompaniments() {
+      if (!accModalProductId) return;
+      const catalog = Array.from(document.querySelectorAll('[id^="acc-avail-"]'));
+      const items = catalog
+        .filter(cb => cb.checked)
+        .map(cb => {
+          const id = cb.id.replace('acc-avail-', '');
+          return {
+            accompaniment_id: Number(id),
+            is_default:   document.getElementById(`acc-default-${id}`)?.checked ? 1 : 0,
+            is_available: 1,
+          };
+        });
+
+      const payload = {
+        is_customizable: document.getElementById('acc-customizable').checked,
+        min_sides: Number(document.getElementById('acc-min').value),
+        max_sides: Number(document.getElementById('acc-max').value),
+        items,
+      };
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/accompaniments/product/${accModalProductId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) { closeAccModal(); loadProducts(); }
+        else await handleApiError(res, 'Erro ao salvar');
+      } catch (e) { alert('Erro de conexão.'); }
+    }
+
+    document.getElementById('acc-modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeAccModal();
+    });
+
     window.onload = () => {
       loadProducts();
       loadRestaurantStatus();
+      loadConfig();
+      loadAccompanimentsCatalog();
     };
   </script>
 </body>

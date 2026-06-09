@@ -21,6 +21,25 @@
     .products-row { display: flex; gap: 25px; overflow-x: auto; overflow-y: hidden; width: 100%; padding: 20px 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .products-row::-webkit-scrollbar { display: none; }
     .card { min-width: 320px; width: 320px; flex: none; background: #1a1a1a; border-radius: 20px; overflow: hidden; transition: 0.3s; }
+
+    /* Modal de seleção de acompanhamentos */
+    #acc-sel-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82); z-index: 2000;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #acc-sel-box {
+      background: #1a1a1a; border-radius: 20px; padding: 28px;
+      width: 100%; max-width: 440px; max-height: 80vh;
+      overflow-y: auto; position: relative;
+    }
+    #acc-sel-box h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #acc-sel-msg { color: #ffcc00; font-size: 0.85rem; margin-bottom: 14px; display: block; }
+    #acc-sel-box .acc-actions { display: flex; gap: 10px; margin-top: 18px; }
+    #acc-sel-box .acc-actions button { flex: 1; padding: 14px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    #btn-acc-confirm { background: #ffcc00; color: #000; }
+    #btn-acc-cancel  { background: #333; color: #fff; }
   </style>
 
   <meta name="description" content="Marmitas caseiras deliciosas em Florianópolis. Comida feita com amor, ingredientes frescos e sabor autêntico. Entrega rápida em Cachoeira do Bom Jesus, Ingleses, Canasvieiras e região.">
@@ -98,6 +117,8 @@
     let menuEventSource = null;
     let refreshDebounceTimer = null;
     let sseReconnectTimer = null;
+    let fallbackPollTimer = null;
+    let isRefreshing = false;
 
     function isActive(product) {
       return product.active === 1 || product.active === true;
@@ -109,12 +130,27 @@
       return res.json();
     }
 
+    const REFRESH_DEBOUNCE_MS = Number(localStorage.getItem('lc_refresh_debounce') || 1000);
+
     function scheduleSiteRefresh() {
       clearTimeout(refreshDebounceTimer);
-      refreshDebounceTimer = setTimeout(refreshSiteData, 300);
+      refreshDebounceTimer = setTimeout(refreshSiteData, REFRESH_DEBOUNCE_MS);
+    }
+
+    // Polling de fallback: só agenda o próximo ciclo APÓS o atual terminar.
+    // Evita sobreposição quando o SSE está indisponível.
+    function scheduleFallbackPoll() {
+      clearTimeout(fallbackPollTimer);
+      fallbackPollTimer = setTimeout(async () => {
+        await refreshSiteData();
+        scheduleFallbackPoll();
+      }, 60000);
     }
 
     async function refreshSiteData() {
+      // Guard: se já está atualizando, ignora a chamada concurrent.
+      if (isRefreshing) return;
+      isRefreshing = true;
       try {
         const products = await fetchPublicMenu();
         renderMenu(products);
@@ -123,6 +159,8 @@
         await updateClientStatusBar();
       } catch (e) {
         console.error('Erro ao atualizar site:', e);
+      } finally {
+        isRefreshing = false;
       }
     }
 
@@ -162,8 +200,15 @@
           menuEventSource.close();
           menuEventSource = null;
         }
+        // SSE caiu: ativa polling de fallback enquanto tenta reconectar.
+        scheduleFallbackPoll();
         clearTimeout(sseReconnectTimer);
         sseReconnectTimer = setTimeout(connectLiveUpdates, 8000);
+      };
+
+      menuEventSource.onopen = () => {
+        // SSE reconectou: cancela o polling de fallback.
+        clearTimeout(fallbackPollTimer);
       };
     }
 
@@ -222,8 +267,9 @@
       const d = product.details || {};
       const tags = [];
       if (product.category === 'marmita') {
-        if (d.protein)  tags.push({ label: d.protein,  color: '#c0392b' });
-        if (d.sides)    d.sides.split(',').forEach(s => s.trim() && tags.push({ label: s.trim(), color: '#2c7a4b' }));
+        if (d.protein)         tags.push({ label: d.protein, color: '#c0392b' });
+        if (d.is_customizable) tags.push({ label: '✏️ Personalizável', color: '#7d3c98' });
+        else if (d.sides)      d.sides.split(',').forEach(s => s.trim() && tags.push({ label: s.trim(), color: '#2c7a4b' }));
       } else {
         if (d.volume)     tags.push({ label: d.volume,     color: '#1a6fa8' });
         if (d.serve_type) tags.push({ label: d.serve_type, color: '#6c3483' });
@@ -237,7 +283,10 @@
     function createCard(product) {
       const card = document.createElement('div');
       card.className = 'card';
-      const cartButton = `<button class="add-to-cart" onclick='addToCart(${safeJson(product)})'>Adicionar ao Carrinho</button>`;
+      const isCustomizable = product.details?.is_customizable;
+      const cartButton = isCustomizable
+        ? `<button class="add-to-cart" onclick='openAccompanimentsModal(${safeJson(product)})'>Personalizar e Adicionar</button>`
+        : `<button class="add-to-cart" onclick='addToCart(${safeJson(product)}, [])'>Adicionar ao Carrinho</button>`;
       const imageHtml = product.image ? `<img src="${imgUrl(product.image)}" alt="${esc(product.name)}">` : '';
       card.innerHTML = `
         ${imageHtml}
@@ -249,6 +298,74 @@
           ${cartButton}
         </div>`;
       return card;
+    }
+
+    // Modal de seleção de acompanhamentos (pratos personalizáveis)
+    let _accModalProduct = null;
+
+    async function openAccompanimentsModal(product) {
+      if (!(await isStoreOpen())) { alert('🔴 O restaurante está fechado no momento.'); return; }
+      _accModalProduct = product;
+
+      document.getElementById('acc-sel-title').textContent = product.name;
+      document.getElementById('acc-sel-list').innerHTML = '<p style="color:#888">Carregando...</p>';
+      document.getElementById('acc-sel-msg').textContent = '';
+      document.getElementById('acc-sel-overlay').style.display = 'flex';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/accompaniments/product/${product.id}`);
+        const items = await res.json();
+
+        const cfg = items[0] || {};
+        const min = cfg.min_sides || 0;
+        const max = cfg.max_sides || 0;
+        document.getElementById('acc-sel-msg').textContent =
+          max > 0 ? `Escolha entre ${min} e ${max} acompanhamento(s).` : '';
+
+        document.getElementById('acc-sel-list').innerHTML = items.length ? items.map(a => {
+          const extraLabel = a.extra_price > 0 ? `<span style="color:#ffcc00; font-size:0.8rem"> +R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : '';
+          return `
+            <label style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #2a2a2a; cursor:pointer;">
+              <input type="checkbox" name="acc-sel" value="${a.id}"
+                data-price="${a.extra_price}"
+                data-name="${esc(a.name)}"
+                ${a.is_default ? 'checked' : ''}>
+              <span>${esc(a.name)}${extraLabel}</span>
+            </label>`;
+        }).join('') : '<p style="color:#888; font-size:0.9rem">Nenhum acompanhamento disponível.</p>';
+
+        // Salvar config de min/max no elemento para usar no confirm
+        document.getElementById('acc-sel-list').dataset.min = min;
+        document.getElementById('acc-sel-list').dataset.max = max;
+      } catch (e) {
+        document.getElementById('acc-sel-list').innerHTML = '<p style="color:#e74c3c">Erro ao carregar opções.</p>';
+      }
+    }
+
+    function confirmAccompaniments() {
+      const list = document.getElementById('acc-sel-list');
+      const min = Number(list.dataset.min || 0);
+      const max = Number(list.dataset.max || 0);
+      const checked = Array.from(list.querySelectorAll('input[name="acc-sel"]:checked'));
+
+      if (max > 0 && (checked.length < min || checked.length > max)) {
+        alert(`Escolha entre ${min} e ${max} acompanhamento(s). Você marcou ${checked.length}.`);
+        return;
+      }
+
+      const selectedAcc = checked.map(cb => ({
+        id: Number(cb.value),
+        name: cb.dataset.name,
+        extra_price: parseFloat(cb.dataset.price || 0),
+      }));
+
+      closeAccSel();
+      addToCart(_accModalProduct, selectedAcc);
+    }
+
+    function closeAccSel() {
+      document.getElementById('acc-sel-overlay').style.display = 'none';
+      _accModalProduct = null;
     }
 
     async function isStoreOpen() {
@@ -276,17 +393,34 @@
         });
     }
 
-    async function addToCart(product) {
+    async function addToCart(product, selectedAcc = []) {
       if (!(await isStoreOpen())) {
         alert('🔴 O restaurante está fechado no momento.');
         return;
       }
 
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existing = cart.find(item => item.id === product.id);
+      const extraPrice = selectedAcc.reduce((sum, a) => sum + (a.extra_price || 0), 0);
+      const finalPrice = parseFloat(product.price) + extraPrice;
 
-      if (existing) existing.quantity = (existing.quantity || 1) + 1;
-      else cart.push({ ...product, quantity: 1 });
+      // Cada combinação produto+acompanhamentos é tratada como item único no carrinho
+      const accKey = selectedAcc.map(a => a.id).sort().join(',');
+      const cartKey = `${product.id}:${accKey}`;
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.find(item => item._cartKey === cartKey);
+
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        cart.push({
+          ...product,
+          price: finalPrice,
+          _basePrice: product.price,
+          _cartKey: cartKey,
+          accompaniments: selectedAcc,
+          quantity: 1,
+        });
+      }
 
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartCount();
@@ -320,9 +454,8 @@
       refreshSiteData();
       updateCartCount();
       connectLiveUpdates();
+      scheduleFallbackPoll();
     };
-
-    setInterval(refreshSiteData, 60000);
   </script>
 
   <footer class="footer">
@@ -356,5 +489,18 @@
       </div>
     </div>
   </footer>
+
+  <!-- Modal de seleção de acompanhamentos -->
+  <div id="acc-sel-overlay" onclick="if(event.target===this) closeAccSel()">
+    <div id="acc-sel-box">
+      <h3 id="acc-sel-title"></h3>
+      <span id="acc-sel-msg"></span>
+      <div id="acc-sel-list"></div>
+      <div class="acc-actions">
+        <button id="btn-acc-confirm" onclick="confirmAccompaniments()">✅ Adicionar ao Carrinho</button>
+        <button id="btn-acc-cancel"  onclick="closeAccSel()">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

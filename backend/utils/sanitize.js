@@ -82,6 +82,30 @@ function sanitizeOrderInput(body) {
   return { customer, address, phone, payment, obs, total, items };
 }
 
+function sanitizeAccompanimentInput(body) {
+  const name = trimString(body.name, 80);
+  const extra_price = parsePrice(body.extra_price ?? 0) ?? 0;
+  const sort_order = Math.max(0, Math.min(999, Math.floor(Number(body.sort_order) || 0)));
+
+  if (!name) return { error: 'Nome do acompanhamento é obrigatório' };
+  return { name, extra_price, sort_order };
+}
+
+function sanitizeProductAccompanimentsInput(body) {
+  const is_customizable = body.is_customizable ? 1 : 0;
+  const min_sides = Math.max(0, Math.min(20, Math.floor(Number(body.min_sides) || 0)));
+  const max_sides = Math.max(0, Math.min(20, Math.floor(Number(body.max_sides) || 0)));
+  const items = Array.isArray(body.items) ? body.items : [];
+  const sanitizedItems = items
+    .filter(i => i && Number.isInteger(Number(i.accompaniment_id)) && Number(i.accompaniment_id) > 0)
+    .map(i => ({
+      accompaniment_id: Number(i.accompaniment_id),
+      is_default:   i.is_default   ? 1 : 0,
+      is_available: i.is_available !== false ? 1 : 0,
+    }));
+  return { is_customizable, min_sides, max_sides, items: sanitizedItems };
+}
+
 module.exports = {
   ALLOWED_CATEGORIES,
   trimString,
@@ -90,4 +114,6 @@ module.exports = {
   isAllowedCategory,
   sanitizeProductInput,
   sanitizeOrderInput,
+  sanitizeAccompanimentInput,
+  sanitizeProductAccompanimentsInput,
 };
