@@ -103,6 +103,56 @@
 
     /* WhatsApp toggle */
     .kb-whatsapp-notice { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; color: #4caf50; display: flex; align-items: center; gap: 8px; }
+
+    /* Card clicável */
+    .kb-card-clickable { cursor: pointer; }
+
+    /* Drawer de detalhes do pedido */
+    #kb-detail-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; }
+    #kb-detail-overlay.open { display:block; }
+    #kb-detail-drawer {
+      position: fixed; top:0; right:0; bottom:0;
+      width: 420px; max-width: 100vw;
+      background: #131313; z-index: 501;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+      border-left: 1px solid #1e1e1e;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+    }
+    #kb-detail-drawer.open { transform: translateX(0); }
+    .kd-header { padding: 16px 20px 12px; border-bottom: 1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .kd-header-left { display:flex; flex-direction:column; gap:2px; }
+    .kd-order-id { font-size: 0.7rem; color:#555; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; }
+    .kd-customer-name { font-size: 1.05rem; font-weight:700; color:#fff; }
+    .kd-close { background:none; border:1px solid #2a2a2a; color:#666; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:1rem; width:auto; margin:0; }
+    .kd-close:hover { color:#fff; border-color:#444; }
+    .kd-body { overflow-y:auto; flex:1; padding:0; }
+    .kd-section { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; }
+    .kd-section:last-child { border-bottom:none; }
+    .kd-section-title { font-size:0.65rem; color:#444; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-weight:700; }
+    .kd-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; font-size:0.85rem; }
+    .kd-row:last-child { margin-bottom:0; }
+    .kd-label { color:#555; white-space:nowrap; flex-shrink:0; }
+    .kd-value { color:#ccc; text-align:right; word-break:break-word; }
+    .kd-value.gold { color:#ffcc00; font-weight:700; }
+    .kd-value.green { color:#4caf50; }
+    .kd-item-row { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #1a1a1a; align-items:flex-start; }
+    .kd-item-row:last-child { border-bottom:none; }
+    .kd-item-qty { color:#ffcc00; font-weight:700; font-size:0.88rem; flex-shrink:0; width:24px; }
+    .kd-item-info { flex:1; }
+    .kd-item-name { font-size:0.88rem; color:#ddd; }
+    .kd-item-acc { font-size:0.75rem; color:#555; margin-top:2px; }
+    .kd-item-price { font-size:0.82rem; color:#888; white-space:nowrap; }
+    .kd-track-code { background:#0f0f0f; border:1px solid #1e1e1e; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:0.82rem; color:#5ca8e0; word-break:break-all; margin-top:6px; cursor:pointer; }
+    .kd-track-code:hover { border-color:#2a4a7a; }
+    .kd-prev-order { padding:8px 0; border-bottom:1px solid #1a1a1a; }
+    .kd-prev-order:last-child { border-bottom:none; }
+    .kd-prev-date { font-size:0.72rem; color:#444; }
+    .kd-prev-total { font-size:0.78rem; color:#888; }
+    .kd-status-badge { display:inline-block; border-radius:50px; padding:3px 10px; font-size:0.72rem; font-weight:700; }
+    .kd-footer { padding:14px 20px; border-top:1px solid #1e1e1e; display:flex; gap:8px; flex-shrink:0; }
+    .kd-footer button { flex:1; padding:11px; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; margin:0; }
   </style>
 </head>
 <body>
@@ -142,10 +192,11 @@
     { key: 'a_caminho',        label: 'A Caminho',          nextLabel: 'Marcar Entregue',   nextKey: 'entregue'         },
   ];
 
-  let orders = [];
+  let orders     = [];
   let dragSrcId  = null;
   let dragSrcCol = null;
   let sseConn    = null;
+  let _wasDragged = false; // distingue drag de click no card
 
   // --- Persistência local da confirmação WhatsApp ---
   const WA_KEY = 'lc_wa_confirmed';
@@ -281,7 +332,8 @@
     return `<div class="kb-card ${waClass}" draggable="true"
         data-id="${o.id}" data-col="${col.key}"
         ondragstart="onDragStart(event, ${o.id}, '${col.key}')"
-        ondragend="onDragEnd(event)">
+        ondragend="onDragEnd(event)"
+        onclick="if(!_wasDragged) openOrderDetail(${o.id})">
       <div class="kb-card-header">
         <span class="kb-card-id">#${o.id}</span>
         <span class="kb-card-time">${elapsed}</span>
@@ -300,7 +352,7 @@
         </div>
       </div>
 
-      <div class="kb-card-actions">
+      <div class="kb-card-actions" onclick="event.stopPropagation()">
         ${col.nextKey ? `<button class="btn-move-next" onclick="moveOrder(${o.id}, '${col.nextKey}')">${col.nextLabel}</button>` : ''}
         <button class="btn-cancel" onclick="moveOrder(${o.id}, 'cancelado')">Cancelar</button>
       </div>
@@ -361,6 +413,7 @@
 
   // ---- Drag & Drop ----
   function onDragStart(e, id, colKey) {
+    _wasDragged = true;
     dragSrcId  = id;
     dragSrcCol = colKey;
     e.dataTransfer.effectAllowed = 'move';
@@ -370,6 +423,8 @@
   function onDragEnd(e) {
     e.target.classList.remove('dragging');
     document.querySelectorAll('.kb-col-body').forEach(el => el.classList.remove('drag-over'));
+    // Resetar flag após o ciclo do evento (o onclick dispara depois do dragend)
+    setTimeout(() => { _wasDragged = false; }, 50);
   }
 
   function onDragOver(e) {
@@ -443,6 +498,145 @@
     // Atualizar tempo decorrido a cada minuto
     setInterval(() => render(), 60000);
   }
+  // ---- Drawer de detalhes do pedido ----
+  const STATUS_COLORS = {
+    novo: '#3498db', em_producao: '#e67e22',
+    aguardando_envio: '#27ae60', a_caminho: '#9b59b6',
+    entregue: '#2ecc71', cancelado: '#e74c3c',
+  };
+  const STATUS_LABELS = {
+    novo: 'Novo Pedido', em_producao: 'Em Produção',
+    aguardando_envio: 'Aguardando Envio', a_caminho: 'A Caminho',
+    entregue: 'Entregue', cancelado: 'Cancelado',
+  };
+  const PAYMENT_LABELS = { pix: 'PIX', dinheiro: 'Dinheiro', cartao: 'Cartão' };
+
+  function openOrderDetail(orderId) {
+    const o = orders.find(x => x.id === orderId);
+    if (!o) return;
+
+    const col = COLUMNS.find(c => c.key === o.status);
+    const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
+
+    // Pedidos anteriores do mesmo telefone
+    const prevOrders = orders.filter(x => x.phone === o.phone && x.id !== o.id);
+
+    const trackUrl = o.order_token
+      ? `${window.location.origin.replace('/admin', '')}/track.html?token=${o.order_token}`
+      : null;
+
+    document.getElementById('kd-order-id').textContent   = `Pedido #${o.id}`;
+    document.getElementById('kd-customer-name').textContent = o.customer;
+
+    const statusColor = STATUS_COLORS[o.status] || '#888';
+    document.getElementById('kd-body').innerHTML = `
+
+      <div class="kd-section">
+        <div class="kd-section-title">Status atual</div>
+        <span class="kd-status-badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44">
+          ${STATUS_LABELS[o.status] || o.status}
+        </span>
+        <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+          ${col?.nextKey ? `<button onclick="moveOrder(${o.id}, '${col.nextKey}'); closeOrderDetail()" style="background:#ffcc00;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;">${col.nextLabel}</button>` : ''}
+          <button onclick="moveOrder(${o.id},'cancelado'); closeOrderDetail()" style="background:#1a0a0a;color:#e74c3c;border:1px solid #2a1010;border-radius:6px;padding:7px 12px;font-size:0.8rem;cursor:pointer;">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="kd-section">
+        <div class="kd-section-title">Dados do cliente</div>
+        <div class="kd-row"><span class="kd-label">Nome</span><span class="kd-value">${esc(o.customer)}</span></div>
+        <div class="kd-row"><span class="kd-label">Telefone</span><span class="kd-value green">${esc(o.phone)}</span></div>
+        <div class="kd-row"><span class="kd-label">Endereço</span><span class="kd-value">${esc(o.address || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">Pagamento</span><span class="kd-value">${PAYMENT_LABELS[o.payment] || esc(o.payment || '—')}</span></div>
+        ${o.obs ? `<div class="kd-row" style="margin-top:8px;"><span class="kd-label">Obs.</span><span class="kd-value" style="color:#888;font-style:italic">${esc(o.obs)}</span></div>` : ''}
+      </div>
+
+      <div class="kd-section">
+        <div class="kd-section-title">Itens do pedido</div>
+        ${items.map(i => {
+          const acc = (i.accompaniments || []).map(a => a.name).join(', ');
+          return `<div class="kd-item-row">
+            <div class="kd-item-qty">${i.qty}×</div>
+            <div class="kd-item-info">
+              <div class="kd-item-name">${esc(i.name)}</div>
+              ${acc ? `<div class="kd-item-acc">↳ ${esc(acc)}</div>` : ''}
+            </div>
+            <div class="kd-item-price">R$ ${(parseFloat(i.price) * i.qty).toFixed(2)}</div>
+          </div>`;
+        }).join('')}
+        <div class="kd-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #1e1e1e;">
+          <span class="kd-label">Total</span>
+          <span class="kd-value gold">R$ ${parseFloat(o.total).toFixed(2)}</span>
+        </div>
+      </div>
+
+      ${trackUrl ? `
+      <div class="kd-section">
+        <div class="kd-section-title">Código de rastreio</div>
+        <div class="kd-track-code" onclick="navigator.clipboard.writeText('${o.order_token}').then(()=>this.textContent='✅ Copiado!').catch(()=>{})" title="Clique para copiar">
+          🔑 ${o.order_token}
+        </div>
+        <div style="margin-top:8px;">
+          <a href="${trackUrl}" target="_blank" style="color:#5ca8e0; font-size:0.78rem; text-decoration:none;">
+            🔍 Abrir página de rastreio do cliente →
+          </a>
+        </div>
+      </div>` : ''}
+
+      ${prevOrders.length ? `
+      <div class="kd-section">
+        <div class="kd-section-title">Pedidos anteriores (${o.phone})</div>
+        ${prevOrders.slice(0, 5).map(p => `
+          <div class="kd-prev-order" onclick="openOrderDetail(${p.id})" style="cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="kd-prev-date">#${p.id} — ${new Date(p.created_at + 'Z').toLocaleDateString('pt-BR')}</span>
+              <span class="kd-prev-total">R$ ${parseFloat(p.total).toFixed(2)}</span>
+            </div>
+            <span class="kd-status-badge" style="background:${(STATUS_COLORS[p.status]||'#888')}22;color:${STATUS_COLORS[p.status]||'#888'};border:1px solid ${(STATUS_COLORS[p.status]||'#888')}44;margin-top:4px;font-size:0.65rem;">
+              ${STATUS_LABELS[p.status] || p.status}
+            </span>
+          </div>
+        `).join('')}
+      </div>` : ''}
+
+      <div class="kd-section">
+        <div class="kd-section-title">Confirmação WhatsApp</div>
+        <div class="${isWaConfirmed(o.id) ? 'wa-check-row confirmed' : 'wa-check-row'}" onclick="toggleWaConfirmed(${o.id}); this.className=isWaConfirmed(${o.id})?'wa-check-row confirmed':'wa-check-row'">
+          <div class="wa-check-box">${isWaConfirmed(o.id) ? '✓' : ''}</div>
+          <div class="wa-check-label">${isWaConfirmed(o.id) ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
+        </div>
+      </div>
+
+      <div class="kd-section">
+        <div class="kd-section-title">Datas</div>
+        <div class="kd-row"><span class="kd-label">Recebido</span><span class="kd-value">${new Date(o.created_at + 'Z').toLocaleString('pt-BR')}</span></div>
+        <div class="kd-row"><span class="kd-label">Atualizado</span><span class="kd-value">${new Date(o.updated_at + 'Z').toLocaleString('pt-BR')}</span></div>
+      </div>
+    `;
+
+    document.getElementById('kb-detail-overlay').classList.add('open');
+    document.getElementById('kb-detail-drawer').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOrderDetail() {
+    document.getElementById('kb-detail-overlay').classList.remove('open');
+    document.getElementById('kb-detail-drawer').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 </script>
+
+<!-- Drawer de detalhes do pedido -->
+<div id="kb-detail-overlay" onclick="closeOrderDetail()"></div>
+<aside id="kb-detail-drawer">
+  <div class="kd-header">
+    <div class="kd-header-left">
+      <span class="kd-order-id" id="kd-order-id"></span>
+      <span class="kd-customer-name" id="kd-customer-name"></span>
+    </div>
+    <button class="kd-close" onclick="closeOrderDetail()">✕</button>
+  </div>
+  <div class="kd-body" id="kd-body"></div>
+</aside>
 </body>
 </html>

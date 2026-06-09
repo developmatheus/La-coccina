@@ -19,6 +19,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .summary-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
+    .summary-header h2 { margin:0; }
+    #client-saved-bar { display:flex; align-items:center; gap:8px; }
+    #client-saved-label { font-size:0.75rem; color:#27ae60; }
+    .btn-clear-client { background:none; border:none; color:#555; font-size:0.72rem; cursor:pointer; padding:2px 6px; border-radius:4px; width:auto; margin:0; }
+    .btn-clear-client:hover { color:#e74c3c; background:#1a0a0a; }
+
+    /* Histórico de endereços */
+    #address-history-bar { margin: -4px 0 6px; }
+    .addr-hist-label { display:block; font-size:0.7rem; color:#555; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:5px; }
+    #address-history-chips { display:flex; flex-wrap:wrap; gap:5px; }
+    .addr-chip { display:inline-flex; align-items:center; gap:5px; background:#1e1e1e; border:1px solid #2a2a2a; border-radius:50px; padding:4px 10px; font-size:0.73rem; color:#aaa; cursor:pointer; max-width:100%; }
+    .addr-chip:hover { border-color:#ffcc00; color:#ffcc00; }
+    .addr-chip-del { color:#444; font-size:0.8rem; margin-left:2px; }
+    .addr-chip:hover .addr-chip-del { color:#e74c3c; }
+  </style>
 </head>
 <body class="cart-page">
 
@@ -35,11 +52,23 @@
 
   <!-- RESUMO -->
   <div class="summary">
-    <h2>Resumo do Pedido</h2>
-    
-    <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos()">
-    
-    <select id="bairro" onchange="habilitarEndereco()">
+    <div class="summary-header">
+      <h2>Resumo do Pedido</h2>
+      <div id="client-saved-bar" style="display:none">
+        <span id="client-saved-label"></span>
+        <button type="button" onclick="clearSavedClient()" class="btn-clear-client" title="Limpar dados salvos">✕ Limpar</button>
+      </div>
+    </div>
+
+    <input type="text" id="customer-name" placeholder="Seu nome completo" oninput="verificarCampos(); autoSaveClient()">
+
+    <!-- Histórico de endereços -->
+    <div id="address-history-bar" style="display:none">
+      <span class="addr-hist-label">Endereços anteriores:</span>
+      <div id="address-history-chips"></div>
+    </div>
+
+    <select id="bairro" onchange="habilitarEndereco(); autoSaveClient()">
       <option value="0">Locais de entrega...</option>
       <option value="0.0">Cachoeira do Bom Jesus</option>
       <option value="8.99">Ingleses</option>
@@ -49,10 +78,10 @@
       <option value="12.99">Canasvieiras</option>
     </select>
 
-    <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos()">
-    <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos()">
-    
-    <select id="payment">
+    <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos(); autoSaveClient()">
+    <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos(); autoSaveClient()">
+
+    <select id="payment" onchange="autoSaveClient()">
       <option value="pix">PIX</option>
       <option value="dinheiro">Dinheiro</option>
       <option value="cartao">Cartão</option>
@@ -361,8 +390,120 @@
       }
     }
 
+    // -----------------------------------------------------------------------
+    // Pré-carregamento e histórico de dados do cliente
+    // -----------------------------------------------------------------------
+    const CLIENT_KEY  = 'lc_client_data';
+    const ADDR_KEY    = 'lc_addr_history';
+
+    function loadSavedClient() {
+      const saved = JSON.parse(localStorage.getItem(CLIENT_KEY) || 'null');
+      if (!saved) return;
+
+      document.getElementById('customer-name').value = saved.name    || '';
+      document.getElementById('phone').value          = saved.phone   || '';
+      document.getElementById('payment').value        = saved.payment || 'pix';
+
+      if (saved.bairro && saved.bairro !== '0') {
+        const sel = document.getElementById('bairro');
+        // Encontrar option pelo texto do bairro salvo
+        Array.from(sel.options).forEach(opt => {
+          if (opt.text === saved.bairro) sel.value = opt.value;
+        });
+        if (sel.value !== '0') {
+          document.getElementById('address').disabled = false;
+          document.getElementById('address').value = saved.address || '';
+          updateTotal(cartSubtotal);
+        }
+      }
+
+      verificarCampos();
+
+      if (saved.name) {
+        document.getElementById('client-saved-bar').style.display = 'flex';
+        document.getElementById('client-saved-label').textContent = `👋 Olá, ${saved.name.split(' ')[0]}`;
+      }
+
+      renderAddressHistory();
+    }
+
+    function autoSaveClient() {
+      const bairroSel = document.getElementById('bairro');
+      const bairroText = bairroSel.options[bairroSel.selectedIndex]?.text || '';
+      const data = {
+        name:    document.getElementById('customer-name').value.trim(),
+        phone:   document.getElementById('phone').value.trim(),
+        payment: document.getElementById('payment').value,
+        bairro:  bairroText !== 'Locais de entrega...' ? bairroText : '',
+        address: document.getElementById('address').value.trim(),
+      };
+      localStorage.setItem(CLIENT_KEY, JSON.stringify(data));
+
+      // Salvar no histórico de endereços se bairro + endereço preenchidos
+      if (data.bairro && data.address) saveAddressHistory(data.bairro, data.address);
+
+      if (data.name) {
+        document.getElementById('client-saved-bar').style.display = 'flex';
+        document.getElementById('client-saved-label').textContent = `👋 Olá, ${data.name.split(' ')[0]}`;
+      }
+    }
+
+    function clearSavedClient() {
+      localStorage.removeItem(CLIENT_KEY);
+      ['customer-name', 'phone', 'address'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('bairro').value = '0';
+      document.getElementById('address').disabled = true;
+      document.getElementById('payment').value = 'pix';
+      document.getElementById('client-saved-bar').style.display = 'none';
+      updateTotal(0);
+      verificarCampos();
+    }
+
+    // --- Histórico de endereços ---
+    function getAddressHistory() {
+      return JSON.parse(localStorage.getItem(ADDR_KEY) || '[]');
+    }
+
+    function saveAddressHistory(bairro, address) {
+      const hist = getAddressHistory().filter(e => !(e.bairro === bairro && e.address === address));
+      hist.unshift({ bairro, address });
+      localStorage.setItem(ADDR_KEY, JSON.stringify(hist.slice(0, 5)));
+      renderAddressHistory();
+    }
+
+    function deleteAddressHistory(bairro, address) {
+      const hist = getAddressHistory().filter(e => !(e.bairro === bairro && e.address === address));
+      localStorage.setItem(ADDR_KEY, JSON.stringify(hist));
+      renderAddressHistory();
+    }
+
+    function applyAddress(bairro, address) {
+      const sel = document.getElementById('bairro');
+      Array.from(sel.options).forEach(opt => { if (opt.text === bairro) sel.value = opt.value; });
+      document.getElementById('address').disabled = false;
+      document.getElementById('address').value = address;
+      updateTotal(cartSubtotal);
+      verificarCampos();
+      autoSaveClient();
+    }
+
+    function renderAddressHistory() {
+      const hist = getAddressHistory();
+      const bar  = document.getElementById('address-history-bar');
+      const chips = document.getElementById('address-history-chips');
+      if (!hist.length) { bar.style.display = 'none'; return; }
+      bar.style.display = 'block';
+      chips.innerHTML = hist.map(e => `
+        <span class="addr-chip" onclick="applyAddress('${e.bairro.replace(/'/g,"\\'")}', '${e.address.replace(/'/g,"\\'")}')">
+          📍 ${e.bairro} — ${e.address}
+          <span class="addr-chip-del" onclick="event.stopPropagation(); deleteAddressHistory('${e.bairro.replace(/'/g,"\\'")}', '${e.address.replace(/'/g,"\\'")}')">✕</span>
+        </span>
+      `).join('');
+    }
+
     window.onload = () => {
       loadCart();
+      loadSavedClient();  // pré-preenche dados do cliente
       verificarCampos();
 
       document.getElementById('whatsapp-btn').addEventListener('click', () => {
