@@ -35,6 +35,48 @@
     .addr-chip:hover { border-color:#ffcc00; color:#ffcc00; }
     .addr-chip-del { color:#444; font-size:0.8rem; margin-left:2px; }
     .addr-chip:hover .addr-chip-del { color:#e74c3c; }
+
+    /* Modal de edição de acompanhamentos no carrinho */
+    #cart-acc-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.85); z-index:2000;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    #cart-acc-overlay.open { display:flex; }
+    #cart-acc-box {
+      background:#1a1a1a; border-radius:20px;
+      width:100%; max-width:440px; max-height:85vh;
+      display:flex; flex-direction:column;
+      box-shadow:0 24px 64px rgba(0,0,0,0.7);
+    }
+    .cacc-header { padding:18px 20px 12px; border-bottom:1px solid #2a2a2a; }
+    .cacc-header h3 { margin:0 0 2px; font-size:1rem; color:#fff; }
+    .cacc-header p { margin:0; font-size:0.78rem; color:#666; }
+    .cacc-list { overflow-y:auto; flex:1; padding:8px 0; }
+    .cacc-item { display:flex; align-items:center; gap:12px; padding:11px 20px; border-bottom:1px solid #222; cursor:pointer; transition:background .15s; }
+    .cacc-item:last-child { border-bottom:none; }
+    .cacc-item:hover { background:#222; }
+    .cacc-item.selected { background:#1a2a1a; }
+    .cacc-chk { width:20px; height:20px; border-radius:5px; border:1.5px solid #3a3a3a; background:#222; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0; transition:all .15s; }
+    .cacc-item.selected .cacc-chk { background:#27ae60; border-color:#27ae60; }
+    .cacc-name { flex:1; font-size:0.88rem; color:#ddd; }
+    .cacc-price { font-size:0.75rem; color:#ffcc00; font-weight:600; }
+    .cacc-footer { padding:14px 20px; border-top:1px solid #2a2a2a; display:flex; gap:10px; }
+    .cacc-footer button { flex:1; padding:12px; border:none; border-radius:50px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+    #cacc-confirm { background:#ffcc00; color:#000; }
+    #cacc-cancel  { background:#2a2a2a; color:#ccc; flex:0 0 auto; width:auto; padding:12px 20px; }
+
+    /* Upsell de bebidas */
+    .upsell-section { margin-top:20px; padding-top:16px; border-top:1px dashed #1e1e1e; }
+    .upsell-title { font-size:0.72rem; color:#555; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px; }
+    .upsell-list { display:flex; flex-wrap:wrap; gap:8px; }
+    .upsell-chip { display:flex; align-items:center; gap:8px; background:#111; border:1px solid #222; border-radius:10px; padding:8px 12px; cursor:pointer; transition:border-color .15s; }
+    .upsell-chip:hover { border-color:#ffcc00; }
+    .upsell-chip img { width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+    .upsell-chip-info { display:flex; flex-direction:column; gap:1px; }
+    .upsell-chip-name { font-size:0.78rem; color:#ccc; }
+    .upsell-chip-price { font-size:0.7rem; color:#ffcc00; font-weight:600; }
+    .upsell-chip-btn { background:#27ae60; color:#fff; border:none; border-radius:50px; padding:3px 10px; font-size:0.7rem; font-weight:700; cursor:pointer; white-space:nowrap; }
   </style>
 </head>
 <body class="cart-page">
@@ -49,6 +91,12 @@
 <div class="cart-container">
   <!-- PRODUTOS -->
   <div class="cart-items" id="cart-items"></div>
+
+  <!-- UPSELL -->
+  <div id="upsell-section" style="display:none" class="upsell-section">
+    <div class="upsell-title">🥤 Adicionar ao pedido</div>
+    <div class="upsell-list" id="upsell-list"></div>
+  </div>
 
   <!-- RESUMO -->
   <div class="summary">
@@ -501,9 +549,133 @@
       `).join('');
     }
 
+    // -----------------------------------------------------------------------
+    // Edição de acompanhamentos no carrinho
+    // -----------------------------------------------------------------------
+    let _cartAccIndex = null;   // índice do item no cart sendo editado
+    let _cartAccItems = [];     // acompanhamentos disponíveis para aquele produto
+
+    async function editAccompaniments(index) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const item = cart[index];
+      if (!item) return;
+
+      _cartAccIndex = index;
+      document.getElementById('cacc-title').textContent = item.name;
+      document.getElementById('cacc-subtitle').textContent = 'Selecione os acompanhamentos desejados';
+      document.getElementById('cacc-list').innerHTML = '<p style="padding:16px 20px; color:#666">Carregando...</p>';
+      document.getElementById('cart-acc-overlay').classList.add('open');
+
+      try {
+        const res = await fetch(`${LaCoccinaSecurity.API_BASE}/api/accompaniments/product/${item.id}`);
+        _cartAccItems = await res.json();
+        const currentIds = new Set((item.accompaniments || []).map(a => a.id));
+
+        document.getElementById('cacc-list').innerHTML = _cartAccItems.length
+          ? _cartAccItems.map(a => `
+            <div class="cacc-item${currentIds.has(a.id) ? ' selected' : ''}"
+                 data-id="${a.id}" data-name="${LaCoccinaSecurity.escapeHtml(a.name)}"
+                 data-price="${a.extra_price}" onclick="toggleCartAcc(this)">
+              <div class="cacc-chk">${currentIds.has(a.id) ? '✓' : ''}</div>
+              <span class="cacc-name">${LaCoccinaSecurity.escapeHtml(a.name)}</span>
+              ${a.extra_price > 0 ? `<span class="cacc-price">+R$ ${parseFloat(a.extra_price).toFixed(2)}</span>` : ''}
+            </div>`)
+            .join('')
+          : '<p style="padding:16px 20px; color:#666; font-size:0.85rem">Nenhum acompanhamento disponível para este prato.</p>';
+      } catch {
+        document.getElementById('cacc-list').innerHTML = '<p style="padding:16px 20px; color:#e74c3c">Erro ao carregar opções.</p>';
+      }
+    }
+
+    function toggleCartAcc(el) {
+      el.classList.toggle('selected');
+      el.querySelector('.cacc-chk').textContent = el.classList.contains('selected') ? '✓' : '';
+    }
+
+    function closeCartAcc() {
+      document.getElementById('cart-acc-overlay').classList.remove('open');
+      _cartAccIndex = null;
+    }
+
+    function saveCartAcc() {
+      if (_cartAccIndex === null) return;
+      const selected = Array.from(document.querySelectorAll('.cacc-item.selected'));
+      const newAcc = selected.map(el => ({
+        id:          Number(el.dataset.id),
+        name:        el.dataset.name,
+        extra_price: parseFloat(el.dataset.price || 0),
+      }));
+
+      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const item = cart[_cartAccIndex];
+      if (!item) { closeCartAcc(); return; }
+
+      // Recalcular preço: base + novos extras
+      const basePrice = parseFloat(item._basePrice ?? item.price);
+      const extraTotal = newAcc.reduce((s, a) => s + a.extra_price, 0);
+      item.price = basePrice + extraTotal;
+      item._basePrice = basePrice;
+      item.accompaniments = newAcc;
+
+      // Atualizar chave do carrinho para refletir nova combinação
+      const accKey = newAcc.map(a => a.id).sort().join(',');
+      item._cartKey = `${item.id}:${accKey}`;
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      closeCartAcc();
+      loadCart();
+    }
+
+    // -----------------------------------------------------------------------
+    // Upsell de bebidas no carrinho
+    // -----------------------------------------------------------------------
+    async function loadUpsell() {
+      try {
+        const res = await fetch(`${LaCoccinaSecurity.API_BASE}/api/products/menu`);
+        const products = await res.json();
+        const bebidas = products.filter(p => p.category === 'bebida');
+        if (!bebidas.length) return;
+
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const cartIds = new Set(cart.map(i => i.id));
+        // Sugerir bebidas que ainda não estão no carrinho
+        const suggestions = bebidas.filter(b => !cartIds.has(b.id));
+        if (!suggestions.length) return;
+
+        const imgUtil = LaCoccinaSecurity.uploadUrl;
+        const escUtil = LaCoccinaSecurity.escapeHtml;
+
+        document.getElementById('upsell-list').innerHTML = suggestions.slice(0, 6).map(b => `
+          <div class="upsell-chip">
+            ${b.image ? `<img src="${imgUtil(b.image)}" alt="">` : '<div style="width:36px;height:36px;background:#222;border-radius:6px;flex-shrink:0"></div>'}
+            <div class="upsell-chip-info">
+              <span class="upsell-chip-name">${escUtil(b.name)}</span>
+              <span class="upsell-chip-price">R$ ${parseFloat(b.price).toFixed(2)}</span>
+            </div>
+            <button class="upsell-chip-btn" onclick='addUpsellItem(${JSON.stringify(b).replace(/'/g, "&#39;")})'>+ Add</button>
+          </div>`).join('');
+
+        document.getElementById('upsell-section').style.display = 'block';
+      } catch { /* silencioso */ }
+    }
+
+    function addUpsellItem(product) {
+      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existing = cart.find(i => i._cartKey === `${product.id}:`);
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        cart.push({ ...product, quantity: 1, accompaniments: [], _cartKey: `${product.id}:`, _basePrice: product.price });
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      loadCart();
+      loadUpsell(); // atualizar sugestões
+    }
+
     window.onload = () => {
       loadCart();
-      loadSavedClient();  // pré-preenche dados do cliente
+      loadSavedClient();
+      loadUpsell();
       verificarCampos();
 
       document.getElementById('whatsapp-btn').addEventListener('click', () => {
@@ -513,6 +685,21 @@
       });
     };
 </script>
+
+<!-- Modal edição de acompanhamentos no carrinho -->
+<div id="cart-acc-overlay" onclick="if(event.target===this) closeCartAcc()">
+  <div id="cart-acc-box">
+    <div class="cacc-header">
+      <h3 id="cacc-title">Acompanhamentos</h3>
+      <p id="cacc-subtitle"></p>
+    </div>
+    <div class="cacc-list" id="cacc-list"></div>
+    <div class="cacc-footer">
+      <button id="cacc-cancel" onclick="closeCartAcc()">Cancelar</button>
+      <button id="cacc-confirm" onclick="saveCartAcc()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Tela de confirmação pós-envio (só aparece se Kanban estiver ativo) -->
 <div id="order-sent-overlay" style="
