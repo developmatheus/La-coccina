@@ -35,15 +35,16 @@ if (isProd) {
   app.set('trust proxy', 1);
 }
 
-const allowedOrigins = [
-  'https://la-coccina.netlify.app',
-  'https://la-coccina.netlify.app/',
-  'https://developmatheus.github.io',
-  'https://developmatheus.github.io/La-coccina',
-  'https://la-coccina-production.up.railway.app',
+const defaultOrigins = [
   'http://localhost:3001',
   'http://127.0.0.1:3001'
 ];
+
+const envOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(cors({
   origin(origin, callback) {
@@ -64,7 +65,19 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.disable('x-powered-by');
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    }
+  }
 }));
 
 app.use('/api/', rateLimit({
@@ -83,6 +96,16 @@ app.use('/uploads', express.static(
   path.join(__dirname, 'uploads'),
   { dotfiles: 'deny', index: false, maxAge: '7d' }
 ));
+
+app.get('/api/health', async (_req, res) => {
+  let dbOk = false;
+  try {
+    const db = require('./db');
+    await db.execute('SELECT 1');
+    dbOk = true;
+  } catch { /* db offline */ }
+  res.status(dbOk ? 200 : 503).json({ status: dbOk ? 'ok' : 'degraded', db: dbOk, timestamp: new Date().toISOString() });
+});
 
 app.use('/api/login', authRouter);
 

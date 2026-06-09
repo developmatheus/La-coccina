@@ -13,8 +13,6 @@ const {
   sanitizeOrderInput,
 } = require('../utils/sanitize');
 
-let manualStatus = { isOpen: true };
-
 // ---------------------------------------------------------------------------
 // SSE — site público escuta mudanças do cardápio
 // ---------------------------------------------------------------------------
@@ -51,8 +49,15 @@ router.get('/menu', async (_req, res) => {
   }
 });
 
-router.get('/status', (_req, res) => {
-  res.json(manualStatus);
+router.get('/status', async (_req, res) => {
+  try {
+    const [rows] = await db.execute("SELECT value FROM config WHERE key = 'isOpen'");
+    const isOpen = rows.length > 0 ? rows[0].value === 'true' : false;
+    res.json({ isOpen });
+  } catch (err) {
+    console.error('Erro ao buscar status:', err.message);
+    res.json({ isOpen: false });
+  }
 });
 
 router.post('/orders', async (req, res) => {
@@ -111,7 +116,7 @@ router.post('/', requireAdmin, async (req, res) => {
 
   try {
     const [result] = await db.execute(
-      'INSERT INTO products (name, price, `desc`, image, category, active, isDailySpecial) VALUES (?, ?, ?, ?, ?, true, false)',
+      'INSERT INTO products (name, price, `desc`, image, category, active, isDailySpecial) VALUES (?, ?, ?, ?, ?, 1, 0)',
       [parsed.name, parsed.price, parsed.desc, parsed.image, parsed.category]
     );
     res.json({ success: true, id: result.insertId });
@@ -128,7 +133,7 @@ router.put('/toggle/:id', requireAdmin, async (req, res) => {
 
   try {
     const [result] = await db.execute(
-      'UPDATE products SET active = IF(active = 1, 0, 1) WHERE id = ?',
+      'UPDATE products SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?',
       [id]
     );
     if (result.affectedRows === 0) {
@@ -146,9 +151,9 @@ router.put('/daily/:id', requireAdmin, async (req, res) => {
   if (!id) return res.status(400).json({ error: 'ID inválido' });
 
   try {
-    await db.execute('UPDATE products SET isDailySpecial = false');
+    await db.execute('UPDATE products SET isDailySpecial = 0');
     const [result] = await db.execute(
-      'UPDATE products SET isDailySpecial = true WHERE id = ?',
+      'UPDATE products SET isDailySpecial = 1 WHERE id = ?',
       [id]
     );
     if (result.affectedRows === 0) {
@@ -163,7 +168,7 @@ router.put('/daily/:id', requireAdmin, async (req, res) => {
 
 router.delete('/daily/:id', requireAdmin, async (_req, res) => {
   try {
-    await db.execute('UPDATE products SET isDailySpecial = false');
+    await db.execute('UPDATE products SET isDailySpecial = 0');
     res.json({ success: true });
     notifyClients('menu-updated');
   } catch (err) {
@@ -187,10 +192,42 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   }
 });
 
-router.put('/status', requireAdmin, (req, res) => {
-  manualStatus.isOpen = req.body.isOpen === true;
-  res.json({ success: true });
-  notifyClients('status-updated');
+router.put('/status', requireAdmin, async (req, res) => {
+  const isOpen = req.body.isOpen === true;
+  try {
+    await db.execute(
+      'INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)',
+      ['isOpen', String(isOpen)]
+    );
+    res.json({ success: true });
+    notifyClients('status-updated');
+  } catch (err) {
+    console.error('Erro ao atualizar status:', err.message);
+    res.status(500).json({ error: 'Erro ao atualizar status' });
+  }
+});
+
+router.put('/:id', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido' });
+
+  const parsed = sanitizeProductInput(req.body);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+  try {
+    const [result] = await db.execute(
+      'UPDATE products SET name = ?, price = ?, `desc` = ?, category = ?, image = COALESCE(NULLIF(?, \'\'), image) WHERE id = ?',
+      [parsed.name, parsed.price, parsed.desc, parsed.category, parsed.image, id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Produto não encontrado' });
+    }
+    res.json({ success: true });
+    notifyClients('menu-updated');
+  } catch (err) {
+    console.error('Erro ao editar produto:', err.message);
+    res.status(500).json({ error: 'Erro ao editar produto' });
+  }
 });
 
 module.exports = router;

@@ -15,24 +15,18 @@
     }
 
     if (typeof window !== 'undefined' && window.location) {
-      const { protocol, hostname, port, origin } = window.location;
+      const { protocol, origin } = window.location;
 
+      // Quando aberto como arquivo local, assume que o servidor está em localhost:3001
       if (protocol === 'file:') {
-        return 'https://la-coccina-production.up.railway.app';
+        return 'http://localhost:3001';
       }
 
-      if (port === '3001') {
-        return origin.replace(/\/$/, '');
-      }
-
-      if (hostname === 'https://la-coccina-production.up.railway.app' || hostname === 'https://la-coccina-production.up.railway.app') {
-        return 'https://la-coccina-production.up.railway.app';
-      }
-
+      // Em qualquer ambiente servido (dev local, produção, Cloudflare), usa a própria origem
       return origin.replace(/\/$/, '');
     }
 
-    return 'https://la-coccina-production.up.railway.app';
+    return '';
   }
 
   const API_BASE = getApiBase();

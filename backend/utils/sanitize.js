@@ -53,7 +53,16 @@ function sanitizeOrderInput(body) {
   const payment = trimString(body.payment, 30);
   const obs = trimString(body.obs, 500);
   const total = parsePrice(body.total) ?? 0;
-  const items = Array.isArray(body.items) ? body.items.slice(0, 50) : [];
+  const rawItems = Array.isArray(body.items) ? body.items.slice(0, 50) : [];
+  const items = rawItems
+    .filter(item => item && typeof item === 'object')
+    .map(item => ({
+      id: Number(item.id) || 0,
+      name: trimString(item.name, 120),
+      price: parsePrice(item.price) ?? 0,
+      qty: Math.max(1, Math.min(99, Math.abs(Math.floor(Number(item.qty) || 1)))),
+    }))
+    .filter(item => item.id > 0 && item.name);
 
   if (!customer || !phone) {
     return { error: 'Nome e telefone são obrigatórios' };

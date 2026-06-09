@@ -32,6 +32,10 @@ const adminPassword = process.env.ADMIN_PASSWORD;
     if (adminPassword.startsWith('$2')) {
       passOk = await bcrypt.compare(password, adminPassword);
     } else {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('❌ ADMIN_PASSWORD sem hash bcrypt em produção. Use: node scripts/hash-password.js');
+        return res.status(500).json({ success: false, error: 'Configuração de senha inválida no servidor' });
+      }
       passOk = password === adminPassword;
       console.warn('⚠️ Use senha com hash bcrypt no .env (rode: node scripts/hash-password.js)');
     }

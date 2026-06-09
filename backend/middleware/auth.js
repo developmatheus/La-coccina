@@ -8,7 +8,13 @@ const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
 
 function getSecret() {
   const secret = process.env.SESSION_SECRET;
+  const isProd = process.env.NODE_ENV === 'production';
+
   if (!secret || secret.length < 16) {
+    if (isProd) {
+      console.error('❌ SESSION_SECRET ausente ou fraca em produção. Encerrando.');
+      process.exit(1);
+    }
     console.warn('⚠️ SESSION_SECRET fraca ou ausente — defina uma chave longa no .env');
     return secret || 'defina-SESSION_SECRET-no-env';
   }

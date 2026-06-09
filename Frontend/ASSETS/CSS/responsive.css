@@ -38,6 +38,15 @@
     --site-width: 94%;
   }
 
+  /* Slider peek: mostra borda do próximo card para indicar scroll */
+  .products-row {
+    padding-right: 2.5rem;
+  }
+
+  .footer-overlay {
+    padding: 2rem 5%;
+  }
+
   header {
     padding: 0 3%;
     gap: 0.5rem;

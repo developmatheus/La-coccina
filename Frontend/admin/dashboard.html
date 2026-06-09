@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' la-coccina-production.up.railway.app https: data: blob:; connect-src 'self' la-coccina-production.up.railway.app;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
 
   <style>
     .admin-panel { padding: 30px; max-width: 1250px; margin: 0 auto; }
@@ -52,6 +52,33 @@
       border-radius: 0 !important;
     }
     table img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table td, table th { white-space: nowrap; }
+    table td:nth-child(2), table td:nth-child(3) { white-space: normal; max-width: 180px; }
+    .btn-edit { background: #2980b9; color: white; padding: 8px 14px; border: none; border-radius: 6px; margin-right: 6px; cursor: pointer; font-weight: bold; }
+
+    /* Modal de edição */
+    #edit-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #edit-modal-overlay.active { display: flex; }
+    #edit-modal {
+      background: #1a1a1a; border-radius: 16px; padding: 30px;
+      width: 100%; max-width: 480px; position: relative;
+    }
+    #edit-modal h3 { margin: 0 0 18px; font-size: 1.1rem; }
+    #edit-modal input, #edit-modal select { width: 100%; }
+    #edit-modal .modal-actions { display: flex; gap: 10px; margin-top: 12px; }
+    #edit-modal .modal-actions button { flex: 1; }
+    #btn-close-modal {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; color: #aaa;
+      font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
+      border-radius: 6px; width: auto;
+    }
+    #btn-close-modal:hover { color: #fff; background: #333; }
   </style>
 </head>
 <body>
@@ -87,18 +114,40 @@
 
       <div class="card-admin">
         <h2>Pratos Cadastrados</h2>
-        <table id="products-table">
-          <thead>
-            <tr>
-              <th>Imagem</th>
-              <th>Prato</th>
-              <th>Categoria</th>
-              <th>Preço</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-scroll">
+          <table id="products-table">
+            <thead>
+              <tr>
+                <th>Imagem</th>
+                <th>Prato</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de edição de produto -->
+  <div id="edit-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div id="edit-modal">
+      <button id="btn-close-modal" onclick="closeEditModal()" aria-label="Fechar" tabindex="0">✕</button>
+      <h3 id="edit-modal-title">✏️ Editar Prato</h3>
+      <input type="text" id="edit-name" placeholder="Nome do prato">
+      <input type="number" id="edit-price" placeholder="Preço" step="0.01">
+      <input type="text" id="edit-desc" placeholder="Descrição">
+      <select id="edit-category">
+        <option value="marmita">🍲 Marmita</option>
+        <option value="bebida">🥤 Bebida</option>
+      </select>
+      <small style="color:#888; display:block; margin-top:4px;">Deixe a imagem em branco para manter a atual.</small>
+      <div class="modal-actions">
+        <button onclick="saveEditProduct()" style="background:#27ae60;">💾 Salvar</button>
+        <button onclick="closeEditModal()" style="background:#555; width:auto; padding: 14px 22px;">Cancelar</button>
       </div>
     </div>
   </div>
@@ -114,6 +163,7 @@
     const imgUrl = LaCoccinaSecurity.uploadUrl;
     let cropper = null;
     let croppedBlob = null;
+    let editingProductId = null;
 
     function getAdminToken() {
       return sessionStorage.getItem('adminToken');
@@ -255,15 +305,22 @@
             <td>${esc(p.category || '-')}</td>
             <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
             <td>
-              <button onclick="toggleActive(${p.id})" style="background:${p.active == 1 ? '#27ae60' : '#e74c3c'}; color:white; padding:8px 14px; border:none; border-radius:6px; margin-right:6px;">
+              <button onclick="toggleActive(${p.id})" style="background:${p.active == 1 ? '#27ae60' : '#e74c3c'}; color:white; padding:8px 14px; border:none; border-radius:6px; margin-right:6px; cursor:pointer;">
                 ${p.active == 1 ? '✅ Ativo' : '❌ Inativo'}
               </button>
               ${p.category === 'marmita' ? `
-                <button onclick="toggleDailySpecial(${p.id}, ${p.isDailySpecial == 1})" style="background:#ffcc00; color:#000; padding:8px 14px; border:none; border-radius:6px; margin-right:6px;">
+                <button onclick="toggleDailySpecial(${p.id}, ${p.isDailySpecial == 1})" style="background:#ffcc00; color:#000; padding:8px 14px; border:none; border-radius:6px; margin-right:6px; cursor:pointer;">
                   ${p.isDailySpecial == 1 ? '🌟 Remover do Dia' : '🌟 Prato do Dia'}
                 </button>
               ` : ''}
-              <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px;">Excluir</button>
+              <button class="btn-edit"
+                data-id="${p.id}"
+                data-name="${esc(p.name)}"
+                data-price="${p.price}"
+                data-desc="${esc(p.desc || '')}"
+                data-category="${esc(p.category)}"
+                onclick="openEditModalFromBtn(this)">✏️ Editar</button>
+              <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">Excluir</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -291,6 +348,61 @@
         if (e.message !== 'Sem token de admin') alert('Erro de conexão. Verifique se o servidor está rodando.');
       }
     }
+
+    function openEditModalFromBtn(btn) {
+      const ds = btn.dataset;
+      editingProductId = Number(ds.id);
+      // data-* attributes already HTML-encoded; decode for input values
+      const decode = s => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      document.getElementById('edit-name').value = decode(ds.name);
+      document.getElementById('edit-price').value = ds.price;
+      document.getElementById('edit-desc').value = decode(ds.desc);
+      document.getElementById('edit-category').value = decode(ds.category);
+      document.getElementById('edit-modal-overlay').classList.add('active');
+      document.getElementById('edit-name').focus();
+    }
+
+    function closeEditModal() {
+      editingProductId = null;
+      document.getElementById('edit-modal-overlay').classList.remove('active');
+    }
+
+    async function saveEditProduct() {
+      if (!editingProductId) return;
+      const name = document.getElementById('edit-name').value.trim();
+      const price = document.getElementById('edit-price').value.trim();
+      const desc = document.getElementById('edit-desc').value.trim();
+      const category = document.getElementById('edit-category').value;
+
+      if (!name || !price) {
+        alert('Nome e preço são obrigatórios.');
+        return;
+      }
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/products/${editingProductId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, desc, category, image: '' })
+        });
+        if (res.ok) {
+          closeEditModal();
+          loadProducts();
+        } else {
+          await handleApiError(res, 'Erro ao salvar edição');
+        }
+      } catch (e) {
+        alert('Erro de conexão ao salvar edição.');
+      }
+    }
+
+    document.getElementById('edit-modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeEditModal();
+    });
 
     async function deleteProduct(id) {
       if (confirm("Excluir este prato?")) {
