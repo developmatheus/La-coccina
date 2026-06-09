@@ -335,16 +335,30 @@
         console.warn('Não foi possível registrar pedido no sistema:', e.message);
       }
 
-      // Montar mensagem WhatsApp — inclui link de rastreio se tiver token
+      const kanbanEnabled = localStorage.getItem('lc_kanban_enabled') === 'true';
+
+      // Montar mensagem WhatsApp — inclui link de rastreio se Kanban ativo e token disponível
       let message = buildWhatsAppMessage();
-      if (orderToken) {
+      if (kanbanEnabled && orderToken) {
         const trackUrl = `${window.location.origin}/track.html?token=${orderToken}`;
-        message += `\n🔍 *Rastrear pedido:* ${trackUrl}\n`;
+        message += `\n🔍 *Acompanhe seu pedido:* ${trackUrl}\n`;
       }
 
       const whatsappUrl = `https://wa.me/5548984138554?text=${encodeURIComponent(message)}`;
       localStorage.removeItem('cart');
-      window.location.href = whatsappUrl;
+
+      if (kanbanEnabled && orderToken) {
+        // Abre WhatsApp em nova aba — cliente não perde a página
+        window.open(whatsappUrl, '_blank', 'noopener');
+        // Atualizar link da tela de confirmação e exibir
+        const trackUrl = `${window.location.origin}/track.html?token=${orderToken}`;
+        document.getElementById('order-track-link').href = trackUrl;
+        const overlay = document.getElementById('order-sent-overlay');
+        overlay.style.display = 'flex';
+      } else {
+        // Comportamento original — redireciona na mesma aba
+        window.location.href = whatsappUrl;
+      }
     }
 
     window.onload = () => {
@@ -358,5 +372,34 @@
       });
     };
 </script>
+
+<!-- Tela de confirmação pós-envio (só aparece se Kanban estiver ativo) -->
+<div id="order-sent-overlay" style="
+  display:none; position:fixed; inset:0; z-index:3000;
+  background:rgba(0,0,0,0.92); align-items:center; justify-content:center; padding:24px;">
+  <div style="
+    background:#1a1a1a; border-radius:20px; padding:32px 28px;
+    max-width:420px; width:100%; text-align:center;
+    border:1px solid #2a2a2a; box-shadow:0 24px 64px rgba(0,0,0,0.7);">
+    <div style="font-size:2.5rem; margin-bottom:12px;">✅</div>
+    <h2 style="margin:0 0 8px; font-size:1.25rem; color:#fff;">Pedido enviado!</h2>
+    <p style="color:#888; font-size:0.88rem; margin:0 0 24px; line-height:1.5;">
+      Sua mensagem foi aberta no WhatsApp.<br>
+      Acompanhe o status da sua marmita em tempo real:
+    </p>
+    <a id="order-track-link" href="track.html" style="
+      display:block; background:#ffcc00; color:#000;
+      border-radius:50px; padding:14px 20px;
+      font-weight:700; font-size:1rem; text-decoration:none;
+      margin-bottom:12px;">
+      🔍 Ver status do meu pedido
+    </a>
+    <a href="index.html" style="
+      display:block; color:#555; font-size:0.82rem;
+      text-decoration:none; padding:8px;">
+      ← Voltar ao cardápio
+    </a>
+  </div>
+</div>
 </body>
 </html>

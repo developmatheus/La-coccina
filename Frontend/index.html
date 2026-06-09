@@ -464,8 +464,10 @@
         name: el.dataset.name,
         extra_price: parseFloat(el.dataset.price || 0),
       }));
+      // Capturar o produto ANTES de fechar o modal (closeAccSel zera _accModalProduct)
+      const product = _accModalProduct;
       closeAccSel();
-      addToCart(_accModalProduct, selectedAcc);
+      addToCart(product, selectedAcc);
     }
 
     function closeAccSel() {

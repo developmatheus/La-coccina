@@ -330,6 +330,21 @@
           </div>
           <p id="cfg-acc-msg" class="tool-cfg-msg"></p>
         </div>
+
+        <div class="tool-cfg-row">
+          <div class="tool-cfg-label">
+            <strong>Kanban de pedidos</strong>
+            <span>Ativa o rastreamento de status do pedido pelo cliente e o painel Kanban para o gestor. Quando ativo: pedidos são salvos no banco ao enviar pelo WhatsApp, o link de rastreio é incluído na mensagem e o cliente vê a tela de confirmação com botão "Ver status do pedido".</span>
+          </div>
+          <div class="tool-cfg-control">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:#bbb; font-size:0.88rem;">
+              <input type="checkbox" id="cfg-kanban-enabled" style="width:auto; margin:0; cursor:pointer; accent-color:#ffcc00;">
+              Habilitar Kanban e rastreamento de pedidos
+            </label>
+            <button onclick="saveKanbanEnabled()" class="btn-tool-save">Salvar</button>
+          </div>
+          <p id="cfg-kanban-msg" class="tool-cfg-msg"></p>
+        </div>
       </div>
 
     </div>
@@ -1004,6 +1019,20 @@
 
     const ACC_DISPLAY_KEY = 'lc_acc_display_mode';
 
+    const KANBAN_KEY = 'lc_kanban_enabled';
+
+    function loadKanbanEnabled() {
+      document.getElementById('cfg-kanban-enabled').checked = localStorage.getItem(KANBAN_KEY) === 'true';
+    }
+
+    function saveKanbanEnabled() {
+      const val = document.getElementById('cfg-kanban-enabled').checked;
+      localStorage.setItem(KANBAN_KEY, String(val));
+      const msg = document.getElementById('cfg-kanban-msg');
+      msg.textContent = val ? '✅ Kanban ativado — rastreamento de pedidos habilitado.' : '✅ Kanban desativado — pedidos apenas via WhatsApp.';
+      setTimeout(() => { msg.textContent = ''; }, 3000);
+    }
+
     function loadAccDisplayMode() {
       const val = localStorage.getItem(ACC_DISPLAY_KEY) || 'tags';
       document.getElementById('cfg-acc-display').value = val;
@@ -1022,6 +1051,7 @@
       loadRestaurantStatus();
       loadConfig();
       loadAccDisplayMode();
+      loadKanbanEnabled();
       loadAccompanimentsCatalog();
     };
   </script>

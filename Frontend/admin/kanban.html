@@ -76,6 +76,28 @@
     .btn-cancel:hover { background: #2a0a0a; }
     .kb-card-obs { font-size: 0.72rem; color: #666; background: #141414; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; border-left: 2px solid #2a2a2a; }
 
+    /* Confirmação WhatsApp */
+    .kb-card.wa-pending { border-color: #e67e22; border-left: 3px solid #e67e22; }
+    .kb-card.wa-confirmed { border-color: #2a2a2a; }
+    .wa-check-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 9px; border-radius: 7px; margin-bottom: 10px;
+      background: #0f0f0f; border: 1px solid #2a2a2a;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .wa-check-row:hover { background: #1a1a1a; }
+    .wa-check-row.confirmed { background: #0d1f10; border-color: #1e3a22; }
+    .wa-check-box {
+      width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
+      border: 1.5px solid #3a3a3a; background: #1a1a1a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; transition: all 0.15s;
+    }
+    .wa-check-row.confirmed .wa-check-box { background: #25d366; border-color: #25d366; }
+    .wa-check-label { font-size: 0.72rem; color: #555; line-height: 1.2; flex: 1; }
+    .wa-check-row.confirmed .wa-check-label { color: #4caf50; }
+    .wa-pending-badge { background: #e67e22; color: #fff; border-radius: 50px; padding: 1px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
+
     /* Empty state */
     .kb-empty { color: #333; font-size: 0.78rem; text-align: center; padding: 20px 10px; font-style: italic; }
 
@@ -125,6 +147,66 @@
   let dragSrcCol = null;
   let sseConn    = null;
 
+  // --- Persistência local da confirmação WhatsApp ---
+  const WA_KEY = 'lc_wa_confirmed';
+
+  function isWaConfirmed(id) {
+    const map = JSON.parse(localStorage.getItem(WA_KEY) || '{}');
+    return !!map[id];
+  }
+
+  function toggleWaConfirmed(id) {
+    const map = JSON.parse(localStorage.getItem(WA_KEY) || '{}');
+    map[id] = !map[id];
+    if (!map[id]) delete map[id];
+    localStorage.setItem(WA_KEY, JSON.stringify(map));
+    // Re-renderizar só o card sem recarregar tudo
+    const cardEl = document.querySelector(`.kb-card[data-id="${id}"]`);
+    if (cardEl) {
+      const order = orders.find(o => o.id === id);
+      const col   = orders.find(o => o.id === id)?.status;
+      const colDef = COLUMNS.find(c => c.key === col);
+      if (order && colDef) {
+        cardEl.outerHTML = renderCard(order, colDef);
+        // Re-bind drag eventos no novo elemento
+        bindCardDrag(document.querySelector(`.kb-card[data-id="${id}"]`));
+      }
+    }
+    updateColCounts();
+  }
+
+  function updateColCounts() {
+    COLUMNS.forEach(col => {
+      const colOrders = orders.filter(o => o.status === col.key);
+      const pendingWa = colOrders.filter(o => !isWaConfirmed(o.id)).length;
+      const countEl   = document.querySelector(`.col-${col.key} .kb-col-count`);
+      const titleEl   = document.querySelector(`.col-${col.key} .kb-col-title`);
+      if (countEl) countEl.textContent = colOrders.length;
+      // Badge de pendentes no título
+      if (titleEl) {
+        const existing = titleEl.querySelector('.wa-pending-badge');
+        if (existing) existing.remove();
+        if (pendingWa > 0) {
+          titleEl.insertAdjacentHTML('beforeend', `<span class="wa-pending-badge" title="${pendingWa} sem confirmação WhatsApp">!${pendingWa}</span>`);
+        }
+      }
+    });
+  }
+
+  function bindCardDrag(el) {
+    if (!el) return;
+    el.addEventListener('dragstart', (e) => {
+      dragSrcId  = Number(el.dataset.id);
+      dragSrcCol = el.dataset.col;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => el.classList.add('dragging'), 0);
+    });
+    el.addEventListener('dragend', (e) => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.kb-col-body').forEach(b => b.classList.remove('drag-over'));
+    });
+  }
+
   function getToken() { return sessionStorage.getItem('adminToken'); }
   function apiFetch(url, opts = {}) {
     const token = getToken();
@@ -147,6 +229,7 @@
     renderProteinSummary();
     const board = document.getElementById('kb-board');
     board.innerHTML = '';
+
 
     COLUMNS.forEach(col => {
       const colOrders = orders
@@ -174,6 +257,8 @@
       body.addEventListener('drop',     e => onDrop(e, col.key));
       body.addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
     });
+
+    updateColCounts();
   }
 
   function renderCard(o, col) {
@@ -186,10 +271,14 @@
       </div>${acc ? `<div class="kb-card-acc">↳ ${esc(acc)}</div>` : ''}`;
     }).join('');
 
-    const elapsed = elapsedTime(o.created_at);
-    const obsHtml = o.obs ? `<div class="kb-card-obs">📝 ${esc(o.obs)}</div>` : '';
+    const elapsed  = elapsedTime(o.created_at);
+    const obsHtml  = o.obs ? `<div class="kb-card-obs">📝 ${esc(o.obs)}</div>` : '';
+    const waOk     = isWaConfirmed(o.id);
+    const waClass  = waOk ? 'wa-confirmed' : 'wa-pending';
+    const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
+    const waCheck  = waOk ? '✓' : '';
 
-    return `<div class="kb-card" draggable="true"
+    return `<div class="kb-card ${waClass}" draggable="true"
         data-id="${o.id}" data-col="${col.key}"
         ondragstart="onDragStart(event, ${o.id}, '${col.key}')"
         ondragend="onDragEnd(event)">
@@ -203,6 +292,14 @@
       ${obsHtml}
       <div class="kb-card-total">R$ ${parseFloat(o.total).toFixed(2)}</div>
       <div class="kb-card-payment">${esc(o.payment || '').toUpperCase()}</div>
+
+      <div class="${waRowCls}" onclick="event.stopPropagation(); toggleWaConfirmed(${o.id})">
+        <div class="wa-check-box">${waCheck}</div>
+        <div class="wa-check-label">
+          ${waOk ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}
+        </div>
+      </div>
+
       <div class="kb-card-actions">
         ${col.nextKey ? `<button class="btn-move-next" onclick="moveOrder(${o.id}, '${col.nextKey}')">${col.nextLabel}</button>` : ''}
         <button class="btn-cancel" onclick="moveOrder(${o.id}, 'cancelado')">Cancelar</button>
