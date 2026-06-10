@@ -12,31 +12,3 @@
     "multer": "^2.1.1"
   }
 }
-{
-  "name": "la-coccina-root",
-  "private": true,
-  "description": "Wrapper de conveniencia para operar o backend do La Coccina a partir da raiz do projeto.",
-  "scripts": {
-    "start": "npm --prefix backend start",
-    "dev": "npm --prefix backend run dev",
-    "migrate": "npm --prefix backend run migrate",
-    "hash-password": "npm --prefix backend run hash-password --"
-  },
-  "dependencies": {
-    "multer": "^2.1.1"
-  }
-}
-{
-  "name": "la-coccina-root",
-  "private": true,
-  "description": "Wrapper de conveniencia para operar o backend do La Coccina a partir da raiz do projeto.",
-  "scripts": {
-    "start": "npm --prefix backend start",
-    "dev": "npm --prefix backend run dev",
-    "migrate": "npm --prefix backend run migrate",
-    "hash-password": "npm --prefix backend run hash-password --"
-  },
-  "dependencies": {
-    "multer": "^2.1.1"
-  }
-}
