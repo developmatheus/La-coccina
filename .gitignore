@@ -10,10 +10,16 @@ backend/config/.env
 # Uploads e cache
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/data/*.db
+backend/data/*.sqlite*
+backend/tmp/
 
 # Sistema
 .DS_Store
 Thumbs.db
 *.log
+.node-version
+backend/.node-version
+.well-known/
 
 *.exe
