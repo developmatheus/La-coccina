@@ -134,6 +134,7 @@ if (serveFrontend && hasFrontend) {
     console.log(`📂 Assets (/assets → ASSETS): ${assetsDir}`);
   }
 
+  app.get(['/index.html', '/index.htm'], (_req, res) => res.redirect(301, '/'));
   app.use(express.static(frontendDir, { index: 'index.html', maxAge: isProd ? '1h' : 0 }));
   app.get('/', (_req, res) => res.sendFile(frontendIndex));
   console.log(`📂 Site estático: ${frontendDir}`);
