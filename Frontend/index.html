@@ -133,7 +133,7 @@
 <body>
   <header>
     <div class="logo">
-      <img src="ASSETS/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
+      <img src="ASSETS/imagens/Mascote 3.webp" alt="La Coccina" class="hero-mascot">
     </div>
   </header>
 
@@ -145,7 +145,7 @@
   <section class="hero">
     <div class="hero-layout">
       <div class="hero-left">
-        <img src="ASSETS/imagens/Mascote 3.png" alt="La Coccina" class="hero-mascot">
+        <img src="ASSETS/imagens/Mascote 3.webp" alt="La Coccina" class="hero-mascot">
         <h1 class="hero-title">Comida Caseira<br><span>Feita com Amor</span></h1>
         <button type="button" class="hero-cta" data-scroll-to="cardapio">Ver Cardápio</button>
       </div>
@@ -304,15 +304,15 @@
             ? `openAccompanimentsModal(${safeJson(daily)})`
             : `addToCart(${safeJson(daily)}, [])`;
           const dailyBtnLabel = isCustomizable ? 'Personalizar e Adicionar' : 'Adicionar ao Carrinho';
-          const dailyBtn = `<button class="add-to-cart" onclick='${dailyBtnAction}' style="background:#ffcc00;color:#000;padding:16px 40px;font-size:1.1rem;border:none;border-radius:50px;cursor:pointer;font-weight:bold;">${dailyBtnLabel}</button>`;
+          const dailyBtn = `<button class="add-to-cart daily-special-button" onclick='${dailyBtnAction}'>${dailyBtnLabel}</button>`;
           container.innerHTML = `
-            <div style="background: #1a1a1a; border-radius: 24px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); max-width: 680px; margin: 0 auto; border: 1px solid #333;">
-              <h2 style="color:#ffcc00; text-align:center; margin:0 0 18px 0; font-size:2.1rem;">🌟 Prato do Dia</h2>
-              <img src="${imgUrl(daily.image)}" style="width:100%; max-height:420px; object-fit:cover; border-radius:18px; margin-bottom:20px; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
-              <h3 style="color:white; text-align:center; font-size:1.85rem; margin:15px 0 10px 0;">${esc(daily.name)}</h3>
-              <p style="color:#ccc; text-align:center; line-height:1.6; font-size:1.08rem; margin-bottom:20px;">${esc(daily.desc || '')}</p>
-              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap: 16px; flex-wrap: wrap;">
-                <strong style="font-size:2.4rem; color:#ffcc00;">R$ ${parseFloat(daily.price).toFixed(2)}</strong>
+            <div class="daily-special-box">
+              <h2 class="daily-special-heading">🌟 Prato do Dia</h2>
+              <img src="${imgUrl(daily.image)}" alt="${esc(daily.name)}">
+              <h3 class="daily-special-name">${esc(daily.name)}</h3>
+              <p class="daily-special-description">${esc(daily.desc || '')}</p>
+              <div class="daily-special-actions">
+                <strong class="daily-special-price">R$ ${parseFloat(daily.price).toFixed(2)}</strong>
                 ${dailyBtn}
               </div>
             </div>`;
@@ -660,16 +660,16 @@
           </div>
 
           <div style="flex: 1; text-align: center; min-width: 320px;">
-            <img src="ASSETS/imagens/icons.png" alt="Benefícios" style="width: 520px; max-width: 100%; height: auto; margin-bottom: 15px;">
+            <img src="ASSETS/imagens/icons.webp" alt="Benefícios" style="width: 520px; max-width: 100%; height: auto; margin-bottom: 15px;">
           </div>
         </div>
 
         <div style="display: flex; justify-content: center; gap: 25px; margin: 15px 0 12px 0;">
           <a href="https://www.instagram.com/lacoccinarestaurante/" target="_blank" style="color:white; text-decoration:none;">
-            <img src="ASSETS/imagens/instagram.png" width="40" height="40" alt="Instagram">
+            <img src="ASSETS/imagens/instagram.webp" width="40" height="40" alt="Instagram">
           </a>
           <a href="https://wa.me/5548984138554" target="_blank" style="color:white; text-decoration:none;">
-            <img src="ASSETS/imagens/whatsapp.png" width="40" height="40" alt="WhatsApp">
+            <img src="ASSETS/imagens/whatsapp.webp" width="40" height="40" alt="WhatsApp">
           </a>
         </div>
 

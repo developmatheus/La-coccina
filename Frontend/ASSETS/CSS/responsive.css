@@ -84,6 +84,41 @@
     padding: 0 3%;
     gap: 1.25rem;
   }
+
+  .hero-daily,
+  #daily-special,
+  .daily-special-box {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .daily-special-box {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .daily-special-box img {
+    max-height: 300px;
+    border-radius: 14px;
+  }
+
+  .daily-special-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .daily-special-price {
+    text-align: center;
+  }
+
+  .daily-special-button {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.9rem 1rem;
+    font-size: 0.95rem;
+  }
   body>header>div.logo {
     max-width: min(110px, 95vw);
   }
@@ -193,6 +228,39 @@
   .hero-layout {
     padding: 0 2%;
     gap: 1rem;
+  }
+
+  .hero-daily {
+    padding-top: 0;
+  }
+
+  .daily-special-box {
+    padding: 0.85rem;
+    border-radius: 16px;
+  }
+
+  .daily-special-heading {
+    font-size: 1.45rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .daily-special-box img {
+    max-height: 220px;
+    margin-bottom: 0.85rem;
+  }
+
+  .daily-special-name {
+    font-size: 1.2rem;
+    margin: 0.6rem 0 0.45rem;
+  }
+
+  .daily-special-description {
+    font-size: 0.86rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .daily-special-price {
+    font-size: 1.75rem;
   }
 
   .menu-section {
