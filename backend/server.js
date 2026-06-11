@@ -17,6 +17,8 @@ require('dotenv').config({
 
 const productsRouter      = require('./routes/products');
 const ordersRouter        = require('./routes/orders');
+const settingsRouter      = require('./routes/settings');
+const deliveryBatchesRouter = require('./routes/deliveryBatches');
 const accompanimentsRouter = require('./routes/accompaniments');
 const authRouter = require('./routes/auth');
 const { requireAdmin } = require('./middleware/auth');
@@ -70,12 +72,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', 'https://maps.googleapis.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      connectSrc: ["'self'", 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://maps.gstatic.com'],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],
     }
@@ -120,6 +122,8 @@ app.post('/api/upload', requireAdmin, upload.single('image'), (req, res) => {
 
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/settings', settingsRouter);
+app.use('/api/delivery-batches', deliveryBatchesRouter);
 app.use('/api/accompaniments', accompanimentsRouter);
 
 if (serveFrontend && hasFrontend) {
