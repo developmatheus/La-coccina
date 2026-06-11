@@ -80,9 +80,18 @@ header {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
   color: var(--color-gold);
   font-size: clamp(1.35rem, 4vw, 2rem);
   font-weight: bold;
+}
+
+.logo img {
+  display: block;
+  height: 2.65rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .admin-btn {

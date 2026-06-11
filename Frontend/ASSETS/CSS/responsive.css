@@ -271,8 +271,8 @@
 }
 
 @media (max-width: 360px) {
-  .logo {
-    font-size: 1.2rem;
+  .logo img {
+    height: 2.3rem;
   }
 
   .card {
