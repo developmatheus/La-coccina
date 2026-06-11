@@ -353,6 +353,21 @@
           </div>
           <p id="cfg-kanban-msg" class="tool-cfg-msg"></p>
         </div>
+
+        <div class="tool-cfg-row">
+          <div class="tool-cfg-label">
+            <strong>Endereço base para entregas</strong>
+            <span>Ponto de partida fixo usado para preparar rotas de entrega. A chave do Google Maps precisa estar configurada no servidor para ativar o mapa embutido.</span>
+          </div>
+          <div class="tool-cfg-control" style="align-items:flex-start; min-width:min(460px, 100%);">
+            <input type="text" id="cfg-delivery-origin" placeholder="Ex: Rua do Restaurante, 123 - Centro, Cidade/UF" style="min-width:min(420px, 100%);">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
+              <span id="cfg-maps-status" style="font-size:0.76rem; color:#666;">Google Maps: verificando...</span>
+            </div>
+          </div>
+          <p id="cfg-delivery-msg" class="tool-cfg-msg"></p>
+        </div>
       </div>
 
     </div>
@@ -1185,12 +1200,55 @@
       setTimeout(() => { msg.textContent = ''; }, 3000);
     }
 
+    async function loadDeliverySettings() {
+      try {
+        const res = await apiFetch(`${API_BASE}/api/settings/admin`);
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById('cfg-delivery-origin').value = data.restaurantOriginAddress || '';
+        document.getElementById('cfg-maps-status').textContent = data.googleMapsApiKeyConfigured
+          ? 'Google Maps: configurado no servidor'
+          : 'Google Maps: pendente no servidor';
+        document.getElementById('cfg-maps-status').style.color = data.googleMapsApiKeyConfigured ? '#4caf50' : '#e67e22';
+      } catch (e) {
+        document.getElementById('cfg-maps-status').textContent = 'Google Maps: erro ao verificar';
+        document.getElementById('cfg-maps-status').style.color = '#e74c3c';
+      }
+    }
+
+    async function saveDeliverySettings() {
+      const restaurantOriginAddress = document.getElementById('cfg-delivery-origin').value.trim();
+      const msg = document.getElementById('cfg-delivery-msg');
+      if (restaurantOriginAddress.length < 8) {
+        msg.textContent = 'Informe um endereço-base válido para entregas.';
+        return;
+      }
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/settings/admin`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurantOriginAddress })
+        });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao salvar endereço-base');
+          return;
+        }
+        msg.textContent = '✅ Endereço base salvo com sucesso.';
+        setTimeout(() => { msg.textContent = ''; }, 3000);
+        loadDeliverySettings();
+      } catch (e) {
+        msg.textContent = 'Erro de conexão ao salvar endereço-base.';
+      }
+    }
+
     window.onload = () => {
       loadProducts();
       loadRestaurantStatus();
       loadConfig();
       loadAccDisplayMode();
       loadKanbanEnabled();
+      loadDeliverySettings();
       loadAccompanimentsCatalog();
     };
   </script>

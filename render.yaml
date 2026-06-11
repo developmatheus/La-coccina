@@ -1,21 +1,22 @@
-# Deploy no Render: conecte o repo e use "Blueprint" ou crie Web Service manualmente.
-# Variáveis com segredo: configure no painel Render (não commitar senhas).
+# Deploy no Render: conecte o repo e use "Blueprint" ou crie o Web Service manualmente.
+# Este projeto usa backend Node + SQLite e serve o frontend estático pelo Express.
+# Variáveis sensíveis devem ser configuradas no painel do Render, nunca commitadas.
 
 services:
   - type: web
     name: la-coccina
     runtime: node
     rootDir: backend
+    plan: free
     buildCommand: npm install
     startCommand: npm start
-    plan: free
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: SERVE_FRONTEND
         value: "true"
-      - key: NODE_VERSION
-        value: "20"
       - key: PUBLIC_URL
         sync: false
       - key: CORS_ORIGINS
@@ -30,43 +31,5 @@ services:
         sync: false
       - key: SESSION_SECRET
         sync: false
-# Deploy no Render: conecte o repo e use "Blueprint" ou crie Web Service manualmente.
-# Variáveis com segredo: configure no painel Render (não commitar senhas).
-
-services:
-  - type: web
-    name: la-coccina
-    runtime: node
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: npm run start:online
-    plan: free
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: SERVE_FRONTEND
-        value: "true"
-      - key: NODE_VERSION
-        value: "20"
-      - key: PUBLIC_URL
-        sync: false
-      - key: CORS_ORIGINS
-        sync: false
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: DB_SSL
-        value: "true"
-      - key: ADMIN_USERNAME
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: SESSION_SECRET
+      - key: GOOGLE_MAPS_API_KEY
         sync: false

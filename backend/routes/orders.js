@@ -11,12 +11,13 @@ const { notifyClients }      = require('../menuEvents');
 const { sanitizeOrderInput } = require('../utils/sanitize');
 const { parsePositiveId }    = require('../utils/sanitize');
 
-const VALID_STATUSES = ['novo', 'em_producao', 'aguardando_envio', 'a_caminho', 'entregue', 'cancelado'];
+const VALID_STATUSES = ['novo', 'em_producao', 'aguardando_envio', 'preparando_rota', 'a_caminho', 'entregue', 'cancelado'];
 
 const STATUS_LABEL = {
   novo:             'Novo Pedido',
   em_producao:      'Em Produção',
   aguardando_envio: 'Aguardando Envio',
+  preparando_rota:  'Preparando Rota',
   a_caminho:        'A Caminho',
   entregue:         'Entregue',
   cancelado:        'Cancelado',
@@ -87,11 +88,34 @@ router.get('/track/:token', async (req, res) => {
 router.get('/', requireAdmin, async (_req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT id, customer, address, phone, payment, total, items, obs,
-              status, kanban_order, order_token, created_at, updated_at
-       FROM orders
-       WHERE status NOT IN ('entregue', 'cancelado')
-       ORDER BY status ASC, kanban_order ASC, created_at ASC`
+      `SELECT o.id, o.customer, o.address, o.phone, o.payment, o.total, o.items, o.obs,
+              o.status, o.kanban_order, o.order_token, o.created_at, o.updated_at,
+              o.delivery_batch_id, o.delivery_sequence,
+              b.batch_code AS delivery_batch_code,
+              b.public_token AS delivery_batch_public_token,
+              b.batch_status AS delivery_batch_status,
+              b.vehicle_plate AS delivery_vehicle_plate
+         FROM orders o
+         LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
+        WHERE o.status NOT IN ('entregue', 'cancelado')
+        ORDER BY
+          CASE o.status
+            WHEN 'novo' THEN 1
+            WHEN 'em_producao' THEN 2
+            WHEN 'aguardando_envio' THEN 3
+            WHEN 'preparando_rota' THEN 4
+            WHEN 'a_caminho' THEN 5
+            ELSE 99
+          END ASC,
+          CASE
+            WHEN o.status = 'a_caminho' THEN COALESCE(b.batch_code, '')
+            ELSE ''
+          END ASC,
+          CASE
+            WHEN o.status = 'a_caminho' THEN COALESCE(o.delivery_sequence, 999999)
+            ELSE COALESCE(o.kanban_order, 999999)
+          END ASC,
+          o.created_at ASC`
     );
     res.json(rows.map(o => ({ ...o, items: JSON.parse(o.items || '[]') })));
   } catch (err) {

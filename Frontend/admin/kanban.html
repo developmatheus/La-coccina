@@ -8,52 +8,50 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com https://maps.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com; frame-ancestors 'none'; base-uri 'self';">
   <style>
     @font-face { font-family: 'SomeTimeLater'; src: url('../ASSETS/fonts/Some Time Later.otf') format('opentype'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #0d0d0d; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-
-    /* Header */
     .kb-header { background: #111; border-bottom: 1px solid #1e1e1e; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
     .kb-brand { font-family: 'SomeTimeLater', cursive; font-size: 1.4rem; color: #ffcc00; }
     .kb-title { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1px; }
     .kb-header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .kb-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500; white-space: nowrap; }
-    .kb-btn:hover { border-color: #444; color: #fff; }
-    .kb-btn.active { border-color: #ffcc00; color: #ffcc00; background: #1a1505; }
+    .kb-btn, .kb-col-action, .batch-btn, .modal-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500; white-space: nowrap; }
+    .kb-btn:hover, .kb-col-action:hover, .batch-btn:hover, .modal-btn:hover { border-color: #444; color: #fff; }
+    .kb-btn.primary, .kb-col-action, .modal-btn.primary, .batch-btn.primary { background: #ffcc00; color: #000; border-color: #ffcc00; }
+    .kb-btn.primary:hover, .kb-col-action:hover, .modal-btn.primary:hover, .batch-btn.primary:hover { background: #ffd633; color: #000; }
+    .batch-btn.warn, .modal-btn.warn { background: #1f1606; border-color: #57430d; color: #ffcc00; }
+    .batch-btn.danger, .modal-btn.danger { background: #1a0a0a; border-color: #3a1010; color: #e74c3c; }
     .kb-badge { background: #e74c3c; color: #fff; border-radius: 50px; padding: 1px 7px; font-size: 0.7rem; font-weight: 700; margin-left: 4px; vertical-align: middle; }
     #kb-conn { font-size: 0.72rem; color: #555; display: flex; align-items: center; gap: 4px; }
     #kb-conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; }
     #kb-conn-dot.connected { background: #27ae60; }
-
-    /* Resumo de proteínas */
     #protein-summary { background: #111; border-bottom: 1px solid #1a1a1a; padding: 10px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
     .protein-chip { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 50px; padding: 4px 12px; font-size: 0.78rem; color: #bbb; display: flex; align-items: center; gap: 6px; }
     .protein-chip strong { color: #ffcc00; font-size: 0.9rem; }
     #protein-summary .ps-label { font-size: 0.72rem; color: #444; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
-
-    /* Board */
     .kb-board { display: flex; gap: 16px; padding: 16px 20px; flex: 1; overflow-x: auto; align-items: flex-start; }
-    .kb-col { flex: 0 0 300px; display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 14px; border: 1px solid #1e1e1e; overflow: hidden; min-height: 200px; }
-    .kb-col-header { padding: 14px 16px 10px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; }
+    .kb-col { flex: 0 0 320px; display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 14px; border: 1px solid #1e1e1e; overflow: hidden; min-height: 260px; }
+    .kb-col-header { padding: 14px 16px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; flex-wrap: wrap; }
     .kb-col-title { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; flex: 1; }
     .kb-col-count { background: #2a2a2a; color: #888; border-radius: 50px; padding: 1px 8px; font-size: 0.72rem; font-weight: 600; }
     .kb-col-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .col-novo .kb-col-indicator      { background: #3498db; }
-    .col-novo .kb-col-title           { color: #5dade2; }
+    .col-novo .kb-col-indicator { background: #3498db; }
+    .col-novo .kb-col-title { color: #5dade2; }
     .col-em_producao .kb-col-indicator { background: #e67e22; }
-    .col-em_producao .kb-col-title     { color: #eb9950; }
+    .col-em_producao .kb-col-title { color: #eb9950; }
     .col-aguardando_envio .kb-col-indicator { background: #27ae60; }
-    .col-aguardando_envio .kb-col-title     { color: #52be80; }
-    .col-a_caminho .kb-col-indicator   { background: #9b59b6; }
-    .col-a_caminho .kb-col-title       { color: #bb8fce; }
-
+    .col-aguardando_envio .kb-col-title { color: #52be80; }
+    .col-preparando_rota .kb-col-indicator { background: #f1c40f; }
+    .col-preparando_rota .kb-col-title { color: #f7dc6f; }
+    .col-a_caminho .kb-col-indicator { background: #9b59b6; }
+    .col-a_caminho .kb-col-title { color: #bb8fce; }
     .kb-col-body { padding: 10px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 100px; }
     .kb-col-body.drag-over { background: #1a1a1a; border-radius: 8px; }
-
-    /* Card de pedido */
+    .kb-col-header .kb-col-action { width: 100%; justify-content: center; }
     .kb-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 14px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
+    .kb-card.static-card { cursor: default; }
     .kb-card:active { cursor: grabbing; }
     .kb-card.dragging { opacity: 0.4; transform: scale(0.97); }
     .kb-card:hover { border-color: #3a3a3a; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
@@ -71,135 +69,274 @@
     .kb-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .kb-card-actions button { border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
     .btn-move-next { background: #ffcc00; color: #000; }
-    .btn-move-next:hover { background: #ffd633; }
     .btn-cancel { background: #1a0a0a; color: #e74c3c; border: 1px solid #2a1010 !important; }
-    .btn-cancel:hover { background: #2a0a0a; }
     .kb-card-obs { font-size: 0.72rem; color: #666; background: #141414; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; border-left: 2px solid #2a2a2a; }
-
-    /* Confirmação WhatsApp */
     .kb-card.wa-pending { border-color: #e67e22; border-left: 3px solid #e67e22; }
     .kb-card.wa-confirmed { border-color: #2a2a2a; }
-    .wa-check-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 9px; border-radius: 7px; margin-bottom: 10px;
-      background: #0f0f0f; border: 1px solid #2a2a2a;
-      cursor: pointer; transition: background 0.15s;
-    }
+    .wa-check-row { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 7px; margin-bottom: 10px; background: #0f0f0f; border: 1px solid #2a2a2a; cursor: pointer; transition: background 0.15s; }
     .wa-check-row:hover { background: #1a1a1a; }
     .wa-check-row.confirmed { background: #0d1f10; border-color: #1e3a22; }
-    .wa-check-box {
-      width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
-      border: 1.5px solid #3a3a3a; background: #1a1a1a;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; transition: all 0.15s;
-    }
+    .wa-check-box { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; border: 1.5px solid #3a3a3a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.15s; }
     .wa-check-row.confirmed .wa-check-box { background: #25d366; border-color: #25d366; }
     .wa-check-label { font-size: 0.72rem; color: #555; line-height: 1.2; flex: 1; }
     .wa-check-row.confirmed .wa-check-label { color: #4caf50; }
     .wa-pending-badge { background: #e67e22; color: #fff; border-radius: 50px; padding: 1px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
-
-    /* Empty state */
     .kb-empty { color: #333; font-size: 0.78rem; text-align: center; padding: 20px 10px; font-style: italic; }
-
-    /* WhatsApp toggle */
     .kb-whatsapp-notice { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; color: #4caf50; display: flex; align-items: center; gap: 8px; }
-
-    /* Card clicável */
-    .kb-card-clickable { cursor: pointer; }
-
-    /* Drawer de detalhes do pedido */
-    #kb-detail-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; }
-    #kb-detail-overlay.open { display:block; }
-    #kb-detail-drawer {
-      position: fixed; top:0; right:0; bottom:0;
-      width: 420px; max-width: 100vw;
-      background: #131313; z-index: 501;
-      display: flex; flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-      border-left: 1px solid #1e1e1e;
-      box-shadow: -8px 0 40px rgba(0,0,0,0.6);
-    }
+    .kb-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .kb-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; }
+    .kb-tag.batch { background: #1e1a0a; color: #ffcc00; border: 1px solid #4d3d11; }
+    .kb-tag.status { background: #111827; color: #9cc3ff; border: 1px solid #21304f; }
+    .kb-tag.plate { background: #1a1020; color: #d2b4de; border: 1px solid #4a2f5a; }
+    .kb-tag.stop { background: #102013; color: #7dcea0; border: 1px solid #29563d; }
+    .kb-batch-panel { background: #101010; border: 1px solid #242424; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .kb-batch-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .kb-batch-panel-title { font-size: 0.8rem; color: #ffcc00; font-weight: 700; }
+    .kb-batch-panel-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .kb-batch-panel p { font-size: 0.75rem; color: #777; line-height: 1.4; }
+    .kb-batch-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .batch-btn { padding: 7px 10px; font-size: 0.75rem; width: auto; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 700; }
+    .modal-overlay.open { display: block; }
+    .route-modal, .batch-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%, -50%) scale(0.98); width: min(1040px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow: hidden; background: #111; border: 1px solid #1f1f1f; border-radius: 18px; z-index: 701; display: none; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55); }
+    .route-modal.open, .batch-modal.open { display: flex; flex-direction: column; }
+    .route-modal-header, .batch-modal-header { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .route-modal-title, .batch-modal-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .route-modal-desc, .batch-modal-desc { font-size: 0.78rem; color: #666; margin-top: 4px; }
+    .route-modal-body { display: grid; grid-template-columns: minmax(320px, 1fr) 340px; gap: 0; min-height: 520px; }
+    .route-map-wrap { background: #0d0d0d; min-height: 520px; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; }
+    #route-map { flex: 1; min-height: 360px; }
+    .route-map-status { padding: 12px 16px; font-size: 0.78rem; color: #777; border-top: 1px solid #1a1a1a; }
+    .route-side { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .route-summary { background: #151515; border: 1px solid #1f1f1f; border-radius: 12px; padding: 12px; }
+    .route-list { display: flex; flex-direction: column; gap: 8px; }
+    .route-stop { background: #151515; border: 1px solid #1f1f1f; border-radius: 10px; padding: 10px; }
+    .route-stop strong { color: #fff; font-size: 0.84rem; display: block; }
+    .route-stop span { display: block; color: #666; font-size: 0.74rem; margin-top: 4px; line-height: 1.3; }
+    .route-modal-footer, .batch-modal-footer { padding: 14px 20px; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .modal-btn { width: auto; }
+    .batch-modal-body { padding: 18px 20px; display: grid; grid-template-columns: 220px 1fr; gap: 18px; overflow-y: auto; }
+    .batch-qr-box { background: #fff; border-radius: 16px; padding: 16px; min-height: 220px; display: flex; align-items: center; justify-content: center; }
+    .batch-info-grid { display: flex; flex-direction: column; gap: 14px; }
+    .batch-section { background: #151515; border: 1px solid #1f1f1f; border-radius: 12px; padding: 14px; }
+    .batch-section h4 { font-size: 0.78rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .batch-section p { font-size: 0.82rem; color: #d1d1d1; line-height: 1.45; margin-bottom: 6px; }
+    .batch-section p:last-child { margin-bottom: 0; }
+    .batch-link { color: #5ca8e0; word-break: break-all; font-size: 0.78rem; }
+    #kb-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; }
+    #kb-detail-overlay.open { display: block; }
+    #kb-detail-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw; background: #131313; z-index: 501; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); border-left: 1px solid #1e1e1e; box-shadow: -8px 0 40px rgba(0,0,0,0.6); }
     #kb-detail-drawer.open { transform: translateX(0); }
-    .kd-header { padding: 16px 20px 12px; border-bottom: 1px solid #1e1e1e; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-    .kd-header-left { display:flex; flex-direction:column; gap:2px; }
-    .kd-order-id { font-size: 0.7rem; color:#555; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; }
-    .kd-customer-name { font-size: 1.05rem; font-weight:700; color:#fff; }
-    .kd-close { background:none; border:1px solid #2a2a2a; color:#666; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:1rem; width:auto; margin:0; }
-    .kd-close:hover { color:#fff; border-color:#444; }
-    .kd-body { overflow-y:auto; flex:1; padding:0; }
+    .kd-header { padding: 16px 20px 12px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .kd-header-left { display: flex; flex-direction: column; gap: 2px; }
+    .kd-order-id { font-size: 0.7rem; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .kd-customer-name { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .kd-close { background: none; border: 1px solid #2a2a2a; color: #666; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem; width: auto; margin: 0; }
+    .kd-close:hover { color: #fff; border-color: #444; }
+    .kd-body { overflow-y: auto; flex: 1; padding: 0; }
     .kd-section { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; }
-    .kd-section:last-child { border-bottom:none; }
-    .kd-section-title { font-size:0.65rem; color:#444; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; font-weight:700; }
-    .kd-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px; font-size:0.85rem; }
-    .kd-row:last-child { margin-bottom:0; }
-    .kd-label { color:#555; white-space:nowrap; flex-shrink:0; }
-    .kd-value { color:#ccc; text-align:right; word-break:break-word; }
-    .kd-value.gold { color:#ffcc00; font-weight:700; }
-    .kd-value.green { color:#4caf50; }
-    .kd-item-row { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #1a1a1a; align-items:flex-start; }
-    .kd-item-row:last-child { border-bottom:none; }
-    .kd-item-qty { color:#ffcc00; font-weight:700; font-size:0.88rem; flex-shrink:0; width:24px; }
-    .kd-item-info { flex:1; }
-    .kd-item-name { font-size:0.88rem; color:#ddd; }
-    .kd-item-acc { font-size:0.75rem; color:#555; margin-top:2px; }
-    .kd-item-price { font-size:0.82rem; color:#888; white-space:nowrap; }
-    .kd-track-code { background:#0f0f0f; border:1px solid #1e1e1e; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:0.82rem; color:#5ca8e0; word-break:break-all; margin-top:6px; cursor:pointer; }
-    .kd-track-code:hover { border-color:#2a4a7a; }
-    .kd-prev-order { padding:8px 0; border-bottom:1px solid #1a1a1a; }
-    .kd-prev-order:last-child { border-bottom:none; }
-    .kd-prev-date { font-size:0.72rem; color:#444; }
-    .kd-prev-total { font-size:0.78rem; color:#888; }
-    .kd-status-badge { display:inline-block; border-radius:50px; padding:3px 10px; font-size:0.72rem; font-weight:700; }
-    .kd-footer { padding:14px 20px; border-top:1px solid #1e1e1e; display:flex; gap:8px; flex-shrink:0; }
-    .kd-footer button { flex:1; padding:11px; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; margin:0; }
+    .kd-section:last-child { border-bottom: none; }
+    .kd-section-title { font-size: 0.65rem; color: #444; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; font-weight: 700; }
+    .kd-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; }
+    .kd-row:last-child { margin-bottom: 0; }
+    .kd-label { color: #555; white-space: nowrap; flex-shrink: 0; }
+    .kd-value { color: #ccc; text-align: right; word-break: break-word; }
+    .kd-value.gold { color: #ffcc00; font-weight: 700; }
+    .kd-value.green { color: #4caf50; }
+    .kd-item-row { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid #1a1a1a; align-items: flex-start; }
+    .kd-item-row:last-child { border-bottom: none; }
+    .kd-item-qty { color: #ffcc00; font-weight: 700; font-size: 0.88rem; flex-shrink: 0; width: 24px; }
+    .kd-item-info { flex: 1; }
+    .kd-item-name { font-size: 0.88rem; color: #ddd; }
+    .kd-item-acc { font-size: 0.75rem; color: #555; margin-top: 2px; }
+    .kd-item-price { font-size: 0.82rem; color: #888; white-space: nowrap; }
+    .kd-track-code { background: #0f0f0f; border: 1px solid #1e1e1e; border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.82rem; color: #5ca8e0; word-break: break-all; margin-top: 6px; cursor: pointer; }
+    .kd-track-code:hover { border-color: #2a4a7a; }
+    .kd-prev-order { padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+    .kd-prev-order:last-child { border-bottom: none; }
+    .kd-prev-date { font-size: 0.72rem; color: #444; }
+    .kd-prev-total { font-size: 0.78rem; color: #888; }
+    .kd-status-badge { display: inline-block; border-radius: 50px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; }
+    #kd-batch-qr { margin-top: 12px; min-height: 160px; display: flex; align-items: center; justify-content: center; }
+    @media (max-width: 980px) {
+      .route-modal-body { grid-template-columns: 1fr; }
+      .route-map-wrap { min-height: 320px; border-right: none; border-bottom: 1px solid #1a1a1a; }
+      .batch-modal-body { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-
 <header class="kb-header">
   <div>
     <div class="kb-brand">La Coccina</div>
     <div class="kb-title">Kanban de Pedidos</div>
   </div>
   <div class="kb-header-right">
-    <div class="kb-whatsapp-notice">
-      📱 Modo WhatsApp ativo — pedidos chegam pelo WhatsApp e são movidos manualmente
-    </div>
+    <div class="kb-whatsapp-notice">📱 Modo WhatsApp ativo — pedidos chegam pelo WhatsApp e são movidos manualmente</div>
     <div id="kb-conn"><div id="kb-conn-dot"></div><span id="kb-conn-label">Conectando...</span></div>
     <a href="dashboard.html" class="kb-btn">← Painel</a>
   </div>
 </header>
-
 <div id="protein-summary">
   <span class="ps-label">Proteínas em produção:</span>
   <span id="protein-chips" style="color:#444; font-size:0.78rem">Carregando...</span>
 </div>
+<main class="kb-board" id="kb-board"></main>
 
-<main class="kb-board" id="kb-board">
-  <!-- Colunas renderizadas via JS -->
-</main>
+<div class="modal-overlay" id="route-modal-overlay" onclick="closeRouteModal()"></div>
+<section class="route-modal" id="route-modal" role="dialog" aria-modal="true">
+  <div class="route-modal-header">
+    <div>
+      <div class="route-modal-title">Preparar Rota de Entrega</div>
+      <div class="route-modal-desc" id="route-modal-desc">Monte um lote com os pedidos elegíveis da coluna.</div>
+    </div>
+    <button class="kb-btn" onclick="closeRouteModal()">✕</button>
+  </div>
+  <div class="route-modal-body">
+    <div class="route-map-wrap">
+      <div id="route-map"></div>
+      <div class="route-map-status" id="route-map-status">Aguardando cálculo da rota...</div>
+    </div>
+    <div class="route-side">
+      <div class="route-summary">
+        <strong style="display:block; color:#fff; margin-bottom:6px;">Origem</strong>
+        <div id="route-origin-label" style="color:#888; font-size:0.8rem; line-height:1.4;">-</div>
+      </div>
+      <div class="route-summary">
+        <strong style="display:block; color:#fff; margin-bottom:6px;">Resumo do lote</strong>
+        <div id="route-summary-count" style="color:#888; font-size:0.8rem;">0 pedidos</div>
+        <div id="route-summary-note" style="color:#666; font-size:0.74rem; margin-top:6px;">Somente pedidos em `Preparando Rota` e sem lote ativo entram nesta preparação.</div>
+      </div>
+      <div class="route-list" id="route-stop-list"></div>
+    </div>
+  </div>
+  <div class="route-modal-footer">
+    <div id="route-result" style="font-size:0.78rem; color:#666; flex:1;">Nenhum lote criado ainda.</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="modal-btn" onclick="closeRouteModal()">Fechar</button>
+      <button class="modal-btn primary" id="route-confirm-btn" onclick="confirmRouteBatch()">Criar lote</button>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="batch-modal-overlay" onclick="closeBatchModal()"></div>
+<section class="batch-modal" id="batch-modal" role="dialog" aria-modal="true">
+  <div class="batch-modal-header">
+    <div>
+      <div class="batch-modal-title" id="batch-modal-title">Lote de entrega</div>
+      <div class="batch-modal-desc" id="batch-modal-desc">QR Code, status e dados do motoboy.</div>
+    </div>
+    <button class="kb-btn" onclick="closeBatchModal()">✕</button>
+  </div>
+  <div class="batch-modal-body">
+    <div class="batch-qr-box"><div id="batch-modal-qr"></div></div>
+    <div class="batch-info-grid">
+      <div class="batch-section">
+        <h4>Link do lote</h4>
+        <p><a id="batch-modal-link" class="batch-link" target="_blank" rel="noopener"></a></p>
+      </div>
+      <div class="batch-section">
+        <h4>Status</h4>
+        <p id="batch-modal-status">-</p>
+        <p id="batch-modal-origin">-</p>
+      </div>
+      <div class="batch-section">
+        <h4>Motoboy</h4>
+        <p id="batch-modal-driver">Aguardando aceite do motoboy.</p>
+      </div>
+      <div class="batch-section">
+        <h4>Paradas</h4>
+        <div id="batch-modal-stops" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="batch-modal-footer">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="modal-btn" onclick="copyBatchLink()">Copiar link</button>
+      <button class="modal-btn" id="batch-open-public-btn" onclick="openBatchPublicPage()">Abrir página do lote</button>
+    </div>
+    <button class="modal-btn" onclick="closeBatchModal()">Fechar</button>
+  </div>
+</section>
+
+<div id="kb-detail-overlay" onclick="closeOrderDetail()"></div>
+<aside id="kb-detail-drawer">
+  <div class="kd-header">
+    <div class="kd-header-left">
+      <span class="kd-order-id" id="kd-order-id"></span>
+      <span class="kd-customer-name" id="kd-customer-name"></span>
+    </div>
+    <button class="kd-close" onclick="closeOrderDetail()">✕</button>
+  </div>
+  <div class="kd-body" id="kd-body"></div>
+</aside>
 
 <script src="../ASSETS/js/config.js"></script>
 <script src="../ASSETS/js/security.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const API = LaCoccinaSecurity.API_BASE;
-
+  const WA_KEY = 'lc_wa_confirmed';
+  const PAYMENT_LABELS = { pix: 'PIX', dinheiro: 'Dinheiro', cartao: 'Cartão' };
+  const STATUS_LABELS = {
+    novo: 'Novo Pedido',
+    em_producao: 'Em Produção',
+    aguardando_envio: 'Aguardando Envio',
+    preparando_rota: 'Preparando Rota',
+    a_caminho: 'A Caminho',
+    entregue: 'Entregue',
+    cancelado: 'Cancelado',
+  };
+  const STATUS_COLORS = {
+    novo: '#3498db',
+    em_producao: '#e67e22',
+    aguardando_envio: '#27ae60',
+    preparando_rota: '#f1c40f',
+    a_caminho: '#9b59b6',
+    entregue: '#2ecc71',
+    cancelado: '#e74c3c',
+  };
+  const BATCH_STATUS_LABELS = {
+    preparado: 'Aguardando aceite do motoboy',
+    aceito_motoboy: 'Motoboy aceitou',
+    liberado_cozinha: 'Liberado pela cozinha',
+  };
   const COLUMNS = [
-    { key: 'novo',             label: 'Novo Pedido',       nextLabel: 'Iniciar Produção',  nextKey: 'em_producao'      },
-    { key: 'em_producao',      label: 'Em Produção',        nextLabel: 'Pronto p/ Envio',   nextKey: 'aguardando_envio' },
-    { key: 'aguardando_envio', label: 'Aguardando Envio',   nextLabel: 'Saiu para Entrega', nextKey: 'a_caminho'        },
-    { key: 'a_caminho',        label: 'A Caminho',          nextLabel: 'Marcar Entregue',   nextKey: 'entregue'         },
+    { key: 'novo', label: 'Novo Pedido', nextLabel: 'Iniciar Produção', nextKey: 'em_producao' },
+    { key: 'em_producao', label: 'Em Produção', nextLabel: 'Pronto p/ Envio', nextKey: 'aguardando_envio' },
+    { key: 'aguardando_envio', label: 'Aguardando Envio', nextLabel: 'Separar p/ Rota', nextKey: 'preparando_rota' },
+    { key: 'preparando_rota', label: 'Preparando Rota', nextLabel: '', nextKey: '' },
+    { key: 'a_caminho', label: 'A Caminho', nextLabel: 'Marcar Entregue', nextKey: 'entregue' },
   ];
 
-  let orders     = [];
-  let dragSrcId  = null;
+  let orders = [];
+  let deliverySettings = { restaurantOriginAddress: '', googleMapsApiKeyConfigured: false, googleMapsApiKey: '' };
+  let dragSrcId = null;
   let dragSrcCol = null;
-  let sseConn    = null;
-  let _wasDragged = false; // distingue drag de click no card
+  let sseConn = null;
+  let _wasDragged = false;
+  let googleMapsPromise = null;
+  let routePreview = null;
+  let routeMap = null;
+  let routeDirectionsRenderer = null;
+  let currentBatchModalUrl = '';
 
-  // --- Persistência local da confirmação WhatsApp ---
-  const WA_KEY = 'lc_wa_confirmed';
+  function esc(value) {
+    return LaCoccinaSecurity.escapeHtml(String(value ?? ''));
+  }
+
+  function getToken() {
+    return sessionStorage.getItem('adminToken');
+  }
+
+  function apiFetch(url, opts = {}) {
+    const token = getToken();
+    if (!token) {
+      window.location.href = 'login.html';
+      return Promise.reject(new Error('Sem token'));
+    }
+    return fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}` } });
+  }
 
   function isWaConfirmed(id) {
     const map = JSON.parse(localStorage.getItem(WA_KEY) || '{}');
@@ -211,29 +348,76 @@
     map[id] = !map[id];
     if (!map[id]) delete map[id];
     localStorage.setItem(WA_KEY, JSON.stringify(map));
-    // Re-renderizar só o card sem recarregar tudo
-    const cardEl = document.querySelector(`.kb-card[data-id="${id}"]`);
-    if (cardEl) {
-      const order = orders.find(o => o.id === id);
-      const col   = orders.find(o => o.id === id)?.status;
-      const colDef = COLUMNS.find(c => c.key === col);
-      if (order && colDef) {
-        cardEl.outerHTML = renderCard(order, colDef);
-        // Re-bind drag eventos no novo elemento
-        bindCardDrag(document.querySelector(`.kb-card[data-id="${id}"]`));
-      }
+    render();
+  }
+
+  function elapsedTime(createdAt) {
+    const diff = Math.floor((Date.now() - new Date(createdAt + 'Z').getTime()) / 60000);
+    if (diff < 1) return 'agora';
+    if (diff < 60) return `${diff}min`;
+    return `${Math.floor(diff / 60)}h${diff % 60 ? `${diff % 60}min` : ''}`;
+  }
+
+  function publicBatchUrl(token) {
+    return new URL(`/delivery-batch.html?token=${token}`, window.location.origin).href;
+  }
+
+  async function loadDeliverySettings() {
+    try {
+      const res = await apiFetch(`${API}/api/settings/admin`);
+      if (!res.ok) return;
+      deliverySettings = await res.json();
+    } catch (e) {
+      console.error('Erro ao carregar configurações de entrega:', e);
     }
-    updateColCounts();
+  }
+
+  async function loadOrders() {
+    try {
+      const res = await apiFetch(`${API}/api/orders`);
+      if (!res.ok) {
+        if (res.status === 401) window.location.href = 'login.html';
+        return;
+      }
+      orders = await res.json();
+      render();
+    } catch (e) {
+      console.error('Erro ao carregar pedidos:', e);
+    }
+  }
+
+  function renderProteinSummary() {
+    const active = orders.filter((order) => ['novo', 'em_producao', 'aguardando_envio'].includes(order.status));
+    const counts = {};
+    active.forEach((order) => {
+      const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      items.forEach((item) => {
+        const protein = String(item.name || '').split(' ')[0] || item.name;
+        counts[protein] = (counts[protein] || 0) + (item.qty || 1);
+      });
+    });
+    const el = document.getElementById('protein-chips');
+    if (!Object.keys(counts).length) {
+      el.textContent = 'Sem pedidos ativos';
+      return;
+    }
+    el.innerHTML = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([protein, total]) => `<span class="protein-chip"><strong>${total}</strong> ${esc(protein)}</span>`)
+      .join('');
+  }
+
+  function batchStatusLabel(status) {
+    return BATCH_STATUS_LABELS[status] || status || 'Sem lote';
   }
 
   function updateColCounts() {
-    COLUMNS.forEach(col => {
-      const colOrders = orders.filter(o => o.status === col.key);
-      const pendingWa = colOrders.filter(o => !isWaConfirmed(o.id)).length;
-      const countEl   = document.querySelector(`.col-${col.key} .kb-col-count`);
-      const titleEl   = document.querySelector(`.col-${col.key} .kb-col-title`);
+    COLUMNS.forEach((col) => {
+      const colOrders = orders.filter((order) => order.status === col.key);
+      const pendingWa = colOrders.filter((order) => !isWaConfirmed(order.id)).length;
+      const countEl = document.querySelector(`.col-${col.key} .kb-col-count`);
+      const titleEl = document.querySelector(`.col-${col.key} .kb-col-title`);
       if (countEl) countEl.textContent = colOrders.length;
-      // Badge de pendentes no título
       if (titleEl) {
         const existing = titleEl.querySelector('.wa-pending-badge');
         if (existing) existing.remove();
@@ -244,48 +428,107 @@
     });
   }
 
-  function bindCardDrag(el) {
-    if (!el) return;
-    el.addEventListener('dragstart', (e) => {
-      dragSrcId  = Number(el.dataset.id);
-      dragSrcCol = el.dataset.col;
-      e.dataTransfer.effectAllowed = 'move';
-      setTimeout(() => el.classList.add('dragging'), 0);
+  function buildBatchGroups(colOrders) {
+    const map = new Map();
+    colOrders.forEach((order) => {
+      if (!order.delivery_batch_id) return;
+      if (!map.has(order.delivery_batch_id)) map.set(order.delivery_batch_id, []);
+      map.get(order.delivery_batch_id).push(order);
     });
-    el.addEventListener('dragend', (e) => {
-      el.classList.remove('dragging');
-      document.querySelectorAll('.kb-col-body').forEach(b => b.classList.remove('drag-over'));
-    });
+    return Array.from(map.entries())
+      .map(([batchId, groupedOrders]) => ({ batchId, orders: groupedOrders }))
+      .sort((a, b) => a.batchId - b.batchId);
   }
 
-  function getToken() { return sessionStorage.getItem('adminToken'); }
-  function apiFetch(url, opts = {}) {
-    const token = getToken();
-    if (!token) { window.location.href = 'login.html'; return Promise.reject(); }
-    return fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}` } });
+  function renderBatchPanel(batchGroup, colKey) {
+    const first = batchGroup.orders[0];
+    const publicUrl = first.delivery_batch_public_token ? publicBatchUrl(first.delivery_batch_public_token) : '';
+    const actions = [];
+    actions.push(`<button class="batch-btn" onclick="openBatchModal(${batchGroup.batchId})">Ver QR</button>`);
+    if (publicUrl) {
+      actions.push(`<button class="batch-btn" onclick="window.open('${publicUrl}', '_blank', 'noopener')">Abrir página</button>`);
+    }
+    if (colKey === 'preparando_rota' && first.delivery_batch_status === 'aceito_motoboy') {
+      actions.push(`<button class="batch-btn warn" onclick="confirmKitchenRelease(${batchGroup.batchId})">Confirmar saída</button>`);
+    }
+    return `
+      <div class="kb-batch-panel">
+        <div class="kb-batch-panel-head">
+          <div class="kb-batch-panel-title">Lote ${esc(first.delivery_batch_code || `#${batchGroup.batchId}`)}</div>
+          <span class="kb-tag status">${esc(batchStatusLabel(first.delivery_batch_status))}</span>
+        </div>
+        <div class="kb-batch-panel-meta">
+          ${first.delivery_vehicle_plate ? `<span class="kb-tag plate">Placa ${esc(first.delivery_vehicle_plate)}</span>` : ''}
+          <span class="kb-tag batch">${batchGroup.orders.length} pedidos</span>
+        </div>
+        <p>${first.delivery_batch_status === 'preparado' ? 'Aguardando o aceite do motoboy pelo QR Code.' : first.delivery_batch_status === 'aceito_motoboy' ? 'Motoboy aceitou o lote. A cozinha precisa confirmar a saída.' : 'Lote já liberado e em rota.'}</p>
+        <div class="kb-batch-actions">${actions.join('')}</div>
+      </div>
+    `;
   }
 
-  // ---- Carregar pedidos ----
-  async function loadOrders() {
-    try {
-      const res = await apiFetch(`${API}/api/orders`);
-      if (!res.ok) { if (res.status === 401) window.location.href = 'login.html'; return; }
-      orders = await res.json();
-      render();
-    } catch (e) { console.error('Erro ao carregar pedidos:', e); }
+  function renderCard(order, col) {
+    const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+    const itemsHtml = items.map((item) => {
+      const acc = (item.accompaniments || []).map((accItem) => accItem.name).join(', ');
+      return `<div class="kb-card-item"><span class="kb-card-item-qty">${item.qty}×</span><span>${esc(item.name)}</span></div>${acc ? `<div class="kb-card-acc">↳ ${esc(acc)}</div>` : ''}`;
+    }).join('');
+
+    const waOk = isWaConfirmed(order.id);
+    const waClass = waOk ? 'wa-confirmed' : 'wa-pending';
+    const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
+    const canDrag = !(order.status === 'preparando_rota' && order.delivery_batch_id);
+    const nextKey = col.key === 'preparando_rota' ? '' : col.nextKey;
+    const nextLabel = col.key === 'preparando_rota' ? '' : col.nextLabel;
+    const tags = [];
+    if (order.delivery_batch_code) tags.push(`<span class="kb-tag batch">Lote ${esc(order.delivery_batch_code)}</span>`);
+    if (order.delivery_batch_status) tags.push(`<span class="kb-tag status">${esc(batchStatusLabel(order.delivery_batch_status))}</span>`);
+    if (order.delivery_vehicle_plate) tags.push(`<span class="kb-tag plate">${esc(order.delivery_vehicle_plate)}</span>`);
+    if (order.delivery_sequence) tags.push(`<span class="kb-tag stop">Parada ${order.delivery_sequence}</span>`);
+
+    return `
+      <div class="kb-card ${waClass} ${canDrag ? '' : 'static-card'}"
+           draggable="${canDrag}"
+           data-id="${order.id}"
+           data-col="${col.key}"
+           ondragstart="${canDrag ? `onDragStart(event, ${order.id}, '${col.key}')` : ''}"
+           ondragend="${canDrag ? 'onDragEnd(event)' : ''}"
+           onclick="if(!_wasDragged) openOrderDetail(${order.id})">
+        <div class="kb-card-header">
+          <span class="kb-card-id">#${order.id}</span>
+          <span class="kb-card-time">${elapsedTime(order.created_at)}</span>
+        </div>
+        ${tags.length ? `<div class="kb-card-tags">${tags.join('')}</div>` : ''}
+        <div class="kb-card-name">${esc(order.customer)}</div>
+        <div class="kb-card-address">${esc(order.address || '')}</div>
+        <div class="kb-card-items">${itemsHtml}</div>
+        ${order.obs ? `<div class="kb-card-obs">📝 ${esc(order.obs)}</div>` : ''}
+        <div class="kb-card-total">R$ ${parseFloat(order.total).toFixed(2)}</div>
+        <div class="kb-card-payment">${esc(order.payment || '').toUpperCase()}</div>
+        <div class="${waRowCls}" onclick="event.stopPropagation(); toggleWaConfirmed(${order.id})">
+          <div class="wa-check-box">${waOk ? '✓' : ''}</div>
+          <div class="wa-check-label">${waOk ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
+        </div>
+        <div class="kb-card-actions" onclick="event.stopPropagation()">
+          ${nextKey ? `<button class="btn-move-next" onclick="moveOrder(${order.id}, '${nextKey}')">${nextLabel}</button>` : ''}
+          <button class="btn-cancel" onclick="moveOrder(${order.id}, 'cancelado')">Cancelar</button>
+        </div>
+      </div>
+    `;
   }
 
-  // ---- Render board ----
   function render() {
     renderProteinSummary();
     const board = document.getElementById('kb-board');
     board.innerHTML = '';
 
-
-    COLUMNS.forEach(col => {
-      const colOrders = orders
-        .filter(o => o.status === col.key)
-        .sort((a, b) => a.kanban_order - b.kanban_order || new Date(a.created_at) - new Date(b.created_at));
+    COLUMNS.forEach((col) => {
+      const colOrders = orders.filter((order) => order.status === col.key);
+      const batchPanels = buildBatchGroups(colOrders).map((group) => renderBatchPanel(group, col.key)).join('');
+      const cards = colOrders.map((order) => renderCard(order, col)).join('');
+      const headerAction = col.key === 'preparando_rota'
+        ? `<button class="kb-col-action" onclick="openRouteModal()">Preparar rota</button>`
+        : '';
 
       const colEl = document.createElement('div');
       colEl.className = `kb-col col-${col.key}`;
@@ -295,102 +538,24 @@
           <div class="kb-col-indicator"></div>
           <div class="kb-col-title">${col.label}</div>
           <div class="kb-col-count">${colOrders.length}</div>
+          ${headerAction}
         </div>
         <div class="kb-col-body" data-col="${col.key}">
-          ${colOrders.length ? colOrders.map(o => renderCard(o, col)).join('') : '<div class="kb-empty">Nenhum pedido</div>'}
+          ${batchPanels}
+          ${cards || '<div class="kb-empty">Nenhum pedido</div>'}
         </div>
       `;
       board.appendChild(colEl);
 
-      // Drag & drop sobre a coluna
       const body = colEl.querySelector('.kb-col-body');
       body.addEventListener('dragover', onDragOver);
-      body.addEventListener('drop',     e => onDrop(e, col.key));
-      body.addEventListener('dragleave', e => e.currentTarget.classList.remove('drag-over'));
+      body.addEventListener('drop', (event) => onDrop(event, col.key));
+      body.addEventListener('dragleave', (event) => event.currentTarget.classList.remove('drag-over'));
     });
 
     updateColCounts();
   }
 
-  function renderCard(o, col) {
-    const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
-    const itemsHtml = items.map(i => {
-      const acc = (i.accompaniments || []).map(a => a.name).join(', ');
-      return `<div class="kb-card-item">
-        <span class="kb-card-item-qty">${i.qty}×</span>
-        <span>${esc(i.name)}</span>
-      </div>${acc ? `<div class="kb-card-acc">↳ ${esc(acc)}</div>` : ''}`;
-    }).join('');
-
-    const elapsed  = elapsedTime(o.created_at);
-    const obsHtml  = o.obs ? `<div class="kb-card-obs">📝 ${esc(o.obs)}</div>` : '';
-    const waOk     = isWaConfirmed(o.id);
-    const waClass  = waOk ? 'wa-confirmed' : 'wa-pending';
-    const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
-    const waCheck  = waOk ? '✓' : '';
-
-    return `<div class="kb-card ${waClass}" draggable="true"
-        data-id="${o.id}" data-col="${col.key}"
-        ondragstart="onDragStart(event, ${o.id}, '${col.key}')"
-        ondragend="onDragEnd(event)"
-        onclick="if(!_wasDragged) openOrderDetail(${o.id})">
-      <div class="kb-card-header">
-        <span class="kb-card-id">#${o.id}</span>
-        <span class="kb-card-time">${elapsed}</span>
-      </div>
-      <div class="kb-card-name">${esc(o.customer)}</div>
-      <div class="kb-card-address">${esc(o.address || '')}</div>
-      <div class="kb-card-items">${itemsHtml}</div>
-      ${obsHtml}
-      <div class="kb-card-total">R$ ${parseFloat(o.total).toFixed(2)}</div>
-      <div class="kb-card-payment">${esc(o.payment || '').toUpperCase()}</div>
-
-      <div class="${waRowCls}" onclick="event.stopPropagation(); toggleWaConfirmed(${o.id})">
-        <div class="wa-check-box">${waCheck}</div>
-        <div class="wa-check-label">
-          ${waOk ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}
-        </div>
-      </div>
-
-      <div class="kb-card-actions" onclick="event.stopPropagation()">
-        ${col.nextKey ? `<button class="btn-move-next" onclick="moveOrder(${o.id}, '${col.nextKey}')">${col.nextLabel}</button>` : ''}
-        <button class="btn-cancel" onclick="moveOrder(${o.id}, 'cancelado')">Cancelar</button>
-      </div>
-    </div>`;
-  }
-
-  function esc(s) { return LaCoccinaSecurity.escapeHtml(String(s ?? '')); }
-
-  function elapsedTime(createdAt) {
-    const diff = Math.floor((Date.now() - new Date(createdAt + 'Z').getTime()) / 60000);
-    if (diff < 1)  return 'agora';
-    if (diff < 60) return `${diff}min`;
-    return `${Math.floor(diff / 60)}h${diff % 60 ? diff % 60 + 'min' : ''}`;
-  }
-
-  // ---- Resumo de proteínas ----
-  function renderProteinSummary() {
-    const active = orders.filter(o => ['novo', 'em_producao', 'aguardando_envio'].includes(o.status));
-    const counts = {};
-    active.forEach(o => {
-      const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
-      items.forEach(i => {
-        const name = String(i.name || '');
-        // Extrair proteína do nome do item (heurística: primeira palavra)
-        const protein = name.split(' ')[0] || name;
-        counts[protein] = (counts[protein] || 0) + (i.qty || 1);
-      });
-    });
-
-    const el = document.getElementById('protein-chips');
-    if (!Object.keys(counts).length) { el.textContent = 'Sem pedidos ativos'; return; }
-    el.innerHTML = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([p, n]) => `<span class="protein-chip"><strong>${n}</strong> ${esc(p)}</span>`)
-      .join('');
-  }
-
-  // ---- Mover pedido ----
   async function moveOrder(id, status) {
     const labels = { entregue: 'Marcar como entregue?', cancelado: 'Cancelar este pedido?' };
     if (labels[status] && !confirm(labels[status])) return;
@@ -401,82 +566,78 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (res.ok) {
-        // Otimista: atualizar localmente
-        const o = orders.find(x => x.id === id);
-        if (o) o.status = status;
-        if (['entregue', 'cancelado'].includes(status)) orders = orders.filter(x => x.id !== id);
-        render();
-      }
-    } catch (e) { console.error('Erro ao mover pedido:', e); }
+      if (!res.ok) return;
+      await loadOrders();
+    } catch (e) {
+      console.error('Erro ao mover pedido:', e);
+    }
   }
 
-  // ---- Drag & Drop ----
-  function onDragStart(e, id, colKey) {
+  function onDragStart(event, id, colKey) {
     _wasDragged = true;
-    dragSrcId  = id;
+    dragSrcId = id;
     dragSrcCol = colKey;
-    e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => e.target.classList.add('dragging'), 0);
+    event.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => event.target.classList.add('dragging'), 0);
   }
 
-  function onDragEnd(e) {
-    e.target.classList.remove('dragging');
-    document.querySelectorAll('.kb-col-body').forEach(el => el.classList.remove('drag-over'));
-    // Resetar flag após o ciclo do evento (o onclick dispara depois do dragend)
+  function onDragEnd(event) {
+    event.target.classList.remove('dragging');
+    document.querySelectorAll('.kb-col-body').forEach((el) => el.classList.remove('drag-over'));
     setTimeout(() => { _wasDragged = false; }, 50);
   }
 
-  function onDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('drag-over');
+  function onDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    event.currentTarget.classList.add('drag-over');
   }
 
-  async function onDrop(e, targetCol) {
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
+  async function onDrop(event, targetCol) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over');
     if (dragSrcId === null) return;
-
+    const movedOrder = orders.find((order) => order.id === dragSrcId);
+    if (movedOrder?.delivery_batch_id && movedOrder.status === 'preparando_rota') {
+      dragSrcId = dragSrcCol = null;
+      return;
+    }
     if (dragSrcCol !== targetCol) {
-      // Mover para outra coluna
       await moveOrder(dragSrcId, targetCol);
     } else {
-      // Reordenar dentro da mesma coluna (drop antes do card alvo)
       const colOrders = orders
-        .filter(o => o.status === targetCol)
-        .sort((a, b) => a.kanban_order - b.kanban_order);
-      const fromIdx = colOrders.findIndex(o => o.id === dragSrcId);
+        .filter((order) => order.status === targetCol && !(order.delivery_batch_id && order.status === 'preparando_rota'))
+        .sort((a, b) => (a.kanban_order || 0) - (b.kanban_order || 0));
+      const fromIdx = colOrders.findIndex((order) => order.id === dragSrcId);
       if (fromIdx === -1) return;
       const [moved] = colOrders.splice(fromIdx, 1);
-      colOrders.push(moved); // simplificado: move para o fim; drop sobre card específico poderia ser mais preciso
-      const ids = colOrders.map(o => o.id);
-      colOrders.forEach((o, i) => { o.kanban_order = i; });
-      render();
+      colOrders.push(moved);
+      const ids = colOrders.map((order) => order.id);
       try {
         await apiFetch(`${API}/api/orders/reorder`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ids }),
         });
-      } catch {}
+        await loadOrders();
+      } catch (e) {
+        console.error('Erro ao reordenar:', e);
+      }
     }
     dragSrcId = dragSrcCol = null;
   }
 
-  // ---- SSE ----
   function connectSSE() {
     if (sseConn) sseConn.close();
     sseConn = new EventSource(`${API}/api/products/stream`);
-
     sseConn.onopen = () => {
       document.getElementById('kb-conn-dot').className = 'connected';
       document.getElementById('kb-conn-label').textContent = 'Ao vivo';
     };
-    sseConn.onmessage = (e) => {
+    sseConn.onmessage = (event) => {
       try {
-        const d = JSON.parse(e.data);
-        if (['order-created', 'order-status-changed', 'menu-updated'].includes(d.type)) {
+        const data = JSON.parse(event.data);
+        if (['order-created', 'order-status-changed', 'menu-updated', 'delivery-batch-prepared', 'delivery-batch-accepted', 'delivery-batch-released'].includes(data.type)) {
           loadOrders();
         }
       } catch {}
@@ -489,138 +650,343 @@
     };
   }
 
-  // ---- Init ----
-  if (!sessionStorage.getItem('adminToken') || localStorage.getItem('adminLogged') !== 'true') {
-    window.location.href = 'login.html';
-  } else if (localStorage.getItem('lc_kanban_enabled') !== 'true') {
-    // Kanban desabilitado — redireciona de volta ao dashboard com aviso
-    alert('O Kanban está desabilitado. Ative-o em ⚙️ Configurações no painel administrativo.');
-    window.location.href = 'dashboard.html';
-  } else {
-    loadOrders();
-    connectSSE();
-    // Atualizar tempo decorrido a cada minuto
-    setInterval(() => render(), 60000);
+  async function ensureGoogleMapsLoaded(apiKey) {
+    if (window.google?.maps) return window.google.maps;
+    if (!apiKey) throw new Error('Google Maps não configurado.');
+    if (!googleMapsPromise) {
+      googleMapsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=geometry`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve(window.google.maps);
+        script.onerror = () => reject(new Error('Falha ao carregar Google Maps.'));
+        document.head.appendChild(script);
+      });
+    }
+    return googleMapsPromise;
   }
-  // ---- Drawer de detalhes do pedido ----
-  const STATUS_COLORS = {
-    novo: '#3498db', em_producao: '#e67e22',
-    aguardando_envio: '#27ae60', a_caminho: '#9b59b6',
-    entregue: '#2ecc71', cancelado: '#e74c3c',
-  };
-  const STATUS_LABELS = {
-    novo: 'Novo Pedido', em_producao: 'Em Produção',
-    aguardando_envio: 'Aguardando Envio', a_caminho: 'A Caminho',
-    entregue: 'Entregue', cancelado: 'Cancelado',
-  };
-  const PAYMENT_LABELS = { pix: 'PIX', dinheiro: 'Dinheiro', cartao: 'Cartão' };
 
-  function openOrderDetail(orderId) {
-    const o = orders.find(x => x.id === orderId);
-    if (!o) return;
+  function closeRouteModal() {
+    document.getElementById('route-modal-overlay').classList.remove('open');
+    document.getElementById('route-modal').classList.remove('open');
+  }
 
-    const col = COLUMNS.find(c => c.key === o.status);
-    const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
+  function openRouteModalShell() {
+    document.getElementById('route-modal-overlay').classList.add('open');
+    document.getElementById('route-modal').classList.add('open');
+  }
 
-    // Pedidos anteriores do mesmo telefone
-    const prevOrders = orders.filter(x => x.phone === o.phone && x.id !== o.id);
+  async function geocodeAddress(address) {
+    const geocoder = new google.maps.Geocoder();
+    return new Promise((resolve, reject) => {
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          resolve(results[0].geometry.location);
+        } else {
+          reject(new Error(`Nao foi possivel localizar: ${address}`));
+        }
+      });
+    });
+  }
 
-    const trackUrl = o.order_token
-      ? `${window.location.origin.replace('/admin', '')}/track.html?token=${o.order_token}`
-      : null;
+  function computeNearestNeighbor(originLocation, stops) {
+    const remaining = stops.slice();
+    const ordered = [];
+    let current = originLocation;
+    while (remaining.length) {
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      remaining.forEach((stop, index) => {
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(current, stop.location);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+      const [nextStop] = remaining.splice(nearestIndex, 1);
+      ordered.push(nextStop);
+      current = nextStop.location;
+    }
+    return ordered;
+  }
 
-    document.getElementById('kd-order-id').textContent   = `Pedido #${o.id}`;
-    document.getElementById('kd-customer-name').textContent = o.customer;
+  function buildGoogleMapsUrl(originAddress, orderedStops) {
+    if (!orderedStops.length) return '';
+    const destination = orderedStops[orderedStops.length - 1].address;
+    const waypoints = orderedStops.slice(0, -1).map((stop) => stop.address).join('|');
+    const url = new URL('https://www.google.com/maps/dir/');
+    url.searchParams.set('api', '1');
+    url.searchParams.set('origin', originAddress);
+    url.searchParams.set('destination', destination);
+    if (waypoints) url.searchParams.set('waypoints', waypoints);
+    return url.toString();
+  }
 
-    const statusColor = STATUS_COLORS[o.status] || '#888';
+  async function renderRouteMap(originAddress, orderedStops) {
+    const mapEl = document.getElementById('route-map');
+    routeMap = new google.maps.Map(mapEl, {
+      center: { lat: -27.5954, lng: -48.548 },
+      zoom: 12,
+      mapTypeControl: false,
+      streetViewControl: false,
+    });
+    routeDirectionsRenderer = new google.maps.DirectionsRenderer({
+      map: routeMap,
+      suppressMarkers: false,
+    });
+    const directionsService = new google.maps.DirectionsService();
+    const waypointStops = orderedStops.slice(0, -1).map((stop) => ({ location: stop.address, stopover: true }));
+    const destination = orderedStops[orderedStops.length - 1]?.address || originAddress;
+    const request = {
+      origin: originAddress,
+      destination,
+      waypoints: waypointStops,
+      travelMode: google.maps.TravelMode.DRIVING,
+      optimizeWaypoints: false,
+    };
+    return new Promise((resolve, reject) => {
+      directionsService.route(request, (result, status) => {
+        if (status === 'OK') {
+          routeDirectionsRenderer.setDirections(result);
+          resolve(result);
+        } else {
+          reject(new Error('Nao foi possivel renderizar a rota no mapa.'));
+        }
+      });
+    });
+  }
+
+  async function openRouteModal() {
+    const eligibleOrders = orders.filter((order) => order.status === 'preparando_rota' && !order.delivery_batch_id);
+    if (!eligibleOrders.length) {
+      alert('Nao ha pedidos sem lote na coluna Preparando Rota.');
+      return;
+    }
+    if (!deliverySettings.restaurantOriginAddress) {
+      alert('Configure o endereco base do restaurante no painel antes de preparar a rota.');
+      return;
+    }
+    if (!deliverySettings.googleMapsApiKeyConfigured || !deliverySettings.googleMapsApiKey) {
+      alert('A chave GOOGLE_MAPS_API_KEY nao esta configurada no servidor.');
+      return;
+    }
+
+    openRouteModalShell();
+    document.getElementById('route-origin-label').textContent = deliverySettings.restaurantOriginAddress;
+    document.getElementById('route-summary-count').textContent = `${eligibleOrders.length} pedidos elegiveis`;
+    document.getElementById('route-stop-list').innerHTML = '<div class="route-stop"><strong>Calculando rota...</strong><span>Geocodificando enderecos e montando ordem sugerida.</span></div>';
+    document.getElementById('route-result').textContent = 'Nenhum lote criado ainda.';
+    document.getElementById('route-confirm-btn').disabled = true;
+    document.getElementById('route-map-status').textContent = 'Calculando melhor ordem sugerida a partir do endereco-base...';
+
+    try {
+      await ensureGoogleMapsLoaded(deliverySettings.googleMapsApiKey);
+      const originLocation = await geocodeAddress(deliverySettings.restaurantOriginAddress);
+      const stops = [];
+      for (const order of eligibleOrders) {
+        const location = await geocodeAddress(order.address);
+        stops.push({ id: order.id, customer: order.customer, address: order.address, phone: order.phone, location });
+      }
+      const orderedStops = computeNearestNeighbor(originLocation, stops);
+      const mapsUrl = buildGoogleMapsUrl(deliverySettings.restaurantOriginAddress, orderedStops);
+      routePreview = { orderIds: eligibleOrders.map((order) => order.id), orderedOrderIds: orderedStops.map((stop) => stop.id), orderedStops, mapsUrl };
+      document.getElementById('route-stop-list').innerHTML = orderedStops.map((stop, index) => `
+        <div class="route-stop">
+          <strong>Parada ${index + 1} • ${esc(stop.customer)}</strong>
+          <span>${esc(stop.address)}</span>
+          <span>${esc(stop.phone || 'Telefone nao informado')}</span>
+        </div>
+      `).join('');
+      await renderRouteMap(deliverySettings.restaurantOriginAddress, orderedStops);
+      document.getElementById('route-map-status').textContent = 'Rota sugerida pronta para confirmacao.';
+      document.getElementById('route-confirm-btn').disabled = false;
+    } catch (error) {
+      console.error(error);
+      document.getElementById('route-map-status').textContent = error.message;
+      document.getElementById('route-stop-list').innerHTML = `<div class="route-stop"><strong>Falha ao preparar rota</strong><span>${esc(error.message)}</span></div>`;
+    }
+  }
+
+  async function confirmRouteBatch() {
+    if (!routePreview) return;
+    document.getElementById('route-confirm-btn').disabled = true;
+    try {
+      const res = await apiFetch(`${API}/api/delivery-batches/prepare`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderIds: routePreview.orderIds,
+          orderedOrderIds: routePreview.orderedOrderIds,
+          mapsUrl: routePreview.mapsUrl,
+          originAddress: deliverySettings.restaurantOriginAddress,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Erro ao criar lote.');
+        document.getElementById('route-confirm-btn').disabled = false;
+        return;
+      }
+      document.getElementById('route-result').innerHTML = `✅ Lote ${esc(data.batchCode)} criado. <a href="${publicBatchUrl(data.publicToken)}" target="_blank" rel="noopener" class="batch-link">Abrir pagina publica</a>`;
+      await loadOrders();
+      openBatchModal(data.batchId);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao criar lote de entrega.');
+    } finally {
+      document.getElementById('route-confirm-btn').disabled = false;
+    }
+  }
+
+  function closeBatchModal() {
+    document.getElementById('batch-modal-overlay').classList.remove('open');
+    document.getElementById('batch-modal').classList.remove('open');
+  }
+
+  function renderQr(containerId, text) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    new QRCode(el, { text, width: 180, height: 180 });
+  }
+
+  async function openBatchModal(batchId) {
+    try {
+      const res = await apiFetch(`${API}/api/delivery-batches/${batchId}`);
+      if (!res.ok) {
+        alert('Nao foi possivel carregar o lote.');
+        return;
+      }
+      const batch = await res.json();
+      currentBatchModalUrl = publicBatchUrl(batch.publicToken);
+      document.getElementById('batch-modal-title').textContent = `Lote ${batch.batchCode}`;
+      document.getElementById('batch-modal-desc').textContent = batchStatusLabel(batch.batchStatus);
+      document.getElementById('batch-modal-link').textContent = currentBatchModalUrl;
+      document.getElementById('batch-modal-link').href = currentBatchModalUrl;
+      document.getElementById('batch-modal-status').textContent = `Status: ${batchStatusLabel(batch.batchStatus)}`;
+      document.getElementById('batch-modal-origin').textContent = `Origem: ${batch.originAddress}`;
+      document.getElementById('batch-modal-driver').textContent = batch.driver?.name
+        ? `${batch.driver.name} • ${batch.driver.whatsapp} • ${batch.driver.vehicleModel} • ${batch.driver.vehiclePlate}`
+        : 'Aguardando aceite do motoboy.';
+      document.getElementById('batch-modal-stops').innerHTML = batch.orders.map((order) => `
+        <div class="route-stop">
+          <strong>Parada ${order.delivery_sequence || '-'} • ${esc(order.customer)}</strong>
+          <span>${esc(order.address)}</span>
+          <span>Status: ${esc(STATUS_LABELS[order.status] || order.status)}</span>
+        </div>
+      `).join('');
+      renderQr('batch-modal-qr', currentBatchModalUrl);
+      document.getElementById('batch-modal-overlay').classList.add('open');
+      document.getElementById('batch-modal').classList.add('open');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao abrir modal do lote.');
+    }
+  }
+
+  function copyBatchLink() {
+    if (!currentBatchModalUrl) return;
+    navigator.clipboard.writeText(currentBatchModalUrl).catch(() => {});
+  }
+
+  function openBatchPublicPage() {
+    if (!currentBatchModalUrl) return;
+    window.open(currentBatchModalUrl, '_blank', 'noopener');
+  }
+
+  async function confirmKitchenRelease(batchId) {
+    if (!confirm('Confirmar a saida deste lote da cozinha?')) return;
+    try {
+      const res = await apiFetch(`${API}/api/delivery-batches/${batchId}/confirm-kitchen`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Erro ao confirmar saida.');
+        return;
+      }
+      await loadOrders();
+      openBatchModal(data.batch.id);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao confirmar saida do lote.');
+    }
+  }
+
+  async function openOrderDetail(orderId) {
+    const order = orders.find((item) => item.id === orderId);
+    if (!order) return;
+    const col = COLUMNS.find((item) => item.key === order.status);
+    const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+    const prevOrders = orders.filter((item) => item.phone === order.phone && item.id !== order.id);
+    const trackUrl = order.order_token ? `${window.location.origin}/track.html?token=${order.order_token}` : null;
+    const statusColor = STATUS_COLORS[order.status] || '#888';
+    document.getElementById('kd-order-id').textContent = `Pedido #${order.id}`;
+    document.getElementById('kd-customer-name').textContent = order.customer;
     document.getElementById('kd-body').innerHTML = `
-
       <div class="kd-section">
         <div class="kd-section-title">Status atual</div>
-        <span class="kd-status-badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44">
-          ${STATUS_LABELS[o.status] || o.status}
-        </span>
+        <span class="kd-status-badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44">${STATUS_LABELS[order.status] || order.status}</span>
         <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-          ${col?.nextKey ? `<button onclick="moveOrder(${o.id}, '${col.nextKey}'); closeOrderDetail()" style="background:#ffcc00;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;">${col.nextLabel}</button>` : ''}
-          <button onclick="moveOrder(${o.id},'cancelado'); closeOrderDetail()" style="background:#1a0a0a;color:#e74c3c;border:1px solid #2a1010;border-radius:6px;padding:7px 12px;font-size:0.8rem;cursor:pointer;">Cancelar</button>
+          ${col?.nextKey && order.status !== 'preparando_rota' ? `<button onclick="moveOrder(${order.id}, '${col.nextKey}'); closeOrderDetail()" style="background:#ffcc00;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;">${col.nextLabel}</button>` : ''}
+          <button onclick="moveOrder(${order.id}, 'cancelado'); closeOrderDetail()" style="background:#1a0a0a;color:#e74c3c;border:1px solid #2a1010;border-radius:6px;padding:7px 12px;font-size:0.8rem;cursor:pointer;">Cancelar</button>
         </div>
       </div>
-
       <div class="kd-section">
         <div class="kd-section-title">Dados do cliente</div>
-        <div class="kd-row"><span class="kd-label">Nome</span><span class="kd-value">${esc(o.customer)}</span></div>
-        <div class="kd-row"><span class="kd-label">Telefone</span><span class="kd-value green">${esc(o.phone)}</span></div>
-        <div class="kd-row"><span class="kd-label">Endereço</span><span class="kd-value">${esc(o.address || '—')}</span></div>
-        <div class="kd-row"><span class="kd-label">Pagamento</span><span class="kd-value">${PAYMENT_LABELS[o.payment] || esc(o.payment || '—')}</span></div>
-        ${o.obs ? `<div class="kd-row" style="margin-top:8px;"><span class="kd-label">Obs.</span><span class="kd-value" style="color:#888;font-style:italic">${esc(o.obs)}</span></div>` : ''}
+        <div class="kd-row"><span class="kd-label">Nome</span><span class="kd-value">${esc(order.customer)}</span></div>
+        <div class="kd-row"><span class="kd-label">Telefone</span><span class="kd-value green">${esc(order.phone)}</span></div>
+        <div class="kd-row"><span class="kd-label">Endereco</span><span class="kd-value">${esc(order.address || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">Pagamento</span><span class="kd-value">${PAYMENT_LABELS[order.payment] || esc(order.payment || '—')}</span></div>
+        ${order.obs ? `<div class="kd-row"><span class="kd-label">Obs.</span><span class="kd-value" style="color:#888;font-style:italic">${esc(order.obs)}</span></div>` : ''}
       </div>
-
       <div class="kd-section">
         <div class="kd-section-title">Itens do pedido</div>
-        ${items.map(i => {
-          const acc = (i.accompaniments || []).map(a => a.name).join(', ');
-          return `<div class="kd-item-row">
-            <div class="kd-item-qty">${i.qty}×</div>
-            <div class="kd-item-info">
-              <div class="kd-item-name">${esc(i.name)}</div>
-              ${acc ? `<div class="kd-item-acc">↳ ${esc(acc)}</div>` : ''}
-            </div>
-            <div class="kd-item-price">R$ ${(parseFloat(i.price) * i.qty).toFixed(2)}</div>
-          </div>`;
+        ${items.map((item) => {
+          const acc = (item.accompaniments || []).map((accItem) => accItem.name).join(', ');
+          return `<div class="kd-item-row"><div class="kd-item-qty">${item.qty}×</div><div class="kd-item-info"><div class="kd-item-name">${esc(item.name)}</div>${acc ? `<div class="kd-item-acc">↳ ${esc(acc)}</div>` : ''}</div><div class="kd-item-price">R$ ${(parseFloat(item.price) * item.qty).toFixed(2)}</div></div>`;
         }).join('')}
-        <div class="kd-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #1e1e1e;">
-          <span class="kd-label">Total</span>
-          <span class="kd-value gold">R$ ${parseFloat(o.total).toFixed(2)}</span>
+        <div class="kd-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #1e1e1e;"><span class="kd-label">Total</span><span class="kd-value gold">R$ ${parseFloat(order.total).toFixed(2)}</span></div>
+      </div>
+      ${trackUrl ? `<div class="kd-section"><div class="kd-section-title">Codigo de rastreio</div><div class="kd-track-code" onclick="navigator.clipboard.writeText('${order.order_token}').then(()=>this.textContent='Copiado!').catch(()=>{})">${esc(order.order_token)}</div><div style="margin-top:8px;"><a href="${trackUrl}" target="_blank" rel="noopener" style="color:#5ca8e0; font-size:0.78rem; text-decoration:none;">Abrir pagina de rastreio do cliente →</a></div></div>` : ''}
+      <div class="kd-section" id="kd-batch-section">${order.delivery_batch_id ? '<div class="kd-section-title">Lote de entrega</div><div id="kd-batch-loading" class="kd-value" style="text-align:left;color:#777;">Carregando dados do lote...</div>' : '<div class="kd-section-title">Lote de entrega</div><div class="kd-value" style="text-align:left;color:#777;">Pedido sem lote associado.</div>'}</div>
+      ${prevOrders.length ? `<div class="kd-section"><div class="kd-section-title">Pedidos anteriores (${esc(order.phone)})</div>${prevOrders.slice(0, 5).map((prev) => `<div class="kd-prev-order" onclick="openOrderDetail(${prev.id})" style="cursor:pointer;"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="kd-prev-date">#${prev.id} — ${new Date(prev.created_at + 'Z').toLocaleDateString('pt-BR')}</span><span class="kd-prev-total">R$ ${parseFloat(prev.total).toFixed(2)}</span></div><span class="kd-status-badge" style="background:${(STATUS_COLORS[prev.status] || '#888')}22;color:${STATUS_COLORS[prev.status] || '#888'};border:1px solid ${(STATUS_COLORS[prev.status] || '#888')}44;margin-top:4px;font-size:0.65rem;">${STATUS_LABELS[prev.status] || prev.status}</span></div>`).join('')}</div>` : ''}
+      <div class="kd-section">
+        <div class="kd-section-title">Confirmacao WhatsApp</div>
+        <div class="${isWaConfirmed(order.id) ? 'wa-check-row confirmed' : 'wa-check-row'}" onclick="toggleWaConfirmed(${order.id});">
+          <div class="wa-check-box">${isWaConfirmed(order.id) ? '✓' : ''}</div>
+          <div class="wa-check-label">${isWaConfirmed(order.id) ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
         </div>
       </div>
-
-      ${trackUrl ? `
-      <div class="kd-section">
-        <div class="kd-section-title">Código de rastreio</div>
-        <div class="kd-track-code" onclick="navigator.clipboard.writeText('${o.order_token}').then(()=>this.textContent='✅ Copiado!').catch(()=>{})" title="Clique para copiar">
-          🔑 ${o.order_token}
-        </div>
-        <div style="margin-top:8px;">
-          <a href="${trackUrl}" target="_blank" style="color:#5ca8e0; font-size:0.78rem; text-decoration:none;">
-            🔍 Abrir página de rastreio do cliente →
-          </a>
-        </div>
-      </div>` : ''}
-
-      ${prevOrders.length ? `
-      <div class="kd-section">
-        <div class="kd-section-title">Pedidos anteriores (${o.phone})</div>
-        ${prevOrders.slice(0, 5).map(p => `
-          <div class="kd-prev-order" onclick="openOrderDetail(${p.id})" style="cursor:pointer;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span class="kd-prev-date">#${p.id} — ${new Date(p.created_at + 'Z').toLocaleDateString('pt-BR')}</span>
-              <span class="kd-prev-total">R$ ${parseFloat(p.total).toFixed(2)}</span>
-            </div>
-            <span class="kd-status-badge" style="background:${(STATUS_COLORS[p.status]||'#888')}22;color:${STATUS_COLORS[p.status]||'#888'};border:1px solid ${(STATUS_COLORS[p.status]||'#888')}44;margin-top:4px;font-size:0.65rem;">
-              ${STATUS_LABELS[p.status] || p.status}
-            </span>
-          </div>
-        `).join('')}
-      </div>` : ''}
-
-      <div class="kd-section">
-        <div class="kd-section-title">Confirmação WhatsApp</div>
-        <div class="${isWaConfirmed(o.id) ? 'wa-check-row confirmed' : 'wa-check-row'}" onclick="toggleWaConfirmed(${o.id}); this.className=isWaConfirmed(${o.id})?'wa-check-row confirmed':'wa-check-row'">
-          <div class="wa-check-box">${isWaConfirmed(o.id) ? '✓' : ''}</div>
-          <div class="wa-check-label">${isWaConfirmed(o.id) ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
-        </div>
-      </div>
-
       <div class="kd-section">
         <div class="kd-section-title">Datas</div>
-        <div class="kd-row"><span class="kd-label">Recebido</span><span class="kd-value">${new Date(o.created_at + 'Z').toLocaleString('pt-BR')}</span></div>
-        <div class="kd-row"><span class="kd-label">Atualizado</span><span class="kd-value">${new Date(o.updated_at + 'Z').toLocaleString('pt-BR')}</span></div>
+        <div class="kd-row"><span class="kd-label">Recebido</span><span class="kd-value">${new Date(order.created_at + 'Z').toLocaleString('pt-BR')}</span></div>
+        <div class="kd-row"><span class="kd-label">Atualizado</span><span class="kd-value">${new Date(order.updated_at + 'Z').toLocaleString('pt-BR')}</span></div>
       </div>
     `;
-
     document.getElementById('kb-detail-overlay').classList.add('open');
     document.getElementById('kb-detail-drawer').classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    if (order.delivery_batch_id) {
+      try {
+        const res = await apiFetch(`${API}/api/delivery-batches/${order.delivery_batch_id}`);
+        if (!res.ok) return;
+        const batch = await res.json();
+        const batchUrl = publicBatchUrl(batch.publicToken);
+        document.getElementById('kd-batch-section').innerHTML = `
+          <div class="kd-section-title">Lote de entrega</div>
+          <div class="kd-row"><span class="kd-label">Lote</span><span class="kd-value">Lote ${esc(batch.batchCode)}</span></div>
+          <div class="kd-row"><span class="kd-label">Status</span><span class="kd-value">${esc(batchStatusLabel(batch.batchStatus))}</span></div>
+          <div class="kd-row"><span class="kd-label">Origem</span><span class="kd-value">${esc(batch.originAddress)}</span></div>
+          <div class="kd-row"><span class="kd-label">Placa</span><span class="kd-value">${esc(batch.driver?.vehiclePlate || '—')}</span></div>
+          <div class="kd-row"><span class="kd-label">Motoboy</span><span class="kd-value">${esc(batch.driver?.name || 'Aguardando aceite')}</span></div>
+          <div style="margin-top:10px;"><a href="${batchUrl}" target="_blank" rel="noopener" class="batch-link">Abrir pagina publica do lote</a></div>
+          <div id="kd-batch-qr"></div>
+        `;
+        renderQr('kd-batch-qr', batchUrl);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 
   function closeOrderDetail() {
@@ -628,19 +994,18 @@
     document.getElementById('kb-detail-drawer').classList.remove('open');
     document.body.style.overflow = '';
   }
-</script>
 
-<!-- Drawer de detalhes do pedido -->
-<div id="kb-detail-overlay" onclick="closeOrderDetail()"></div>
-<aside id="kb-detail-drawer">
-  <div class="kd-header">
-    <div class="kd-header-left">
-      <span class="kd-order-id" id="kd-order-id"></span>
-      <span class="kd-customer-name" id="kd-customer-name"></span>
-    </div>
-    <button class="kd-close" onclick="closeOrderDetail()">✕</button>
-  </div>
-  <div class="kd-body" id="kd-body"></div>
-</aside>
+  if (!sessionStorage.getItem('adminToken') || localStorage.getItem('adminLogged') !== 'true') {
+    window.location.href = 'login.html';
+  } else if (localStorage.getItem('lc_kanban_enabled') !== 'true') {
+    alert('O Kanban está desabilitado. Ative-o em Configurações no painel administrativo.');
+    window.location.href = 'dashboard.html';
+  } else {
+    Promise.all([loadDeliverySettings(), loadOrders()]).finally(() => {
+      connectSSE();
+      setInterval(() => render(), 60000);
+    });
+  }
+</script>
 </body>
 </html>
