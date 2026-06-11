@@ -271,8 +271,8 @@
 }
 
 @media (max-width: 360px) {
-  .logo img {
-    height: 2.3rem;
+  .logo .hero-mascot {
+    max-width: min(118px, 28vw);
   }
 
   .card {

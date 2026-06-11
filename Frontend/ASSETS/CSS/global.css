@@ -89,9 +89,19 @@ header {
 
 .logo img {
   display: block;
-  height: 2.65rem;
-  width: auto;
+  width: 100%;
+  max-width: min(138px, 20vw);
+  height: auto;
+  margin: 0;
   object-fit: contain;
+}
+
+.logo .hero-mascot {
+  display: block;
+  width: auto;
+  max-width: min(138px, 20vw);
+  height: auto;
+  margin: 0;
 }
 
 .admin-btn {
