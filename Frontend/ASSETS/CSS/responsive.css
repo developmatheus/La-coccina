@@ -84,6 +84,9 @@
     padding: 0 3%;
     gap: 1.25rem;
   }
+  body>header>div.logo {
+    max-width: min(110px, 95vw);
+  }
 
   .menu-section {
     padding: 1.25rem 2.5%;
