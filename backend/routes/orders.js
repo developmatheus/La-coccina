@@ -85,6 +85,11 @@ async function hasTable(tableName) {
 }
 
 async function buildKanbanOrdersQuery() {
+  const ordersTableExists = await hasTable('orders');
+  if (!ordersTableExists) {
+    return null;
+  }
+
   const orderColumns = await getTableColumns('orders');
   const deliveryTableExists = await hasTable('delivery_batches');
   const deliveryColumns = deliveryTableExists ? await getTableColumns('delivery_batches') : new Set();
@@ -217,6 +222,11 @@ router.get('/track/:token', async (req, res) => {
 router.get('/', requireAdmin, async (_req, res) => {
   try {
     const query = await buildKanbanOrdersQuery();
+    if (!query) {
+      console.warn('Kanban sem tabela orders disponível; retornando lista vazia.');
+      return res.json([]);
+    }
+
     const [rows] = await db.execute(query);
     const normalizedRows = rows
       .map((order) => {
@@ -232,6 +242,9 @@ router.get('/', requireAdmin, async (_req, res) => {
     res.json(normalizedRows);
   } catch (err) {
     console.error('Erro ao buscar pedidos do kanban:', err.message);
+    if (err.stack) {
+      console.error(err.stack);
+    }
     res.status(500).json({ error: 'Erro ao buscar pedidos' });
   }
 });

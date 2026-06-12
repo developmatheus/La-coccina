@@ -88,7 +88,7 @@
     #acc-catalog-body tr.dragging { opacity: 0.3; }
     #acc-catalog-body tr.drag-over { outline: 2px solid #ffcc00; outline-offset: -2px; border-radius: 4px; }
 
-    /* Tabela principal */
+    /* Blocos principais */
     .card-admin { background: #1a1a1a; padding: 22px; border-radius: 16px; }
     .card-admin + .card-admin { margin-top: 24px; }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -96,6 +96,350 @@
     th, td { padding: 12px 14px; border-bottom: 1px solid #2a2a2a; text-align: left; font-size: 0.9rem; }
     th { background: #222; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #888; }
     td:nth-child(2), td:nth-child(3) { white-space: normal; max-width: 200px; }
+    .products-card { padding: 0; overflow: hidden; }
+    .products-layout { padding: 22px; }
+    .products-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .products-toolbar h2 { margin: 0 0 4px; font-size: 1.05rem; color: #fff; }
+    .products-toolbar p { margin: 0; color: #777; font-size: 0.85rem; }
+    .products-toolbar-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .products-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #111;
+      border: 1px solid #252525;
+      color: #bbb;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .product-view-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 999px;
+      background: #111;
+      border: 1px solid #252525;
+      flex-wrap: wrap;
+    }
+    .product-view-btn {
+      width: auto;
+      margin: 0;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: transparent;
+      color: #8f8f8f;
+      border: 1px solid transparent;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .product-view-btn:hover {
+      background: #1a1a1a;
+      color: #ddd;
+    }
+    .product-view-btn.active {
+      background: #ffcc00;
+      color: #111;
+      border-color: #ffcc00;
+    }
+    .product-view-hint {
+      width: 100%;
+      margin: 2px 0 0;
+      color: #6f6f6f;
+      font-size: 0.77rem;
+    }
+    .product-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .product-section {
+      border: 1px solid #262626;
+      border-radius: 16px;
+      background: #121212;
+      overflow: hidden;
+    }
+    .product-section.collapsed .product-section-content { display: none; }
+    .product-section-toggle {
+      width: 100%;
+      margin: 0;
+      padding: 18px 20px;
+      border: none;
+      background: transparent;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+    }
+    .product-section-toggle:hover { background: #171717; }
+    .product-section-main {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .product-section-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .product-section-title {
+      margin: 0;
+      font-size: 1rem;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .product-section-subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 0.8rem;
+    }
+    .product-section-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .product-mini-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      background: #1a1a1a;
+      color: #999;
+    }
+    .product-mini-pill.active {
+      background: #132417;
+      border-color: #21462b;
+      color: #6cd28c;
+    }
+    .product-mini-pill.inactive {
+      background: #261414;
+      border-color: #442323;
+      color: #ef8d8d;
+    }
+    .product-section-chevron {
+      font-size: 1.1rem;
+      color: #888;
+      transition: transform 0.18s ease;
+      flex-shrink: 0;
+    }
+    .product-section.collapsed .product-section-chevron { transform: rotate(-90deg); }
+    .product-section-content {
+      padding: 0 18px 18px;
+      border-top: 1px solid #202020;
+    }
+    .product-section-content.compact {
+      padding-top: 16px;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .product-card {
+      display: flex;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #252525;
+      background: #191919;
+      min-width: 0;
+    }
+    .product-card.is-inactive { opacity: 0.72; }
+    .product-card-image {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #222;
+    }
+    .product-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+    .product-card-top {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .product-card-info { min-width: 0; }
+    .product-card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .product-card-title {
+      margin: 0;
+      font-size: 0.96rem;
+      color: #fff;
+      word-break: break-word;
+    }
+    .product-card-details {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #8b8b8b;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .product-card-price {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffcc00;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .product-card-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .product-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .product-badge.active {
+      background: #132417;
+      border-color: #21462b;
+      color: #6cd28c;
+    }
+    .product-badge.inactive {
+      background: #261414;
+      border-color: #442323;
+      color: #ef8d8d;
+    }
+    .product-badge.daily {
+      background: #302609;
+      border-color: #5d4810;
+      color: #ffd75c;
+    }
+    .product-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .product-card-actions button {
+      width: auto;
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .product-list-row {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1.7fr) auto minmax(170px, 0.9fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #252525;
+      background: #181818;
+    }
+    .product-list-row.is-inactive { opacity: 0.72; }
+    .product-list-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #222;
+    }
+    .product-list-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .product-list-title {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #fff;
+      word-break: break-word;
+    }
+    .product-list-text {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #838383;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .product-list-price {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffcc00;
+      white-space: nowrap;
+    }
+    .product-list-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .product-list-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .product-list-actions button {
+      width: auto;
+      margin: 0;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+    }
+    .product-empty {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 12px;
+      background: #161616;
+      color: #6f6f6f;
+      font-size: 0.88rem;
+      border: 1px dashed #2d2d2d;
+      text-align: center;
+    }
 
     /* Inputs e selects globais */
     input, select { width: 100%; padding: 11px 14px; margin: 6px 0; border-radius: 8px; background: #2a2a2a; color: white; border: 1px solid #3a3a3a; font-size: 0.9rem; }
@@ -229,6 +573,34 @@
     }
     #btn-close-acc:hover { color: #fff; background: #333; }
     .btn-accompaniments { background: #8e44ad; color: white; padding: 8px 14px; border: none; border-radius: 6px; margin-right: 6px; cursor: pointer; font-weight: bold; }
+    @media (max-width: 720px) {
+      .admin-panel { padding: 16px; }
+      .products-layout { padding: 18px; }
+      .product-view-switch { width: 100%; border-radius: 16px; }
+      .product-view-btn { flex: 1 1 calc(50% - 8px); text-align: center; }
+      .product-section-toggle { padding: 16px; align-items: flex-start; }
+      .product-section-summary { justify-content: flex-start; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-card { flex-direction: column; }
+      .product-card-image { width: 100%; height: 180px; }
+      .product-card-top { flex-direction: column; }
+      .product-card-price { white-space: normal; }
+      .product-card-actions button { flex: 1 1 calc(50% - 8px); }
+      .product-list-row {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+      }
+      .product-list-thumb {
+        width: 100%;
+        height: 160px;
+      }
+      .product-list-actions {
+        justify-content: flex-start;
+      }
+      .product-list-actions button {
+        flex: 1 1 calc(50% - 6px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -248,20 +620,25 @@
       </div>
     </div>
 
-    <div class="card-admin">
-      <div class="table-scroll">
-        <table id="products-table">
-          <thead>
-            <tr>
-              <th style="width:80px">Foto</th>
-              <th>Prato</th>
-              <th>Categoria</th>
-              <th>Preço</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    <div class="card-admin products-card">
+      <div class="products-layout">
+        <div class="products-toolbar">
+          <div>
+            <h2>Cardápio do Admin</h2>
+            <p>Escolha a forma de visualizar o catálogo conforme a operação: mais visual ou mais compacta.</p>
+          </div>
+          <div class="products-toolbar-meta">
+            <span class="products-pill" id="products-total-badge">Carregando produtos...</span>
+            <div class="product-view-switch" role="group" aria-label="Opções de visualização do catálogo">
+              <button type="button" class="product-view-btn" data-view-mode="sections" onclick="setProductViewMode('sections')">Sugestão 1: Visual</button>
+              <button type="button" class="product-view-btn" data-view-mode="compact" onclick="setProductViewMode('compact')">Sugestão 2: Compacta</button>
+              <p class="product-view-hint" id="product-view-hint">Carregando opções de visualização...</p>
+            </div>
+          </div>
+        </div>
+        <div id="product-sections" class="product-sections">
+          <div class="product-empty">Carregando produtos...</div>
+        </div>
       </div>
     </div>
 
@@ -486,9 +863,285 @@
     const API_BASE = LaCoccinaSecurity.API_BASE;
     const esc = LaCoccinaSecurity.escapeHtml;
     const imgUrl = LaCoccinaSecurity.uploadUrl;
+    const PRODUCT_SECTION_STORAGE_KEY = 'lc_admin_product_sections';
+    const PRODUCT_VIEW_MODE_KEY = 'lc_admin_product_view_mode';
+    const PRODUCT_CATEGORY_META = {
+      marmita: {
+        label: 'Refeições',
+        icon: '🍲',
+        description: 'Pratos principais e refeições do dia.',
+      },
+      bebida: {
+        label: 'Bebidas',
+        icon: '🥤',
+        description: 'Sucos, refrigerantes e demais bebidas.',
+      },
+      outros: {
+        label: 'Outros',
+        icon: '📦',
+        description: 'Itens fora das categorias principais.',
+      },
+    };
     let cropper = null;
     let croppedBlob = null;
     let editingProductId = null;
+    let productsCache = [];
+
+    function getProductCategoryMeta(category) {
+      return PRODUCT_CATEGORY_META[category] || PRODUCT_CATEGORY_META.outros;
+    }
+
+    function getProductSectionState() {
+      try {
+        return JSON.parse(localStorage.getItem(PRODUCT_SECTION_STORAGE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function isProductSectionExpanded(category) {
+      const state = getProductSectionState();
+      return state[category] !== false;
+    }
+
+    function setProductSectionExpanded(category, expanded) {
+      const state = getProductSectionState();
+      state[category] = expanded;
+      localStorage.setItem(PRODUCT_SECTION_STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function toggleProductSection(category) {
+      const nextExpanded = !isProductSectionExpanded(category);
+      setProductSectionExpanded(category, nextExpanded);
+      const section = document.querySelector(`.product-section[data-category="${category}"]`);
+      if (!section) return;
+      section.classList.toggle('collapsed', !nextExpanded);
+      const toggle = section.querySelector('.product-section-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', String(nextExpanded));
+    }
+
+    function getProductViewMode() {
+      const mode = localStorage.getItem(PRODUCT_VIEW_MODE_KEY);
+      return mode === 'compact' ? 'compact' : 'sections';
+    }
+
+    function syncProductViewModeUi() {
+      const mode = getProductViewMode();
+      document.querySelectorAll('.product-view-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.viewMode === mode);
+      });
+      const hint = document.getElementById('product-view-hint');
+      if (!hint) return;
+      hint.textContent = mode === 'compact'
+        ? 'Sugestão 2: visão compacta para comparar mais itens e agir rápido.'
+        : 'Sugestão 1: visão visual por categoria para organizar melhor comida e bebida.';
+    }
+
+    function setProductViewMode(mode) {
+      const nextMode = mode === 'compact' ? 'compact' : 'sections';
+      localStorage.setItem(PRODUCT_VIEW_MODE_KEY, nextMode);
+      syncProductViewModeUi();
+      renderProductSections(productsCache);
+    }
+
+    function formatCurrency(value) {
+      const amount = Number.parseFloat(value);
+      return `R$ ${Number.isFinite(amount) ? amount.toFixed(2) : '0.00'}`;
+    }
+
+    function getProductDetailText(product) {
+      const details = product.details || {};
+      if (product.category === 'marmita') {
+        return [details.protein, details.sides].filter(Boolean).join(' · ');
+      }
+      if (product.category === 'bebida') {
+        return [details.volume, details.serve_type].filter(Boolean).join(' · ');
+      }
+      return Object.values(details).filter(Boolean).join(' · ');
+    }
+
+    function getSortedProducts(items) {
+      return items
+        .slice()
+        .sort((a, b) => {
+          const activeDiff = Number(b.active) - Number(a.active);
+          if (activeDiff !== 0) return activeDiff;
+          return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+        });
+    }
+
+    function getGroupedProducts(products) {
+      const categoryOrder = ['marmita', 'bebida'];
+      const grouped = { marmita: [], bebida: [], outros: [] };
+      products.forEach((product) => {
+        const category = categoryOrder.includes(product.category) ? product.category : 'outros';
+        grouped[category].push(product);
+      });
+      return grouped;
+    }
+
+    function buildProductActionButtons(product) {
+      const isActive = Number(product.active) === 1;
+      const isDaily = Number(product.isDailySpecial) === 1;
+      return `
+        <button onclick="toggleActive(${product.id})" class="${isActive ? 'btn-toggle-on' : 'btn-toggle-off'}">
+          ${isActive ? 'Desligar' : 'Ligar'}
+        </button>
+        ${product.category === 'marmita' ? `
+          <button onclick="toggleDailySpecial(${product.id}, ${isDaily})" class="${isDaily ? 'btn-daily-on' : 'btn-daily-off'}">
+            ${isDaily ? 'Remover do dia' : 'Marcar no dia'}
+          </button>
+        ` : ''}
+        ${product.category === 'marmita' ? `
+          <button class="btn-accompaniments" onclick="openAccModal(${product.id}, '${esc(product.name || '')}')">Acomp.</button>
+        ` : ''}
+        <button
+          class="btn-edit"
+          data-id="${product.id}"
+          data-name="${esc(product.name || '')}"
+          data-price="${product.price}"
+          data-desc="${esc(product.desc || '')}"
+          data-category="${esc(product.category || '')}"
+          data-details="${esc(JSON.stringify(product.details || {}))}"
+          data-image="${esc(product.image || '')}"
+          onclick="openDrawerForEdit(this)"
+        >Editar</button>
+        <button onclick="deleteProduct(${product.id})" class="btn-del">Excluir</button>
+      `;
+    }
+
+    function buildProductCard(product) {
+      const detailText = getProductDetailText(product);
+      const isActive = Number(product.active) === 1;
+      const isDaily = Number(product.isDailySpecial) === 1;
+
+      return `
+        <article class="product-card ${isActive ? '' : 'is-inactive'}">
+          <img
+            class="product-card-image"
+            src="${imgUrl(product.image)}"
+            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22180%22 height=%22180%22%3E%3Crect width=%22180%22 height=%22180%22 fill=%22%23262626%22/%3E%3Ctext x=%2290%22 y=%2296%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%23888%22%3ESem foto%3C/text%3E%3C/svg%3E'"
+            alt=""
+          >
+          <div class="product-card-body">
+            <div class="product-card-top">
+              <div class="product-card-info">
+                <div class="product-card-title-row">
+                  <h3 class="product-card-title">${esc(product.name || 'Sem nome')}</h3>
+                  ${isDaily ? '<span class="product-badge daily">Prato do dia</span>' : ''}
+                </div>
+                <p class="product-card-details">${detailText ? esc(detailText) : 'Sem detalhes adicionais cadastrados.'}</p>
+              </div>
+              <div class="product-card-price">${formatCurrency(product.price)}</div>
+            </div>
+            <div class="product-card-meta">
+              <span class="product-badge ${isActive ? 'active' : 'inactive'}">
+                ${isActive ? '● Ativo' : '○ Inativo'}
+              </span>
+            </div>
+            <div class="product-card-actions">
+              ${buildProductActionButtons(product)}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function buildProductListRow(product) {
+      const detailText = getProductDetailText(product);
+      const isActive = Number(product.active) === 1;
+      const isDaily = Number(product.isDailySpecial) === 1;
+      return `
+        <article class="product-list-row ${isActive ? '' : 'is-inactive'}">
+          <img
+            class="product-list-thumb"
+            src="${imgUrl(product.image)}"
+            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22%3E%3Crect width=%22160%22 height=%22160%22 fill=%22%23262626%22/%3E%3Ctext x=%2280%22 y=%2286%22 text-anchor=%22middle%22 font-size=%2213%22 fill=%22%23888%22%3ESem foto%3C/text%3E%3C/svg%3E'"
+            alt=""
+          >
+          <div class="product-list-info">
+            <h3 class="product-list-title">${esc(product.name || 'Sem nome')}</h3>
+            <p class="product-list-text">${detailText ? esc(detailText) : 'Sem detalhes adicionais cadastrados.'}</p>
+          </div>
+          <div class="product-list-price">${formatCurrency(product.price)}</div>
+          <div class="product-list-meta">
+            <span class="product-badge ${isActive ? 'active' : 'inactive'}">${isActive ? '● Ativo' : '○ Inativo'}</span>
+            ${isDaily ? '<span class="product-badge daily">Prato do dia</span>' : ''}
+          </div>
+          <div class="product-list-actions">
+            ${buildProductActionButtons(product)}
+          </div>
+        </article>
+      `;
+    }
+
+    function buildProductSection(category, items, contentHtml, contentClass = '') {
+      const meta = getProductCategoryMeta(category);
+      const activeItems = items.filter((item) => Number(item.active) === 1).length;
+      const expanded = isProductSectionExpanded(category);
+      return `
+        <section class="product-section ${expanded ? '' : 'collapsed'}" data-category="${category}">
+          <button
+            type="button"
+            class="product-section-toggle"
+            aria-expanded="${expanded}"
+            onclick="toggleProductSection('${category}')"
+          >
+            <span class="product-section-main">
+              <span class="product-section-title-row">
+                <span class="product-section-title">${meta.icon} ${meta.label}</span>
+                <span class="product-mini-pill">${items.length} itens</span>
+              </span>
+              <span class="product-section-subtitle">${meta.description}</span>
+            </span>
+            <span class="product-section-summary">
+              <span class="product-mini-pill active">${activeItems} ativos</span>
+              <span class="product-mini-pill inactive">${items.length - activeItems} inativos</span>
+              <span class="product-section-chevron">⌃</span>
+            </span>
+          </button>
+          <div class="product-section-content ${contentClass}">
+            ${contentHtml}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderProductSections(products) {
+      const container = document.getElementById('product-sections');
+      const totalBadge = document.getElementById('products-total-badge');
+      const mode = getProductViewMode();
+      const grouped = getGroupedProducts(products);
+      syncProductViewModeUi();
+
+      const activeCount = products.filter((product) => Number(product.active) === 1).length;
+      totalBadge.textContent = `${products.length} itens · ${activeCount} ativos`;
+
+      const sectionsHtml = ['marmita', 'bebida', 'outros']
+        .filter((category) => grouped[category].length > 0)
+        .map((category) => {
+          const items = getSortedProducts(grouped[category]);
+          if (!items.length) {
+            return '';
+          }
+          if (mode === 'compact') {
+            return buildProductSection(
+              category,
+              items,
+              `<div class="product-list">${items.map(buildProductListRow).join('')}</div>`,
+              'compact'
+            );
+          }
+          return buildProductSection(
+            category,
+            items,
+            `<div class="product-grid">${items.map(buildProductCard).join('')}</div>`
+          );
+        })
+        .join('');
+
+      container.innerHTML = sectionsHtml || '<div class="product-empty">Nenhum produto cadastrado ainda.</div>';
+    }
 
     function toggleDetailFields(selectId, containerId) {
       const cat = document.getElementById(selectId).value;
@@ -665,48 +1318,8 @@
           return;
         }
         const products = await res.json();
-        const tbody = document.querySelector('#products-table tbody');
-        tbody.innerHTML = '';
-        products.forEach(p => {
-          const tr = document.createElement('tr');
-          const d = p.details || {};
-          const detailText = p.category === 'marmita'
-            ? [d.protein, d.sides].filter(Boolean).join(' · ')
-            : [d.volume, d.serve_type].filter(Boolean).join(' · ');
-          tr.innerHTML = `
-            <td><img src="${imgUrl(p.image)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2270%22 height=%2270%22%3E%3Crect width=%2270%22 height=%2270%22 fill=%22%23333%22/%3E%3Ctext x=%2235%22 y=%2238%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%23888%22%3ESem foto%3C/text%3E%3C/svg%3E'" width="70" height="70" alt=""></td>
-            <td>
-              ${esc(p.name)}
-              ${detailText ? `<br><small style="color:#888">${esc(detailText)}</small>` : ''}
-            </td>
-            <td>${esc(p.category || '-')}</td>
-            <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
-            <td>
-              <button onclick="toggleActive(${p.id})" style="background:${p.active == 1 ? '#27ae60' : '#e74c3c'}; color:white; padding:8px 14px; border:none; border-radius:6px; margin-right:6px; cursor:pointer;">
-                ${p.active == 1 ? '✅ Ativo' : '❌ Inativo'}
-              </button>
-              ${p.category === 'marmita' ? `
-                <button onclick="toggleDailySpecial(${p.id}, ${p.isDailySpecial == 1})" style="background:#ffcc00; color:#000; padding:8px 14px; border:none; border-radius:6px; margin-right:6px; cursor:pointer;">
-                  ${p.isDailySpecial == 1 ? '🌟 Remover do Dia' : '🌟 Prato do Dia'}
-                </button>
-              ` : ''}
-              ${p.category === 'marmita' ? `
-                <button class="btn-accompaniments" onclick="openAccModal(${p.id}, '${esc(p.name)}')">🥗 Acomp.</button>
-              ` : ''}
-              <button class="btn-edit"
-                data-id="${p.id}"
-                data-name="${esc(p.name)}"
-                data-price="${p.price}"
-                data-desc="${esc(p.desc || '')}"
-                data-category="${esc(p.category)}"
-                data-details="${esc(JSON.stringify(p.details || {}))}"
-                data-image="${esc(p.image || '')}"
-                onclick="openDrawerForEdit(this)">✏️ Editar</button>
-              <button onclick="deleteProduct(${p.id})" style="background:#e74c3c; color:white; padding:8px 14px; border:none; border-radius:6px; cursor:pointer;">Excluir</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+        productsCache = Array.isArray(products) ? products : [];
+        renderProductSections(productsCache);
       } catch (e) { console.error(e); }
     }
 
@@ -1243,6 +1856,7 @@
     }
 
     window.onload = () => {
+      syncProductViewModeUi();
       loadProducts();
       loadRestaurantStatus();
       loadConfig();
