@@ -46,6 +46,27 @@ function normalizeStatusInput(status) {
   return STATUS_ALIASES[key] || key;
 }
 
+function parseOrderItems(rawItems) {
+  if (Array.isArray(rawItems)) return rawItems;
+  if (rawItems && typeof rawItems === 'object') {
+    return Array.isArray(rawItems.items) ? rawItems.items : [];
+  }
+  if (typeof rawItems !== 'string') return [];
+
+  const trimmed = rawItems.trim();
+  if (!trimmed) return [];
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.items)) return parsed.items;
+  } catch {
+    // Mantem o kanban operacional mesmo com pedidos legados malformados.
+  }
+
+  return [];
+}
+
 function compareOrdersForKanban(a, b) {
   const statusDiff = (STATUS_ORDER[a.status] || 999) - (STATUS_ORDER[b.status] || 999);
   if (statusDiff) return statusDiff;
@@ -147,7 +168,7 @@ router.get('/', requireAdmin, async (_req, res) => {
         return {
           ...order,
           status: normalizedStatus,
-          items: JSON.parse(order.items || '[]'),
+          items: parseOrderItems(order.items),
         };
       })
       .sort(compareOrdersForKanban);
