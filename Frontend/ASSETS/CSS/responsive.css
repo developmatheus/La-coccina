@@ -7,10 +7,28 @@
 @media (min-width: 1025px) {
   .hero-layout {
     align-items: center;
+    gap: clamp(2rem, 4vw, 4rem);
+    padding: 0 4%;
   }
 
   .hero-left {
+    flex: 0 1 470px;
+    max-width: 470px;
     padding-top: 0.5rem;
+  }
+
+  .hero-mascot {
+    max-width: min(380px, 24vw);
+  }
+
+  .hero-daily {
+    flex: 0 1 620px;
+    max-width: 620px;
+  }
+
+  .daily-special-box {
+    max-width: 620px;
+    margin: 0 auto;
   }
 }
 
@@ -74,10 +92,16 @@
   }
 
   .cart-float {
-    right: 5%;
-    bottom: 2.85rem;
-    width: 3.75rem;
-    height: 3.75rem;
+    display: none;
+  }
+
+  body {
+    padding-bottom: 6.75rem;
+  }
+
+  #track-btn {
+    bottom: 6.6rem !important;
+    right: 1rem !important;
   }
 
   .products-slider {
@@ -210,6 +234,10 @@
 
   .footer-col {
     text-align: center;
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 }
 
