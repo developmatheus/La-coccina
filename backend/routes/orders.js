@@ -12,6 +12,24 @@ const { sanitizeOrderInput } = require('../utils/sanitize');
 const { parsePositiveId }    = require('../utils/sanitize');
 
 const VALID_STATUSES = ['novo', 'em_producao', 'aguardando_envio', 'preparando_rota', 'a_caminho', 'entregue', 'cancelado'];
+const STATUS_ALIASES = {
+  aguardando_entrega: 'aguardando_envio',
+  separando_rota: 'preparando_rota',
+  preparacao_rota: 'preparando_rota',
+  preparo_rota: 'preparando_rota',
+  em_rota: 'a_caminho',
+  em_entrega: 'a_caminho',
+  saiu_para_entrega: 'a_caminho',
+};
+const STATUS_ORDER = {
+  novo: 1,
+  em_producao: 2,
+  aguardando_envio: 3,
+  preparando_rota: 4,
+  a_caminho: 5,
+  entregue: 6,
+  cancelado: 7,
+};
 
 const STATUS_LABEL = {
   novo:             'Novo Pedido',
@@ -22,6 +40,29 @@ const STATUS_LABEL = {
   entregue:         'Entregue',
   cancelado:        'Cancelado',
 };
+
+function normalizeStatusInput(status) {
+  const key = String(status || '').trim();
+  return STATUS_ALIASES[key] || key;
+}
+
+function compareOrdersForKanban(a, b) {
+  const statusDiff = (STATUS_ORDER[a.status] || 999) - (STATUS_ORDER[b.status] || 999);
+  if (statusDiff) return statusDiff;
+
+  if (a.status === 'a_caminho') {
+    const batchDiff = String(a.delivery_batch_code || '').localeCompare(String(b.delivery_batch_code || ''), 'pt-BR', { numeric: true });
+    if (batchDiff) return batchDiff;
+
+    const seqDiff = (a.delivery_sequence ?? 999999) - (b.delivery_sequence ?? 999999);
+    if (seqDiff) return seqDiff;
+  } else {
+    const kanbanDiff = (a.kanban_order ?? 999999) - (b.kanban_order ?? 999999);
+    if (kanbanDiff) return kanbanDiff;
+  }
+
+  return new Date(`${a.created_at}Z`).getTime() - new Date(`${b.created_at}Z`).getTime();
+}
 
 function generateToken(id) {
   return `${id}-${crypto.randomBytes(5).toString('hex')}`;
@@ -98,26 +139,20 @@ router.get('/', requireAdmin, async (_req, res) => {
          FROM orders o
          LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
         WHERE o.status NOT IN ('entregue', 'cancelado')
-        ORDER BY
-          CASE o.status
-            WHEN 'novo' THEN 1
-            WHEN 'em_producao' THEN 2
-            WHEN 'aguardando_envio' THEN 3
-            WHEN 'preparando_rota' THEN 4
-            WHEN 'a_caminho' THEN 5
-            ELSE 99
-          END ASC,
-          CASE
-            WHEN o.status = 'a_caminho' THEN COALESCE(b.batch_code, '')
-            ELSE ''
-          END ASC,
-          CASE
-            WHEN o.status = 'a_caminho' THEN COALESCE(o.delivery_sequence, 999999)
-            ELSE COALESCE(o.kanban_order, 999999)
-          END ASC,
-          o.created_at ASC`
+        ORDER BY o.created_at ASC`
     );
-    res.json(rows.map(o => ({ ...o, items: JSON.parse(o.items || '[]') })));
+    const normalizedRows = rows
+      .map((order) => {
+        const normalizedStatus = normalizeStatusInput(order.status);
+        return {
+          ...order,
+          status: normalizedStatus,
+          items: JSON.parse(order.items || '[]'),
+        };
+      })
+      .sort(compareOrdersForKanban);
+
+    res.json(normalizedRows);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar pedidos' });
   }
@@ -142,7 +177,7 @@ router.get('/history', requireAdmin, async (_req, res) => {
 // ---------------------------------------------------------------------------
 router.put('/:id/status', requireAdmin, async (req, res) => {
   const id     = parsePositiveId(req.params.id);
-  const status = String(req.body.status || '').trim();
+  const status = normalizeStatusInput(req.body.status);
 
   if (!id)                          return res.status(400).json({ error: 'ID inválido' });
   if (!VALID_STATUSES.includes(status)) return res.status(400).json({ error: 'Status inválido' });

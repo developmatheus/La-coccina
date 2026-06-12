@@ -308,6 +308,16 @@
     { key: 'preparando_rota', label: 'Preparando Rota', nextLabel: '', nextKey: '' },
     { key: 'a_caminho', label: 'A Caminho', nextLabel: 'Marcar Entregue', nextKey: 'entregue' },
   ];
+  const COLUMN_ORDER = COLUMNS.map((col) => col.key);
+  const STATUS_ALIASES = {
+    aguardando_entrega: 'aguardando_envio',
+    separando_rota: 'preparando_rota',
+    preparacao_rota: 'preparando_rota',
+    preparo_rota: 'preparando_rota',
+    em_rota: 'a_caminho',
+    em_entrega: 'a_caminho',
+    saiu_para_entrega: 'a_caminho',
+  };
 
   let orders = [];
   let deliverySettings = { restaurantOriginAddress: '', googleMapsApiKeyConfigured: false, googleMapsApiKey: '' };
@@ -362,6 +372,53 @@
     return new URL(`/delivery-batch.html?token=${token}`, window.location.origin).href;
   }
 
+  function normalizeStatusKey(status) {
+    const key = String(status || '').trim();
+    return STATUS_ALIASES[key] || key;
+  }
+
+  function columnIndex(status) {
+    return COLUMN_ORDER.indexOf(normalizeStatusKey(status));
+  }
+
+  function compareOrders(a, b) {
+    const idxDiff = columnIndex(a.status) - columnIndex(b.status);
+    if (idxDiff) return idxDiff;
+
+    if (normalizeStatusKey(a.status) === 'a_caminho') {
+      const batchDiff = String(a.delivery_batch_code || '').localeCompare(String(b.delivery_batch_code || ''), 'pt-BR', { numeric: true });
+      if (batchDiff) return batchDiff;
+
+      const seqDiff = (a.delivery_sequence ?? 999999) - (b.delivery_sequence ?? 999999);
+      if (seqDiff) return seqDiff;
+    } else {
+      const kanbanDiff = (a.kanban_order ?? 999999) - (b.kanban_order ?? 999999);
+      if (kanbanDiff) return kanbanDiff;
+    }
+
+    return new Date(`${a.created_at}Z`).getTime() - new Date(`${b.created_at}Z`).getTime();
+  }
+
+  function canMoveToStatus(order, targetStatus) {
+    const current = normalizeStatusKey(order?.status);
+    const target = normalizeStatusKey(targetStatus);
+    if (!current || !target) return false;
+    if (current === target) return true;
+    if (['cancelado', 'entregue'].includes(target)) return true;
+    if (current === 'preparando_rota') return false;
+    const currentIndex = columnIndex(current);
+    return currentIndex !== -1 && COLUMN_ORDER[currentIndex + 1] === target;
+  }
+
+  function transitionErrorMessage(order, targetStatus) {
+    const current = normalizeStatusKey(order?.status);
+    const target = normalizeStatusKey(targetStatus);
+    if (current === 'preparando_rota' && target === 'a_caminho') {
+      return 'Pedidos em "Preparando Rota" so podem ir para "A Caminho" ao confirmar a saida do lote.';
+    }
+    return 'Arraste ou avance apenas para a proxima etapa do fluxo: Novo Pedido -> Em Producao -> Aguardando Envio -> Preparando Rota -> A Caminho.';
+  }
+
   async function loadDeliverySettings() {
     try {
       const res = await apiFetch(`${API}/api/settings/admin`);
@@ -379,7 +436,10 @@
         if (res.status === 401) window.location.href = 'login.html';
         return;
       }
-      orders = await res.json();
+      const data = await res.json();
+      orders = data
+        .map((order) => ({ ...order, status: normalizeStatusKey(order.status) }))
+        .sort(compareOrders);
       render();
     } catch (e) {
       console.error('Erro ao carregar pedidos:', e);
@@ -477,7 +537,8 @@
     const waOk = isWaConfirmed(order.id);
     const waClass = waOk ? 'wa-confirmed' : 'wa-pending';
     const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
-    const canDrag = !(order.status === 'preparando_rota' && order.delivery_batch_id);
+    const normalizedStatus = normalizeStatusKey(order.status);
+    const canDrag = !(normalizedStatus === 'preparando_rota' && order.delivery_batch_id) && normalizedStatus !== 'a_caminho';
     const nextKey = col.key === 'preparando_rota' ? '' : col.nextKey;
     const nextLabel = col.key === 'preparando_rota' ? '' : col.nextLabel;
     const tags = [];
@@ -557,16 +618,32 @@
   }
 
   async function moveOrder(id, status) {
+    const normalizedStatus = normalizeStatusKey(status);
+    const order = orders.find((item) => item.id === id);
     const labels = { entregue: 'Marcar como entregue?', cancelado: 'Cancelar este pedido?' };
-    if (labels[status] && !confirm(labels[status])) return;
+
+    if (order && !canMoveToStatus(order, normalizedStatus)) {
+      alert(transitionErrorMessage(order, normalizedStatus));
+      return;
+    }
+
+    if (labels[normalizedStatus] && !confirm(labels[normalizedStatus])) return;
 
     try {
       const res = await apiFetch(`${API}/api/orders/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: normalizedStatus }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        let errorMessage = 'Erro ao atualizar status do pedido.';
+        try {
+          const data = await res.json();
+          errorMessage = data.error || errorMessage;
+        } catch {}
+        alert(errorMessage);
+        return;
+      }
       await loadOrders();
     } catch (e) {
       console.error('Erro ao mover pedido:', e);
@@ -602,11 +679,17 @@
       dragSrcId = dragSrcCol = null;
       return;
     }
-    if (dragSrcCol !== targetCol) {
-      await moveOrder(dragSrcId, targetCol);
+    const normalizedTargetCol = normalizeStatusKey(targetCol);
+    if (dragSrcCol !== normalizedTargetCol) {
+      if (!canMoveToStatus(movedOrder, normalizedTargetCol)) {
+        alert(transitionErrorMessage(movedOrder, normalizedTargetCol));
+        dragSrcId = dragSrcCol = null;
+        return;
+      }
+      await moveOrder(dragSrcId, normalizedTargetCol);
     } else {
       const colOrders = orders
-        .filter((order) => order.status === targetCol && !(order.delivery_batch_id && order.status === 'preparando_rota'))
+        .filter((order) => order.status === normalizedTargetCol && !(order.delivery_batch_id && order.status === 'preparando_rota'))
         .sort((a, b) => (a.kanban_order || 0) - (b.kanban_order || 0));
       const fromIdx = colOrders.findIndex((order) => order.id === dragSrcId);
       if (fromIdx === -1) return;

@@ -92,25 +92,35 @@
 </head>
 <body class="cart-page">
 
-<header>
+<header class="cart-header">
   <div class="logo">La Coccina</div>
   <a href="/" class="btn-back">← Voltar à Loja</a>
 </header>
 
-<h1 class="section-title cart-page-title">🛒 Seu Carrinho</h1>
+<section class="cart-page-intro">
+  <p class="cart-page-kicker">Finalizar pedido</p>
+  <div class="cart-page-title-row">
+    <h1 class="section-title cart-page-title">🛒 Seu Carrinho</h1>
+    <span id="cart-count-label" class="cart-count-pill">0 itens</span>
+  </div>
+  <p class="cart-page-subtitle">Revise seus itens, informe a entrega e finalize pelo WhatsApp.</p>
+</section>
 
 <div class="cart-container">
-  <!-- PRODUTOS -->
-  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-main">
+    <!-- PRODUTOS -->
+    <div class="cart-items" id="cart-items"></div>
 
-  <!-- UPSELL -->
-  <div id="upsell-section" style="display:none" class="upsell-section">
-    <div class="upsell-title">🥤 Adicionar ao pedido</div>
-    <div class="upsell-list" id="upsell-list"></div>
+    <!-- UPSELL -->
+    <div id="upsell-section" style="display:none" class="upsell-section">
+      <div class="upsell-title">🥤 Adicionar ao pedido</div>
+      <div class="upsell-list" id="upsell-list"></div>
+    </div>
   </div>
 
   <!-- RESUMO -->
-  <div class="summary">
+  <div class="summary" id="checkout-summary">
+    <div class="summary-topline">Entrega e pagamento</div>
     <div class="summary-header">
       <h2>Resumo do Pedido</h2>
       <div id="client-saved-bar" style="display:none">
@@ -167,10 +177,25 @@
     </div>
 
     <button type="button" id="whatsapp-btn" class="whatsapp-btn" disabled
+      data-default-label="Preencha os dados para continuar"
+      data-ready-label="📱 Enviar Pedido pelo WhatsApp"
       title="Preencha seu nome, bairro, endereço e telefone para continuar">
       📱 Enviar Pedido pelo WhatsApp
     </button>
   </div>
+</div>
+
+<div class="mobile-cart-bar" id="mobile-cart-bar">
+  <div class="mobile-cart-bar__price-wrap">
+    <span class="mobile-cart-bar__label">Total</span>
+    <strong class="mobile-cart-bar__price">R$ <span id="mobile-total-price">0.00</span></strong>
+    <span class="mobile-cart-bar__meta" id="mobile-cart-meta">Adicione seus dados para continuar</span>
+  </div>
+  <button type="button" id="whatsapp-btn-mobile" class="mobile-cart-bar__button" disabled
+    data-default-label="Preencha os dados"
+    data-ready-label="Enviar pedido">
+    Preencha os dados
+  </button>
 </div>
 
 <footer class="footer">
@@ -239,8 +264,13 @@
 
       let cart = JSON.parse(localStorage.getItem('cart')) || [];
       const container = document.getElementById('cart-items');
+      const countLabel = document.getElementById('cart-count-label');
       container.innerHTML = '';
 
+      const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      countLabel.textContent = `${totalItems} ${totalItems === 1 ? 'item' : 'itens'}`;
+      document.body.classList.toggle('cart-has-items', totalItems > 0);
+      document.body.classList.toggle('cart-empty', totalItems === 0);
 
       if (cart.length === 0) {
         container.innerHTML = `<p class="cart-empty-msg">Seu carrinho está vazio. Volte à loja e adicione pratos.</p>`;
@@ -255,11 +285,14 @@
         const qty = item.quantity || 1;
         const itemTotal = parseFloat(item.price) * qty;
         cartSubtotal += itemTotal;
+        const imageHtml = item.image
+          ? `<img src="${LaCoccinaSecurity.uploadUrl(item.image)}" alt="${esc(item.name)}" onerror="this.replaceWith(createCartPlaceholder('${esc(item.name).replace(/'/g, "\\'")}'))">`
+          : createCartPlaceholder(item.name).outerHTML;
 
         const div = document.createElement('div');
         div.className = 'cart-item';
         div.innerHTML = `
-          <img src="${LaCoccinaSecurity.uploadUrl(item.image)}" alt="">
+          ${imageHtml}
           <div class="cart-item-info">
             <strong>${item.name}</strong>
             ${renderAccompaniments(item, index)}
@@ -290,6 +323,23 @@
       document.getElementById('subtotal').textContent = subtotal.toFixed(2);
       document.getElementById('frete').textContent = frete.toFixed(2);
       document.getElementById('total-price').textContent = total.toFixed(2);
+      document.getElementById('mobile-total-price').textContent = total.toFixed(2);
+      document.getElementById('mobile-cart-meta').textContent =
+        frete > 0 ? `Subtotal R$ ${subtotal.toFixed(2)} + entrega R$ ${frete.toFixed(2)}` : 'Escolha o local de entrega para calcular o frete';
+    }
+
+    function createCartPlaceholder(name) {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'cart-item-thumb cart-item-thumb--placeholder';
+      placeholder.setAttribute('aria-label', name);
+      placeholder.innerHTML = '<span>La Coccina</span>';
+      return placeholder;
+    }
+
+    function getCheckoutButtons() {
+      return ['whatsapp-btn', 'whatsapp-btn-mobile']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
     }
 
     function changeQuantity(index, change) {
@@ -318,21 +368,37 @@
       const address = document.getElementById('address').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const bairro = document.getElementById('bairro').value;
-      const btn = document.getElementById('whatsapp-btn');
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      btn.classList.remove('enabled', 'locked');
+      const buttons = getCheckoutButtons();
+      const mobileBar = document.getElementById('mobile-cart-bar');
+      mobileBar.classList.toggle('is-visible', cart.length > 0);
+
+      buttons.forEach((btn) => {
+        btn.classList.remove('enabled', 'locked');
+      });
 
       if (cart.length === 0) {
-        btn.disabled = true;
-        btn.classList.add('locked');
+        buttons.forEach((btn) => {
+          btn.disabled = true;
+          btn.classList.add('locked');
+          btn.textContent = 'Carrinho vazio';
+        });
         return;
       }
 
       if (name && address && phone && bairro !== '0') {
-        btn.disabled = false;
-        btn.classList.add('enabled');
+        buttons.forEach((btn) => {
+          btn.disabled = false;
+          btn.classList.add('enabled');
+          btn.textContent = btn.dataset.readyLabel || 'Continuar';
+        });
+        document.getElementById('mobile-cart-meta').textContent = 'Tudo certo para finalizar seu pedido';
       } else {
-        btn.disabled = true;
+        buttons.forEach((btn) => {
+          btn.disabled = true;
+          btn.classList.add('locked');
+          btn.textContent = btn.dataset.defaultLabel || 'Preencha os dados';
+        });
       }
     }
 
@@ -727,10 +793,12 @@
       loadUpsell();
       verificarCampos();
 
-      document.getElementById('whatsapp-btn').addEventListener('click', () => {
-        if (!document.getElementById('whatsapp-btn').disabled) {
-          sendToWhatsApp();
-        }
+      getCheckoutButtons().forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!button.disabled) {
+            sendToWhatsApp();
+          }
+        });
       });
     };
 </script>
