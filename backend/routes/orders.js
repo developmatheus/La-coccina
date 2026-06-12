@@ -67,6 +67,70 @@ function parseOrderItems(rawItems) {
   return [];
 }
 
+async function getTableColumns(tableName) {
+  try {
+    const [rows] = await db.execute(`PRAGMA table_info(${tableName})`);
+    return new Set(rows.map((row) => row.name));
+  } catch {
+    return new Set();
+  }
+}
+
+async function hasTable(tableName) {
+  const [rows] = await db.execute(
+    `SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?`,
+    [tableName]
+  );
+  return rows.length > 0;
+}
+
+async function buildKanbanOrdersQuery() {
+  const orderColumns = await getTableColumns('orders');
+  const deliveryTableExists = await hasTable('delivery_batches');
+  const deliveryColumns = deliveryTableExists ? await getTableColumns('delivery_batches') : new Set();
+
+  const hasBatchId = orderColumns.has('delivery_batch_id');
+  const hasSequence = orderColumns.has('delivery_sequence');
+  const hasDeliveryJoin =
+    deliveryTableExists &&
+    hasBatchId &&
+    deliveryColumns.has('id') &&
+    deliveryColumns.has('batch_code') &&
+    deliveryColumns.has('public_token') &&
+    deliveryColumns.has('batch_status') &&
+    deliveryColumns.has('vehicle_plate');
+
+  const selectFields = [
+    'o.id',
+    'o.customer',
+    'o.address',
+    'o.phone',
+    'o.payment',
+    'o.total',
+    'o.items',
+    'o.obs',
+    'o.status',
+    'o.kanban_order',
+    'o.order_token',
+    'o.created_at',
+    'o.updated_at',
+    hasBatchId ? 'o.delivery_batch_id' : 'NULL AS delivery_batch_id',
+    hasSequence ? 'o.delivery_sequence' : 'NULL AS delivery_sequence',
+    hasDeliveryJoin ? 'b.batch_code AS delivery_batch_code' : "'' AS delivery_batch_code",
+    hasDeliveryJoin ? 'b.public_token AS delivery_batch_public_token' : "'' AS delivery_batch_public_token",
+    hasDeliveryJoin ? 'b.batch_status AS delivery_batch_status' : "'' AS delivery_batch_status",
+    hasDeliveryJoin ? 'b.vehicle_plate AS delivery_vehicle_plate' : "'' AS delivery_vehicle_plate",
+  ];
+
+  return `
+      SELECT ${selectFields.join(',\n             ')}
+        FROM orders o
+        ${hasDeliveryJoin ? 'LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id' : ''}
+       WHERE o.status NOT IN ('entregue', 'cancelado')
+       ORDER BY o.created_at ASC
+    `;
+}
+
 function compareOrdersForKanban(a, b) {
   const statusDiff = (STATUS_ORDER[a.status] || 999) - (STATUS_ORDER[b.status] || 999);
   if (statusDiff) return statusDiff;
@@ -149,19 +213,8 @@ router.get('/track/:token', async (req, res) => {
 // ---------------------------------------------------------------------------
 router.get('/', requireAdmin, async (_req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT o.id, o.customer, o.address, o.phone, o.payment, o.total, o.items, o.obs,
-              o.status, o.kanban_order, o.order_token, o.created_at, o.updated_at,
-              o.delivery_batch_id, o.delivery_sequence,
-              b.batch_code AS delivery_batch_code,
-              b.public_token AS delivery_batch_public_token,
-              b.batch_status AS delivery_batch_status,
-              b.vehicle_plate AS delivery_vehicle_plate
-         FROM orders o
-         LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
-        WHERE o.status NOT IN ('entregue', 'cancelado')
-        ORDER BY o.created_at ASC`
-    );
+    const query = await buildKanbanOrdersQuery();
+    const [rows] = await db.execute(query);
     const normalizedRows = rows
       .map((order) => {
         const normalizedStatus = normalizeStatusInput(order.status);
@@ -175,6 +228,7 @@ router.get('/', requireAdmin, async (_req, res) => {
 
     res.json(normalizedRows);
   } catch (err) {
+    console.error('Erro ao buscar pedidos do kanban:', err.message);
     res.status(500).json({ error: 'Erro ao buscar pedidos' });
   }
 });
