@@ -88,9 +88,12 @@ async function buildKanbanOrdersQuery() {
   const orderColumns = await getTableColumns('orders');
   const deliveryTableExists = await hasTable('delivery_batches');
   const deliveryColumns = deliveryTableExists ? await getTableColumns('delivery_batches') : new Set();
+  const orderCol = (columnName, fallbackSql) => (orderColumns.has(columnName) ? `o.${columnName}` : `${fallbackSql} AS ${columnName}`);
 
   const hasBatchId = orderColumns.has('delivery_batch_id');
   const hasSequence = orderColumns.has('delivery_sequence');
+  const hasStatus = orderColumns.has('status');
+  const hasCreatedAt = orderColumns.has('created_at');
   const hasDeliveryJoin =
     deliveryTableExists &&
     hasBatchId &&
@@ -102,20 +105,20 @@ async function buildKanbanOrdersQuery() {
 
   const selectFields = [
     'o.id',
-    'o.customer',
-    'o.address',
-    'o.phone',
-    'o.payment',
-    'o.total',
-    'o.items',
-    'o.obs',
-    'o.status',
-    'o.kanban_order',
-    'o.order_token',
-    'o.created_at',
-    'o.updated_at',
-    hasBatchId ? 'o.delivery_batch_id' : 'NULL AS delivery_batch_id',
-    hasSequence ? 'o.delivery_sequence' : 'NULL AS delivery_sequence',
+    orderCol('customer', "''"),
+    orderCol('address', "''"),
+    orderCol('phone', "''"),
+    orderCol('payment', "''"),
+    orderCol('total', '0'),
+    orderCol('items', "'[]'"),
+    orderCol('obs', "''"),
+    orderCol('status', "'novo'"),
+    orderCol('kanban_order', '0'),
+    orderCol('order_token', "''"),
+    orderCol('created_at', "datetime('now')"),
+    orderCol('updated_at', "datetime('now')"),
+    orderCol('delivery_batch_id', 'NULL'),
+    orderCol('delivery_sequence', 'NULL'),
     hasDeliveryJoin ? 'b.batch_code AS delivery_batch_code' : "'' AS delivery_batch_code",
     hasDeliveryJoin ? 'b.public_token AS delivery_batch_public_token' : "'' AS delivery_batch_public_token",
     hasDeliveryJoin ? 'b.batch_status AS delivery_batch_status' : "'' AS delivery_batch_status",
@@ -126,8 +129,8 @@ async function buildKanbanOrdersQuery() {
       SELECT ${selectFields.join(',\n             ')}
         FROM orders o
         ${hasDeliveryJoin ? 'LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id' : ''}
-       WHERE o.status NOT IN ('entregue', 'cancelado')
-       ORDER BY o.created_at ASC
+       ${hasStatus ? "WHERE o.status NOT IN ('entregue', 'cancelado')" : ''}
+       ORDER BY ${hasCreatedAt ? 'o.created_at' : 'o.id'} ASC
     `;
 }
 
