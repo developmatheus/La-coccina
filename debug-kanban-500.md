@@ -28,5 +28,14 @@ Status: OPEN
 ## Hipótese mais forte
 - Existe ao menos um pedido ativo em produção com `items` legado ou malformado, e o parse desse campo estava derrubando a rota inteira do kanban.
 
+## Nova evidência
+- O deploy em produção foi concluído, mas o `500` continuou.
+- O backend no Render inicia com `npm start`, e o script `start` ainda não executava `npm run migrate`.
+- A migration `006_delivery_batches.js` é a responsável por criar `delivery_batches` e adicionar `delivery_batch_id` / `delivery_sequence` em `orders`.
+
+## Causa raiz mais provável
+- Produção está com código novo do kanban, mas banco sem a migration `006`, então a query de `/api/orders` quebra ao acessar estrutura de entrega inexistente.
+
 ## Mitigação aplicada
 - Endurecimento do parse de `order.items` para aceitar formatos legados e fazer fallback seguro para `[]`, mantendo o kanban operacional.
+- Alteração do script `npm start` para executar `npm run migrate` antes de subir o servidor, aplicando migrations pendentes automaticamente no boot.

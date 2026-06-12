@@ -4,7 +4,7 @@
   "description": "Backend do La Coccina",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run migrate && node server.js",
     "dev": "nodemon server.js",
     "stop": "powershell -ExecutionPolicy Bypass -File parar-servidor.ps1",
     "hash-password": "node scripts/hash-password.js",
