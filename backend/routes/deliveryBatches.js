@@ -10,6 +10,56 @@ const router = express.Router();
 
 const VALID_BATCH_STATUSES = ['preparado', 'aceito_motoboy', 'liberado_cozinha'];
 
+async function getTableColumns(conn, tableName) {
+  try {
+    const rows = await conn.all(`PRAGMA table_info(${tableName})`);
+    return new Set(rows.map((row) => row.name));
+  } catch {
+    return new Set();
+  }
+}
+
+async function ensureColumn(conn, tableName, columnName, sqlDefinition) {
+  const columns = await getTableColumns(conn, tableName);
+  if (!columns.has(columnName)) {
+    await conn.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${sqlDefinition}`);
+  }
+}
+
+async function ensureDeliveryBatchSchema() {
+  const conn = await db.raw();
+
+  await conn.exec(`
+    CREATE TABLE IF NOT EXISTS delivery_batches (
+      id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+      batch_code           TEXT    NOT NULL DEFAULT '',
+      public_token         TEXT    NOT NULL DEFAULT '',
+      batch_status         TEXT    NOT NULL DEFAULT 'preparado',
+      origin_address       TEXT    NOT NULL DEFAULT '',
+      maps_url             TEXT    NOT NULL DEFAULT '',
+      driver_name          TEXT    NOT NULL DEFAULT '',
+      driver_whatsapp      TEXT    NOT NULL DEFAULT '',
+      driver_cpf           TEXT    NOT NULL DEFAULT '',
+      vehicle_model        TEXT    NOT NULL DEFAULT '',
+      vehicle_plate        TEXT    NOT NULL DEFAULT '',
+      accepted_at          TEXT,
+      kitchen_confirmed_at TEXT,
+      created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+      updated_at           TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
+  await ensureColumn(conn, 'orders', 'delivery_batch_id', 'INTEGER');
+  await ensureColumn(conn, 'orders', 'delivery_sequence', 'INTEGER');
+
+  await conn.exec(`
+    CREATE INDEX IF NOT EXISTS idx_delivery_batches_public_token ON delivery_batches(public_token);
+    CREATE INDEX IF NOT EXISTS idx_delivery_batches_status ON delivery_batches(batch_status);
+    CREATE INDEX IF NOT EXISTS idx_orders_delivery_batch_id ON orders(delivery_batch_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_delivery_sequence ON orders(delivery_sequence);
+  `);
+}
+
 function generatePublicToken() {
   return crypto.randomBytes(12).toString('hex');
 }
@@ -25,6 +75,7 @@ async function getConfigValue(key) {
 }
 
 async function loadBatchByToken(token) {
+  await ensureDeliveryBatchSchema();
   const [rows] = await db.execute(
     `SELECT id, batch_code, public_token, batch_status, origin_address, maps_url,
             driver_name, driver_whatsapp, driver_cpf, vehicle_model, vehicle_plate,
@@ -37,6 +88,7 @@ async function loadBatchByToken(token) {
 }
 
 async function loadBatchOrders(batchId) {
+  await ensureDeliveryBatchSchema();
   const [rows] = await db.execute(
     `SELECT id, customer, address, phone, payment, total, items, obs, status,
             delivery_sequence, created_at, updated_at
@@ -99,6 +151,7 @@ router.post('/prepare', requireAdmin, async (req, res) => {
   if (!mapsUrl) return res.status(400).json({ error: 'A rota do Google Maps é obrigatória.' });
 
   try {
+    await ensureDeliveryBatchSchema();
     const configuredOrigin = await getConfigValue('restaurantOriginAddress');
     const googleMapsApiKey = String(process.env.GOOGLE_MAPS_API_KEY || '').trim();
 
@@ -173,7 +226,10 @@ router.post('/prepare', requireAdmin, async (req, res) => {
     }
   } catch (err) {
     console.error('Erro ao preparar lote de entrega:', err.message);
-    res.status(500).json({ error: 'Erro ao preparar lote de entrega' });
+    if (err.stack) {
+      console.error(err.stack);
+    }
+    res.status(500).json({ error: 'Erro ao preparar lote de entrega', detail: err.message });
   }
 });
 
@@ -230,6 +286,7 @@ router.post('/:id/confirm-kitchen', requireAdmin, async (req, res) => {
   if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });
 
   try {
+    await ensureDeliveryBatchSchema();
     const [rows] = await db.execute(
       `SELECT id, batch_code, public_token, batch_status
          FROM delivery_batches
@@ -310,6 +367,7 @@ router.get('/:id', requireAdmin, async (req, res) => {
   if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });
 
   try {
+    await ensureDeliveryBatchSchema();
     const [rows] = await db.execute(
       `SELECT id, batch_code, public_token, batch_status, origin_address, maps_url,
               driver_name, driver_whatsapp, driver_cpf, vehicle_model, vehicle_plate,
