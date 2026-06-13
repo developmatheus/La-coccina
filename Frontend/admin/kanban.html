@@ -738,12 +738,22 @@
     if (!apiKey) throw new Error('Google Maps não configurado.');
     if (!googleMapsPromise) {
       googleMapsPromise = new Promise((resolve, reject) => {
+        const callbackName = '__laCoccinaKanbanMapsReady';
+        window[callbackName] = () => {
+          try {
+            resolve(window.google.maps);
+          } finally {
+            delete window[callbackName];
+          }
+        };
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=geometry&loading=async`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=geometry&loading=async&callback=${callbackName}`;
         script.async = true;
         script.defer = true;
-        script.onload = () => resolve(window.google.maps);
-        script.onerror = () => reject(new Error('Falha ao carregar Google Maps.'));
+        script.onerror = () => {
+          delete window[callbackName];
+          reject(new Error('Falha ao carregar Google Maps.'));
+        };
         document.head.appendChild(script);
       });
     }
