@@ -2,484 +2,1960 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lote de Entrega — La Coccina</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Central do Motoboy - La Coccina</title>
+  <meta name="theme-color" content="#0f0f11">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="La Coccina Driver">
+  <link rel="manifest" href="ASSETS/imagens/site.webmanifest">
+  <link rel="apple-touch-icon" href="ASSETS/imagens/android-chrome-192x192.png">
   <link rel="icon" type="image/png" sizes="32x32" href="ASSETS/imagens/favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com https://maps.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com; frame-ancestors 'none'; base-uri 'self';">
   <style>
     @font-face { font-family:'SomeTimeLater'; src:url('ASSETS/fonts/Some Time Later.otf') format('opentype'); }
+    :root {
+      color-scheme: dark;
+      --bg: #09090b;
+      --surface: rgba(20, 20, 24, 0.92);
+      --surface-soft: rgba(28, 28, 34, 0.92);
+      --surface-strong: rgba(13, 13, 17, 0.98);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --muted-2: #71717a;
+      --brand: #ffcc00;
+      --brand-strong: #f59e0b;
+      --success: #22c55e;
+      --info: #38bdf8;
+      --danger: #ef4444;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --footer-h: 88px;
+    }
+
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; background: #0d0d0d; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; padding: 24px 16px 40px; }
-    .page { max-width: 1080px; margin: 0 auto; }
-    .brand { font-family: 'SomeTimeLater', cursive; font-size: 2rem; color: #ffcc00; text-align: center; margin-bottom: 2px; }
-    .tagline { text-align: center; font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 28px; }
-    .grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start; }
-    .card { background: #161616; border: 1px solid #1e1e1e; border-radius: 18px; padding: 18px; margin-bottom: 16px; }
-    .card h2 { margin: 0 0 6px; font-size: 1.05rem; }
-    .card p { margin: 0; color: #777; line-height: 1.5; font-size: 0.84rem; }
-    .muted { color: #777; }
-    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 5px 10px; font-size: 0.7rem; font-weight: 700; }
-    .badge.status { background: #111827; border: 1px solid #233253; color: #a9c5ff; }
-    .badge.batch { background: #1e1a0a; border: 1px solid #5f4b15; color: #ffcc00; }
-    .badge.route { background: #102013; border: 1px solid #2c583f; color: #7dcea0; }
-    .driver-summary { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-    .driver-line { display: flex; justify-content: space-between; gap: 12px; font-size: 0.84rem; }
-    .driver-line span:first-child { color: #666; }
-    .driver-line span:last-child { color: #ddd; text-align: right; }
-    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    button, .link-btn { background: #1f1f1f; border: 1px solid #2f2f2f; color: #ddd; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 0.86rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    button.primary, .link-btn.primary { background: #ffcc00; border-color: #ffcc00; color: #000; }
-    button.secondary { background: #131313; }
-    button:hover, .link-btn:hover { border-color: #555; color: #fff; }
-    button.primary:hover, .link-btn.primary:hover { color: #000; background: #ffd633; }
-    label { display: block; color: #999; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-    input { width: 100%; margin-bottom: 12px; border-radius: 10px; border: 1px solid #2a2a2a; background: #0f0f0f; color: #fff; padding: 12px 14px; font-size: 0.92rem; }
-    input:focus { outline: none; border-color: #ffcc00; box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1); }
-    #driver-form { display: none; margin-top: 16px; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(255, 204, 0, 0.16), transparent 28%),
+        linear-gradient(180deg, #111214 0%, #09090b 42%, #050507 100%);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 14px calc(env(safe-area-inset-bottom, 0px) + var(--footer-h) + 20px);
+    }
+
+    a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    button { border: 0; }
+
+    .shell {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .main-column { min-width: 0; }
+    .side-column { min-width: 0; position: sticky; top: 16px; }
+
+    .topbar {
+      position: sticky;
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      z-index: 20;
+      margin-bottom: 14px;
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(10, 10, 12, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 10px 12px 10px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand-wrap { min-width: 0; }
+    .brand { font-family: 'SomeTimeLater', cursive; font-size: 1.92rem; line-height: 1; color: var(--brand); }
+    .brand-sub { font-size: 0.72rem; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card + .card { margin-top: 16px; }
+
+    .hero {
+      overflow: hidden;
+      position: relative;
+      background:
+        linear-gradient(135deg, rgba(255, 204, 0, 0.14), rgba(255, 204, 0, 0.02)),
+        linear-gradient(180deg, rgba(20, 20, 24, 0.96), rgba(10, 10, 12, 0.96));
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: auto -30% -30% auto;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.18), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--brand);
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--brand);
+      box-shadow: 0 0 0 6px rgba(255, 204, 0, 0.12);
+    }
+
+    .hero-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .hero-title {
+      margin: 8px 0 6px;
+      font-size: clamp(1.55rem, 2.3vw, 2.1rem);
+      line-height: 1.05;
+      font-weight: 800;
+    }
+
+    .hero-copy {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+      max-width: 62ch;
+    }
+
+    .badge-row, .stat-grid, .chip-row, .mini-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .badge.brand { background: rgba(255, 204, 0, 0.12); color: var(--brand); border-color: rgba(255, 204, 0, 0.25); }
+    .badge.info { background: rgba(56, 189, 248, 0.12); color: #8fe4ff; border-color: rgba(56, 189, 248, 0.25); }
+    .badge.success { background: rgba(34, 197, 94, 0.12); color: #86efac; border-color: rgba(34, 197, 94, 0.25); }
+    .badge.warn { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.25); }
+
+    .hero-side {
+      background: rgba(7, 7, 9, 0.62);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
+      padding: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.68rem;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.22rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .progress-wrap { margin-top: 16px; }
+    .progress-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar > span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--brand), #fde68a);
+      transition: width 0.24s ease;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 800;
+    }
+
+    .section-copy {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn, .link-btn {
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .btn:hover, .link-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn.primary, .link-btn.primary {
+      background: var(--brand);
+      color: #09090b;
+      border-color: rgba(255, 204, 0, 0.4);
+    }
+
+    .btn.primary:hover, .link-btn.primary:hover { background: #ffd633; }
+    .btn.ghost { background: transparent; }
+    .btn.block, .link-btn.block { width: 100%; }
+    .btn.compact { min-height: 38px; padding: 8px 12px; font-size: 0.8rem; }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .notice {
+      display: none;
+      border-radius: 18px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 14px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .notice.error { background: rgba(127, 29, 29, 0.35); border-color: rgba(239, 68, 68, 0.25); color: #fecaca; }
+    .notice.info { background: rgba(17, 24, 39, 0.72); border-color: rgba(59, 130, 246, 0.2); color: #dbeafe; }
+    .notice.success { background: rgba(20, 83, 45, 0.45); border-color: rgba(34, 197, 94, 0.25); color: #dcfce7; }
+
+    .status-banner {
+      display: none;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(20, 20, 24, 0.92), rgba(10, 10, 12, 0.92));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 16px;
+    }
+
+    .status-banner h2 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+    }
+
+    .status-banner p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .live-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 14px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #52525b;
+    }
+
+    .live-dot.active {
+      background: var(--success);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .list-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .surface-soft {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .surface-soft h3 {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+    }
+
+    .surface-soft p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .pill-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.8rem;
+      min-width: 0;
+    }
+
+    .pill strong {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .driver-summary, .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .driver-line, .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.84rem;
+    }
+
+    .driver-line span:first-child, .info-row span:first-child {
+      color: var(--muted-2);
+      flex-shrink: 0;
+    }
+
+    .driver-line span:last-child, .info-row span:last-child {
+      color: var(--text);
+      text-align: right;
+      word-break: break-word;
+    }
+
+    label {
+      display: block;
+      color: var(--muted-2);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 12px 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(255, 204, 0, 0.65);
+      box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.12);
+    }
+
+    #driver-form { display: none; margin-top: 14px; }
     #driver-form.open { display: block; }
-    .status-box { padding: 14px; border-radius: 14px; border: 1px solid #232323; background: #111; margin-top: 14px; }
-    .status-title { font-size: 0.82rem; color: #ffcc00; margin-bottom: 4px; font-weight: 700; }
-    .status-text { font-size: 0.9rem; color: #ddd; }
-    #waiting-card { display: none; }
-    #route-card { display: none; }
-    #route-map { min-height: 460px; border-radius: 14px; overflow: hidden; border: 1px solid #202020; background: #0d0d0d; }
-    .route-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-    .route-stop { background: #101010; border: 1px solid #202020; border-radius: 12px; padding: 12px; }
-    .route-stop strong { color: #fff; display: block; font-size: 0.88rem; }
-    .route-stop span { color: #777; display: block; font-size: 0.78rem; margin-top: 5px; line-height: 1.35; }
-    #error-msg { display: none; background: #1a0a0a; border: 1px solid #3a1010; color: #e74c3c; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
-    #loading-msg { color: #666; text-align: center; padding: 24px 0; }
-    @media (max-width: 960px) {
-      .grid { grid-template-columns: 1fr; }
-      #route-map { min-height: 320px; }
+
+    .checklist-row, .stop-card, .pickup-order {
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px;
+    }
+
+    .checklist-row.done, .pickup-order.done, .stop-card.done {
+      border-color: rgba(34, 197, 94, 0.22);
+      background: rgba(20, 83, 45, 0.24);
+    }
+
+    .checklist-row-head, .stop-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .checklist-row strong, .stop-card strong, .pickup-order strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .checklist-row p, .stop-card p, .pickup-order p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .order-items {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .order-item {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      font-size: 0.8rem;
+    }
+
+    .order-item-qty {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      border-radius: 12px;
+      background: rgba(255, 204, 0, 0.12);
+      color: var(--brand);
+      border: 1px solid rgba(255, 204, 0, 0.22);
+      font-weight: 800;
+    }
+
+    .order-item-copy { color: var(--muted); }
+
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .summary-count {
+      width: 54px;
+      height: 54px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: rgba(255, 204, 0, 0.1);
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 1.1rem;
+      border: 1px solid rgba(255, 204, 0, 0.22);
+    }
+
+    .summary-row strong { display: block; font-size: 0.88rem; margin-bottom: 4px; }
+    .summary-row span { display: block; color: var(--muted); font-size: 0.76rem; line-height: 1.45; }
+
+    .route-map {
+      min-height: 420px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: #0f1013;
+      margin-top: 14px;
+    }
+
+    .route-stops {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stop-meta {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .stop-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.74rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .stop-chip.active {
+      background: rgba(255, 204, 0, 0.12);
+      border-color: rgba(255, 204, 0, 0.24);
+      color: var(--brand);
+    }
+
+    .nav-console {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .nav-stage {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 22px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 35%),
+        linear-gradient(180deg, #111827 0%, #0b1020 100%);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .nav-stage small {
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      font-size: 0.7rem;
+    }
+
+    .nav-stage h3 {
+      margin: 10px 0 8px;
+      font-size: clamp(1.45rem, 2vw, 2rem);
+      line-height: 1.1;
+    }
+
+    .nav-stage p {
+      margin: 0;
+      color: #dbeafe;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .nav-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .nav-actions .btn, .nav-actions .link-btn { min-height: 56px; }
+
+    .nav-side {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-metric {
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-metric span {
+      display: block;
+      color: var(--muted-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.68rem;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .nav-metric strong {
+      display: block;
+      font-size: 1.14rem;
+      line-height: 1.1;
+    }
+
+    .footer-nav {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      transform: translateX(-50%);
+      width: min(calc(100vw - 20px), 720px);
+      z-index: 40;
+    }
+
+    .footer-nav-inner {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      background: rgba(9, 9, 11, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 10px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .footer-tab {
+      min-height: 64px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .footer-tab svg { width: 20px; height: 20px; }
+    .footer-tab.active {
+      color: var(--brand);
+      background: rgba(255, 204, 0, 0.1);
+      border-color: rgba(255, 204, 0, 0.18);
+    }
+
+    .footer-tab:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      word-break: break-all;
+      font-size: 0.78rem;
+    }
+
+    .hide-desktop { display: none; }
+
+    @media (max-width: 1024px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .side-column {
+        position: static;
+      }
+
+      .hide-desktop { display: block; }
+      .hide-mobile { display: none; }
+    }
+
+    @media (max-width: 820px) {
+      .hero-grid, .split-grid, .nav-console, .support-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .route-map { min-height: 320px; }
+      .topbar-inner { border-radius: 24px; align-items: flex-start; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding-left: 12px; padding-right: 12px; }
+      .card { padding: 16px; border-radius: 20px; }
+      .topbar { margin-bottom: 12px; }
+      .topbar-inner { padding: 12px 14px; }
+      .hero-side { padding: 14px; }
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .summary-row { grid-template-columns: 44px minmax(0, 1fr); }
+      .summary-count { width: 44px; height: 44px; border-radius: 14px; font-size: 0.96rem; }
+      .nav-actions { grid-template-columns: 1fr 1fr; }
+      .status-banner { flex-direction: column; }
+      .footer-nav { width: calc(100vw - 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); }
+      .footer-nav-inner { gap: 6px; padding: 8px; border-radius: 22px; }
+      .footer-tab { min-height: 60px; font-size: 0.68rem; }
     }
   </style>
 </head>
 <body>
-<div class="page">
-  <div class="brand">La Coccina</div>
-  <div class="tagline">Lote de Entrega do Motoboy</div>
-
-  <div id="error-msg"></div>
-  <div id="loading-msg">Carregando lote...</div>
-
-  <div class="grid" id="app" style="display:none;">
-    <div>
-      <section class="card" id="route-card">
-        <h2>Mapa da rota</h2>
-        <p>Rota liberada pela cozinha. Siga a ordem abaixo para manter o lote organizado.</p>
-        <div class="btn-row">
-          <a href="#" id="open-maps-btn" target="_blank" rel="noopener" class="link-btn primary">Abrir no Google Maps</a>
-          <button type="button" class="secondary" onclick="refreshBatch()">Atualizar status</button>
-        </div>
-        <div id="route-map" style="margin-top:16px;"></div>
-        <div class="route-list" id="route-stop-list"></div>
-      </section>
-    </div>
-
-    <aside>
-      <section class="card">
-        <h2 id="batch-title">Lote</h2>
-        <p id="batch-subtitle">Carregando dados do lote...</p>
-        <div class="badge-row">
-          <span class="badge batch" id="batch-code-badge">-</span>
-          <span class="badge status" id="batch-status-badge">-</span>
-          <span class="badge route" id="batch-stops-badge">-</span>
-        </div>
-        <div class="status-box">
-          <div class="status-title">Origem</div>
-          <div class="status-text" id="origin-address">-</div>
-        </div>
-      </section>
-
-      <section class="card" id="driver-card">
-        <h2>Cadastro do Motoboy</h2>
-        <p id="driver-card-desc">Use seu cadastro-base para aceitar este lote.</p>
-
-        <div id="driver-summary" class="driver-summary"></div>
-
-        <form id="driver-form" onsubmit="event.preventDefault(); acceptBatch();">
-          <label for="driver-name">Nome</label>
-          <input id="driver-name" type="text" autocomplete="name" required>
-
-          <label for="driver-whatsapp">Whatsapp</label>
-          <input id="driver-whatsapp" type="text" inputmode="tel" required>
-
-          <label for="driver-cpf">CPF</label>
-          <input id="driver-cpf" type="text" inputmode="numeric" required>
-
-          <label for="driver-model">Modelo</label>
-          <input id="driver-model" type="text" required>
-
-          <label for="driver-plate">Placa</label>
-          <input id="driver-plate" type="text" autocomplete="off" required>
-        </form>
-
-        <div class="btn-row" id="driver-actions"></div>
-      </section>
-
-      <section class="card" id="waiting-card">
-        <h2>Aguardando liberação</h2>
-        <p id="waiting-text">A cozinha ainda não confirmou a saída deste lote.</p>
-        <div class="btn-row">
-          <button type="button" class="secondary" onclick="refreshBatch()">Atualizar agora</button>
-        </div>
-      </section>
-    </aside>
-  </div>
-</div>
-
-<script src="ASSETS/js/config.js"></script>
-<script src="ASSETS/js/security.js"></script>
-<script>
-  const API = LaCoccinaSecurity.API_BASE;
-  const DRIVER_KEY = 'lc_driver_profile';
-  const BATCH_STATUS_LABELS = {
-    preparado: 'Aguardando aceite do motoboy',
-    aceito_motoboy: 'Aceito pelo motoboy',
-    liberado_cozinha: 'Liberado pela cozinha',
-  };
-
-  let currentToken = '';
-  let currentBatch = null;
-  let editingDriver = false;
-  let pollTimer = null;
-  let googleMapsPromise = null;
-  let mapInstance = null;
-  let directionsRenderer = null;
-
-  function showError(message) {
-    const el = document.getElementById('error-msg');
-    el.textContent = message;
-    el.style.display = 'block';
-    document.getElementById('loading-msg').style.display = 'none';
-  }
-
-  function showApp() {
-    document.getElementById('loading-msg').style.display = 'none';
-    document.getElementById('error-msg').style.display = 'none';
-    document.getElementById('app').style.display = '';
-  }
-
-  function getSavedDriverProfile() {
-    try {
-      return JSON.parse(localStorage.getItem(DRIVER_KEY) || 'null');
-    } catch {
-      return null;
-    }
-  }
-
-  function saveDriverProfile(profile) {
-    localStorage.setItem(DRIVER_KEY, JSON.stringify(profile));
-  }
-
-  function batchStatusLabel(status) {
-    return BATCH_STATUS_LABELS[status] || status || 'Sem status';
-  }
-
-  function fillDriverForm(profile) {
-    document.getElementById('driver-name').value = profile?.name || '';
-    document.getElementById('driver-whatsapp').value = profile?.whatsapp || '';
-    document.getElementById('driver-cpf').value = profile?.cpf || '';
-    document.getElementById('driver-model').value = profile?.vehicleModel || '';
-    document.getElementById('driver-plate').value = profile?.vehiclePlate || '';
-  }
-
-  function readDriverProfileFromForm() {
-    return {
-      name: document.getElementById('driver-name').value.trim(),
-      whatsapp: document.getElementById('driver-whatsapp').value.trim(),
-      cpf: document.getElementById('driver-cpf').value.trim(),
-      vehicleModel: document.getElementById('driver-model').value.trim(),
-      vehiclePlate: document.getElementById('driver-plate').value.trim().toUpperCase(),
-    };
-  }
-
-  function isDriverProfileComplete(profile) {
-    return Boolean(profile?.name && profile?.whatsapp && profile?.cpf && profile?.vehicleModel && profile?.vehiclePlate);
-  }
-
-  function setEditingDriver(enabled) {
-    editingDriver = enabled;
-    document.getElementById('driver-form').classList.toggle('open', enabled);
-  }
-
-  function renderDriverSummary(profile) {
-    if (!profile) return '<p class="muted">Nenhum cadastro-base salvo neste aparelho.</p>';
-    return `
-      <div class="driver-line"><span>Nome</span><span>${LaCoccinaSecurity.escapeHtml(profile.name || '-')}</span></div>
-      <div class="driver-line"><span>Whatsapp</span><span>${LaCoccinaSecurity.escapeHtml(profile.whatsapp || '-')}</span></div>
-      <div class="driver-line"><span>CPF</span><span>${LaCoccinaSecurity.escapeHtml(profile.cpf || '-')}</span></div>
-      <div class="driver-line"><span>Modelo</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehicleModel || '-')}</span></div>
-      <div class="driver-line"><span>Placa</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehiclePlate || '-')}</span></div>
-    `;
-  }
-
-  function renderDriverCard() {
-    const savedProfile = getSavedDriverProfile();
-    const summary = document.getElementById('driver-summary');
-    const actions = document.getElementById('driver-actions');
-    const form = document.getElementById('driver-form');
-    const desc = document.getElementById('driver-card-desc');
-
-    if (!currentBatch) return;
-
-    if (currentBatch.batchStatus !== 'preparado') {
-      const driver = currentBatch.driver?.name ? currentBatch.driver : savedProfile;
-      desc.textContent = currentBatch.driver?.name
-        ? 'Este lote ja esta vinculado a um motoboy.'
-        : 'Aguardando dados do motoboy.';
-      summary.innerHTML = renderDriverSummary(driver);
-      actions.innerHTML = '';
-      form.classList.remove('open');
-      return;
-    }
-
-    if (savedProfile && isDriverProfileComplete(savedProfile) && !editingDriver) {
-      desc.textContent = 'Cadastro-base encontrado neste aparelho. Voce pode aceitar o lote direto ou editar os dados antes.';
-      summary.innerHTML = renderDriverSummary(savedProfile);
-      actions.innerHTML = `
-        <button type="button" class="secondary" onclick="startEditingDriver()">Editar dados</button>
-        <button type="button" class="primary" onclick="acceptBatch()">Aceitar lote</button>
-      `;
-      form.classList.remove('open');
-      return;
-    }
-
-    desc.textContent = 'Preencha os dados do motoboy para aceitar o lote. Este cadastro fica salvo apenas neste aparelho.';
-    summary.innerHTML = '';
-    fillDriverForm(savedProfile);
-    form.classList.add('open');
-    actions.innerHTML = `
-      ${savedProfile ? '<button type="button" class="secondary" onclick="cancelEditingDriver()">Usar dados salvos</button>' : ''}
-      <button type="submit" form="driver-form" class="primary">Salvar e aceitar lote</button>
-    `;
-  }
-
-  function startEditingDriver() {
-    setEditingDriver(true);
-    fillDriverForm(getSavedDriverProfile());
-    renderDriverCard();
-  }
-
-  function cancelEditingDriver() {
-    setEditingDriver(false);
-    renderDriverCard();
-  }
-
-  function updateBatchMeta() {
-    if (!currentBatch) return;
-    document.getElementById('batch-title').textContent = `Lote ${currentBatch.batchCode}`;
-    document.getElementById('batch-subtitle').textContent = currentBatch.batchStatus === 'liberado_cozinha'
-      ? 'Rota pronta para entrega.'
-      : currentBatch.batchStatus === 'aceito_motoboy'
-        ? 'Aguardando confirmacao da cozinha.'
-        : 'Aceite o lote para continuar.';
-    document.getElementById('batch-code-badge').textContent = `Lote ${currentBatch.batchCode}`;
-    document.getElementById('batch-status-badge').textContent = batchStatusLabel(currentBatch.batchStatus);
-    document.getElementById('batch-stops-badge').textContent = `${currentBatch.orders.length} paradas`;
-    document.getElementById('origin-address').textContent = currentBatch.originAddress || '-';
-  }
-
-  function updateWaitingCard() {
-    const waitingCard = document.getElementById('waiting-card');
-    const waitingText = document.getElementById('waiting-text');
-    if (!currentBatch) return;
-    if (currentBatch.batchStatus === 'preparado') {
-      waitingCard.style.display = 'block';
-      waitingText.textContent = 'O lote foi preparado. Assim que o motoboy aceitar, a cozinha precisara confirmar a saida.';
-      return;
-    }
-    if (currentBatch.batchStatus === 'aceito_motoboy') {
-      waitingCard.style.display = 'block';
-      waitingText.textContent = 'Motoboy identificado e lote aceito. Aguarde a confirmacao da cozinha para liberar o mapa.';
-      return;
-    }
-    waitingCard.style.display = 'none';
-  }
-
-  async function ensureGoogleMapsLoaded() {
-    if (window.google?.maps) return window.google.maps;
-    if (!googleMapsPromise) {
-      googleMapsPromise = fetch(`${API}/api/settings/public-delivery`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Google Maps nao configurado no servidor.');
-          return res.json();
-        })
-        .then((data) => new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(data.googleMapsApiKey)}`;
-          script.async = true;
-          script.defer = true;
-          script.onload = () => resolve(window.google.maps);
-          script.onerror = () => reject(new Error('Falha ao carregar Google Maps.'));
-          document.head.appendChild(script);
-        }));
-    }
-    return googleMapsPromise;
-  }
-
-  async function renderRouteMap() {
-    if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') return;
-    await ensureGoogleMapsLoaded();
-    const mapEl = document.getElementById('route-map');
-    mapInstance = new google.maps.Map(mapEl, {
-      center: { lat: -27.5954, lng: -48.548 },
-      zoom: 12,
-      mapTypeControl: false,
-      streetViewControl: false,
-    });
-    directionsRenderer = new google.maps.DirectionsRenderer({ map: mapInstance });
-    const directionsService = new google.maps.DirectionsService();
-    const orders = currentBatch.orders.slice().sort((a, b) => (a.delivery_sequence || 999) - (b.delivery_sequence || 999));
-    const destination = orders[orders.length - 1]?.address || currentBatch.originAddress;
-    const waypoints = orders.slice(0, -1).map((order) => ({ location: order.address, stopover: true }));
-
-    await new Promise((resolve, reject) => {
-      directionsService.route({
-        origin: currentBatch.originAddress,
-        destination,
-        waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
-        optimizeWaypoints: false,
-      }, (result, status) => {
-        if (status === 'OK') {
-          directionsRenderer.setDirections(result);
-          resolve(result);
-        } else {
-          reject(new Error('Nao foi possivel renderizar o mapa do lote.'));
-        }
-      });
-    });
-  }
-
-  function renderRouteList() {
-    const list = document.getElementById('route-stop-list');
-    if (!currentBatch) {
-      list.innerHTML = '';
-      return;
-    }
-    const orders = currentBatch.orders.slice().sort((a, b) => (a.delivery_sequence || 999) - (b.delivery_sequence || 999));
-    list.innerHTML = orders.map((order) => `
-      <div class="route-stop">
-        <strong>Parada ${order.delivery_sequence || '-'} • ${LaCoccinaSecurity.escapeHtml(order.customer)}</strong>
-        <span>${LaCoccinaSecurity.escapeHtml(order.address)}</span>
-        <span>${LaCoccinaSecurity.escapeHtml(order.phone || 'Telefone nao informado')}</span>
-        <span>Status atual: ${LaCoccinaSecurity.escapeHtml(order.status)}</span>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-wrap">
+        <div class="brand">La Coccina</div>
+        <div class="brand-sub">Central de trabalho do motoboy</div>
       </div>
-    `).join('');
-  }
+      <div class="topbar-actions">
+        <button type="button" class="btn compact ghost" id="install-btn" style="display:none;">Instalar app</button>
+        <button type="button" class="btn compact" id="refresh-btn">Atualizar</button>
+      </div>
+    </div>
+  </header>
 
-  async function renderRouteCard() {
-    const routeCard = document.getElementById('route-card');
-    if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') {
-      routeCard.style.display = 'none';
-      return;
+  <div class="notice error" id="error-msg"></div>
+  <div class="notice success" id="success-msg"></div>
+  <div class="notice info" id="loading-msg">Carregando lote...</div>
+
+  <div id="app" style="display:none;">
+    <section class="card hero">
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Ferramenta de campo</div>
+      <div class="hero-grid">
+        <div>
+          <div class="badge-row" id="hero-badges"></div>
+          <h1 class="hero-title" id="batch-title">Lote</h1>
+          <p class="hero-copy" id="batch-subtitle">Carregando dados do lote...</p>
+          <div class="progress-wrap">
+            <div class="progress-head">
+              <span id="progress-label">Progresso operacional</span>
+              <strong id="progress-copy">0%</strong>
+            </div>
+            <div class="progress-bar"><span id="progress-bar-fill"></span></div>
+          </div>
+          <div class="live-wrap">
+            <span class="live-dot" id="live-dot"></span>
+            <span id="live-label">Sincronizando dados do lote...</span>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="stat-grid">
+            <div class="stat">
+              <span class="stat-label">Paradas</span>
+              <span class="stat-value" id="stat-stops">-</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Coletadas</span>
+              <span class="stat-value" id="stat-collected">-</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Entregas locais</span>
+              <span class="stat-value" id="stat-delivered">-</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Placa</span>
+              <span class="stat-value" id="stat-plate">-</span>
+            </div>
+          </div>
+          <div class="pill-grid" id="hero-pills"></div>
+        </div>
+      </div>
+
+      <div class="status-banner" id="status-banner">
+        <div>
+          <h2 id="status-banner-title">Aguardando fluxo</h2>
+          <p id="status-banner-copy">A cozinha ainda nao liberou a rota.</p>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn" id="status-refresh-btn">Atualizar agora</button>
+          <button type="button" class="btn ghost" id="status-install-btn" style="display:none;">Instalar app</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell">
+      <main class="main-column">
+        <section class="card panel active" data-panel="coleta">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Modo Coleta</h2>
+              <p class="section-copy">Resumo do que precisa sair da cozinha, com checklist local por pedido para evitar falta de marmita ou troca de sacola.</p>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn compact" id="mark-all-collected-btn">Marcar tudo</button>
+              <button type="button" class="btn compact ghost" id="clear-collected-btn">Limpar checklist</button>
+            </div>
+          </div>
+          <div class="split-grid">
+            <div class="surface-soft">
+              <h3>Resumo de retirada</h3>
+              <p>Os itens abaixo sao agrupados a partir dos pedidos do lote para facilitar a conferencia com a cozinha.</p>
+              <div class="summary-list" id="pickup-summary-list"></div>
+            </div>
+            <div class="surface-soft">
+              <h3>Checklist por pedido</h3>
+              <p>Confira cliente, telefone, observacoes e itens antes de sair. Esse controle e local no aparelho do motoboy.</p>
+              <div class="pill-grid" id="pickup-summary-pills"></div>
+            </div>
+          </div>
+          <div class="list-stack" id="pickup-orders-list" style="margin-top:14px;"></div>
+        </section>
+
+        <section class="card panel" data-panel="rota">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Modo Rota</h2>
+              <p class="section-copy">Mapa embutido, progresso da rodada e paradas ordenadas. Quando a cozinha libera, o lote vira guia de execucao da rota.</p>
+            </div>
+            <div class="btn-row">
+              <a href="#" target="_blank" rel="noopener" class="link-btn primary" id="open-maps-btn">Abrir no Google Maps</a>
+            </div>
+          </div>
+          <div id="route-locked-state" class="empty-state">A rota sera liberada assim que o lote estiver aceito e confirmado pela cozinha.</div>
+          <div id="route-content" style="display:none;">
+            <div class="pill-grid" id="route-summary-pills"></div>
+            <div class="route-map" id="route-map"></div>
+            <div class="route-stops" id="route-stop-list"></div>
+          </div>
+        </section>
+
+        <section class="card panel" data-panel="nav">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Modo Navegacao</h2>
+              <p class="section-copy">Layout de consulta rapida, com foco na proxima parada, botao grande para abrir rota e atalhos de contato em estilo painel de bordo.</p>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn compact" id="prev-stop-btn">Anterior</button>
+              <button type="button" class="btn compact" id="next-stop-btn">Proxima</button>
+            </div>
+          </div>
+          <div id="nav-locked-state" class="empty-state">O modo navegacao fica pronto quando a cozinha liberar o lote para entrega.</div>
+          <div id="nav-content" style="display:none;">
+            <div class="pill-grid" id="nav-stop-chips"></div>
+            <div class="nav-console" style="margin-top:14px;">
+              <div class="nav-stage">
+                <div>
+                  <small id="nav-kicker">Parada ativa</small>
+                  <h3 id="nav-customer">Aguardando rota</h3>
+                  <p id="nav-address">Assim que a cozinha liberar, esta area passa a destacar a proxima entrega.</p>
+                </div>
+                <div class="nav-actions">
+                  <a href="#" class="link-btn primary" id="nav-open-stop" target="_blank" rel="noopener">Abrir parada</a>
+                  <a href="#" class="link-btn" id="nav-call-stop">Ligar</a>
+                  <a href="#" class="link-btn" id="nav-wa-stop" target="_blank" rel="noopener">Whatsapp</a>
+                  <button type="button" class="btn" id="nav-toggle-delivered">Marcar entregue local</button>
+                </div>
+              </div>
+              <div class="nav-side">
+                <div class="nav-metric">
+                  <span>Andamento</span>
+                  <strong id="nav-progress">0 / 0</strong>
+                </div>
+                <div class="nav-metric">
+                  <span>Status atual</span>
+                  <strong id="nav-status">-</strong>
+                </div>
+                <div class="nav-metric">
+                  <span>Telefone</span>
+                  <strong id="nav-phone">-</strong>
+                </div>
+                <div class="nav-metric">
+                  <span>Observacao</span>
+                  <strong id="nav-obs">Sem observacoes</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card panel" data-panel="apoio">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">Modo Apoio</h2>
+              <p class="section-copy">Atalhos uteis para operacao diaria, informacoes do lote, instalacao do PWA e dados do motoboy no mesmo lugar.</p>
+            </div>
+          </div>
+          <div class="support-grid">
+            <div class="surface-soft">
+              <h3>Atalhos rapidos</h3>
+              <div class="btn-row" style="margin-top:12px;">
+                <button type="button" class="btn" id="support-refresh-btn">Atualizar lote</button>
+                <button type="button" class="btn" id="support-install-btn" style="display:none;">Instalar app</button>
+                <a href="#" class="link-btn" id="support-open-route" target="_blank" rel="noopener">Abrir rota completa</a>
+                <button type="button" class="btn" id="support-copy-link-btn">Copiar link</button>
+              </div>
+            </div>
+            <div class="surface-soft">
+              <h3>Orientacao de uso</h3>
+              <p>Boa pratica: use o modo Coleta para retirar as marmitas, confira a liberacao no modo Rota e troque para Navegacao quando sair para a rua. As marcacoes locais ajudam o ritmo do motoboy sem mexer no painel admin.</p>
+            </div>
+          </div>
+          <div class="split-grid" style="margin-top:14px;">
+            <div class="surface-soft">
+              <h3>Resumo do lote</h3>
+              <div class="info-list">
+                <div class="info-row"><span>Lote</span><span id="support-batch-code">-</span></div>
+                <div class="info-row"><span>Status</span><span id="support-batch-status">-</span></div>
+                <div class="info-row"><span>Origem</span><span id="support-origin">-</span></div>
+                <div class="info-row"><span>Link publico</span><span class="mono" id="support-link">-</span></div>
+              </div>
+            </div>
+            <div class="surface-soft">
+              <h3>Cadastro do motoboy</h3>
+              <p id="driver-card-desc">Use seu cadastro-base para aceitar este lote.</p>
+              <div id="driver-summary" class="driver-summary" style="margin-top:12px;"></div>
+              <form id="driver-form" onsubmit="event.preventDefault(); acceptBatch();">
+                <label for="driver-name">Nome</label>
+                <input id="driver-name" type="text" autocomplete="name" required>
+
+                <label for="driver-whatsapp">Whatsapp</label>
+                <input id="driver-whatsapp" type="text" inputmode="tel" required>
+
+                <label for="driver-cpf">CPF</label>
+                <input id="driver-cpf" type="text" inputmode="numeric" required>
+
+                <label for="driver-model">Modelo</label>
+                <input id="driver-model" type="text" required>
+
+                <label for="driver-plate">Placa</label>
+                <input id="driver-plate" type="text" autocomplete="off" required>
+              </form>
+              <div class="btn-row" id="driver-actions" style="margin-top:14px;"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="side-column hide-mobile">
+        <section class="card">
+          <div class="section-head" style="margin-bottom:12px;">
+            <div>
+              <h2 class="section-title">Painel rapido</h2>
+              <p class="section-copy">Visao lateral fixa para consulta durante a operacao.</p>
+            </div>
+          </div>
+          <div class="badge-row" id="side-badges"></div>
+          <div class="surface-soft" style="margin-top:14px;">
+            <h3>Origem</h3>
+            <p id="origin-address">-</p>
+          </div>
+          <div class="surface-soft" style="margin-top:12px;">
+            <h3>Motoboy vinculado</h3>
+            <div id="side-driver-summary" class="driver-summary" style="margin-top:12px;"></div>
+          </div>
+          <div class="surface-soft" style="margin-top:12px;">
+            <h3>Controles</h3>
+            <div class="btn-row" style="margin-top:12px;">
+              <button type="button" class="btn block" id="side-refresh-btn">Atualizar lote</button>
+              <a href="#" class="link-btn block" id="side-open-route" target="_blank" rel="noopener">Abrir rota</a>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <nav class="footer-nav" aria-label="Navegacao do motoboy">
+    <div class="footer-nav-inner">
+      <button type="button" class="footer-tab active" data-view="coleta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+        <span>Coleta</span>
+      </button>
+      <button type="button" class="footer-tab" data-view="rota">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-4 2 2-4 8-8 2 2-8 8z"/><path d="M14 5l2-2 5 5-2 2"/><path d="M3 3h6"/><path d="M15 21h6"/></svg>
+        <span>Rota</span>
+      </button>
+      <button type="button" class="footer-tab" data-view="nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 18-7-4-7 4 7-18z"/><path d="M12 3v14"/></svg>
+        <span>Navegar</span>
+      </button>
+      <button type="button" class="footer-tab" data-view="apoio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/><path d="M8 3l1.5 3"/><path d="M16 3l-1.5 3"/></svg>
+        <span>Apoio</span>
+      </button>
+    </div>
+  </nav>
+
+  <script src="ASSETS/js/config.js"></script>
+  <script src="ASSETS/js/security.js"></script>
+  <script>
+    const API = LaCoccinaSecurity.API_BASE;
+    const DRIVER_KEY = 'lc_driver_profile';
+    const LAST_TOKEN_KEY = 'lc_last_delivery_batch_token';
+    const VIEW_KEY = 'lc_driver_current_view';
+    const BATCH_STATUS_LABELS = {
+      preparado: 'Aguardando aceite do motoboy',
+      aceito_motoboy: 'Aguardando liberacao da cozinha',
+      liberado_cozinha: 'Rota liberada para entrega',
+    };
+
+    let currentToken = '';
+    let currentBatch = null;
+    let currentView = localStorage.getItem(VIEW_KEY) || 'coleta';
+    let editingDriver = false;
+    let pollTimer = null;
+    let googleMapsPromise = null;
+    let mapInstance = null;
+    let directionsRenderer = null;
+    let deferredInstallPrompt = null;
+    let isRefreshing = false;
+
+    function iconHtml(path, viewBox = '0 0 24 24') {
+      return `<svg class="icon" viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
     }
 
-    routeCard.style.display = 'block';
-    document.getElementById('open-maps-btn').href = currentBatch.mapsUrl || '#';
-    renderRouteList();
-    try {
-      await renderRouteMap();
-    } catch (error) {
-      console.error(error);
-      showError(error.message);
-    }
-  }
-
-  async function renderBatch() {
-    showApp();
-    updateBatchMeta();
-    renderDriverCard();
-    updateWaitingCard();
-    await renderRouteCard();
-  }
-
-  async function fetchBatch() {
-    const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}`);
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || 'Lote nao encontrado.');
-    }
-    currentBatch = await res.json();
-    return currentBatch;
-  }
-
-  async function refreshBatch() {
-    try {
-      await fetchBatch();
-      await renderBatch();
-    } catch (error) {
-      console.error(error);
-      showError(error.message);
-    }
-  }
-
-  async function acceptBatch() {
-    let payload = getSavedDriverProfile();
-    if (editingDriver || !isDriverProfileComplete(payload)) {
-      payload = readDriverProfileFromForm();
-    }
-    if (!isDriverProfileComplete(payload)) {
-      setEditingDriver(true);
-      renderDriverCard();
-      showError('Preencha nome, whatsapp, CPF, modelo e placa para aceitar o lote.');
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+    function showNotice(type, message) {
+      const ids = ['error-msg', 'success-msg', 'loading-msg'];
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        el.style.display = 'none';
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Nao foi possivel registrar o aceite do lote.');
-      saveDriverProfile(payload);
-      currentBatch = data.batch;
-      setEditingDriver(false);
-      await renderBatch();
-    } catch (error) {
-      console.error(error);
-      showError(error.message);
-    }
-  }
 
-  function startPolling() {
-    stopPolling();
-    pollTimer = setInterval(() => {
-      refreshBatch().catch(() => {});
-    }, 10000);
-  }
-
-  function stopPolling() {
-    clearInterval(pollTimer);
-    pollTimer = null;
-  }
-
-  (async function init() {
-    const params = new URLSearchParams(window.location.search);
-    currentToken = params.get('token') || '';
-    if (!currentToken) {
-      showError('Token do lote nao informado.');
-      return;
+      const map = {
+        error: 'error-msg',
+        success: 'success-msg',
+        loading: 'loading-msg',
+      };
+      const id = map[type];
+      if (!id || !message) return;
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.style.display = 'block';
     }
 
-    try {
-      await fetchBatch();
+    function clearNotice(type) {
+      const map = {
+        error: 'error-msg',
+        success: 'success-msg',
+        loading: 'loading-msg',
+      };
+      const id = map[type];
+      if (!id) return;
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function showError(message) {
+      clearNotice('loading');
+      showNotice('error', message);
+    }
+
+    function showSuccess(message) {
+      clearNotice('error');
+      showNotice('success', message);
+      window.clearTimeout(showSuccess.timer);
+      showSuccess.timer = window.setTimeout(() => clearNotice('success'), 2200);
+    }
+
+    function showApp() {
+      clearNotice('loading');
+      document.getElementById('app').style.display = '';
+    }
+
+    function setLive(connected) {
+      const dot = document.getElementById('live-dot');
+      const label = document.getElementById('live-label');
+      dot.className = connected ? 'live-dot active' : 'live-dot';
+      label.textContent = connected ? 'Atualizando o lote automaticamente a cada 10s' : 'Sem conexao com o lote. Tentando reconectar...';
+    }
+
+    function batchStatusLabel(status) {
+      return BATCH_STATUS_LABELS[status] || status || 'Sem status';
+    }
+
+    function formatTime(dateString) {
+      if (!dateString) return '-';
+      const normalized = dateString.includes('Z') ? dateString : `${dateString}Z`;
+      const date = new Date(normalized);
+      if (Number.isNaN(date.getTime())) return '-';
+      return date.toLocaleString('pt-BR');
+    }
+
+    function sanitizePhone(phone) {
+      return String(phone || '').replace(/\D/g, '');
+    }
+
+    function stopMapsUrlFromAddress(address) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address || '')}&travelmode=driving`;
+    }
+
+    function getSavedDriverProfile() {
+      try {
+        return JSON.parse(localStorage.getItem(DRIVER_KEY) || 'null');
+      } catch {
+        return null;
+      }
+    }
+
+    function saveDriverProfile(profile) {
+      localStorage.setItem(DRIVER_KEY, JSON.stringify(profile));
+    }
+
+    function fillDriverForm(profile) {
+      document.getElementById('driver-name').value = profile?.name || '';
+      document.getElementById('driver-whatsapp').value = profile?.whatsapp || '';
+      document.getElementById('driver-cpf').value = profile?.cpf || '';
+      document.getElementById('driver-model').value = profile?.vehicleModel || '';
+      document.getElementById('driver-plate').value = profile?.vehiclePlate || '';
+    }
+
+    function readDriverProfileFromForm() {
+      return {
+        name: document.getElementById('driver-name').value.trim(),
+        whatsapp: document.getElementById('driver-whatsapp').value.trim(),
+        cpf: document.getElementById('driver-cpf').value.trim(),
+        vehicleModel: document.getElementById('driver-model').value.trim(),
+        vehiclePlate: document.getElementById('driver-plate').value.trim().toUpperCase(),
+      };
+    }
+
+    function isDriverProfileComplete(profile) {
+      return Boolean(profile?.name && profile?.whatsapp && profile?.cpf && profile?.vehicleModel && profile?.vehiclePlate);
+    }
+
+    function setEditingDriver(enabled) {
+      editingDriver = enabled;
+      document.getElementById('driver-form').classList.toggle('open', enabled);
+    }
+
+    function renderDriverSummary(profile) {
+      if (!profile) {
+        return '<p style="margin:0;color:var(--muted);font-size:0.84rem;">Nenhum cadastro-base salvo neste aparelho.</p>';
+      }
+      return `
+        <div class="driver-line"><span>Nome</span><span>${LaCoccinaSecurity.escapeHtml(profile.name || '-')}</span></div>
+        <div class="driver-line"><span>Whatsapp</span><span>${LaCoccinaSecurity.escapeHtml(profile.whatsapp || '-')}</span></div>
+        <div class="driver-line"><span>CPF</span><span>${LaCoccinaSecurity.escapeHtml(profile.cpf || '-')}</span></div>
+        <div class="driver-line"><span>Modelo</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehicleModel || '-')}</span></div>
+        <div class="driver-line"><span>Placa</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehiclePlate || '-')}</span></div>
+      `;
+    }
+
+    function getOrderedOrders() {
+      if (!currentBatch?.orders?.length) return [];
+      return currentBatch.orders.slice().sort((a, b) => (a.delivery_sequence || 999) - (b.delivery_sequence || 999));
+    }
+
+    function getLocalState() {
+      if (!currentToken) return { collectedIds: [], deliveredIds: [], currentStopId: null };
+      try {
+        const raw = localStorage.getItem(`lc_driver_ops_${currentToken}`);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return {
+          collectedIds: Array.isArray(parsed.collectedIds) ? parsed.collectedIds.map(Number).filter(Boolean) : [],
+          deliveredIds: Array.isArray(parsed.deliveredIds) ? parsed.deliveredIds.map(Number).filter(Boolean) : [],
+          currentStopId: parsed.currentStopId ? Number(parsed.currentStopId) : null,
+        };
+      } catch {
+        return { collectedIds: [], deliveredIds: [], currentStopId: null };
+      }
+    }
+
+    function saveLocalState(state) {
+      if (!currentToken) return;
+      localStorage.setItem(`lc_driver_ops_${currentToken}`, JSON.stringify(state));
+    }
+
+    function syncLocalStateWithBatch() {
+      const state = getLocalState();
+      const deliveredIds = new Set(state.deliveredIds);
+      getOrderedOrders().forEach((order) => {
+        if (order.status === 'entregue') deliveredIds.add(Number(order.id));
+      });
+      state.deliveredIds = Array.from(deliveredIds);
+      if (!state.currentStopId) {
+        const nextOrder = getOrderedOrders().find((order) => !state.deliveredIds.includes(Number(order.id)));
+        state.currentStopId = nextOrder?.id || getOrderedOrders()[0]?.id || null;
+      }
+      saveLocalState(state);
+      return state;
+    }
+
+    function getBatchProgress() {
+      const orders = getOrderedOrders();
+      const state = getLocalState();
+      const total = orders.length;
+      const collected = orders.filter((order) => state.collectedIds.includes(Number(order.id))).length;
+      const delivered = orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length;
+      const percent = total ? Math.round((delivered / total) * 100) : 0;
+      return { total, collected, delivered, percent };
+    }
+
+    function getCurrentStop() {
+      const orders = getOrderedOrders();
+      const state = getLocalState();
+      const byCurrent = orders.find((order) => Number(order.id) === Number(state.currentStopId));
+      if (byCurrent) return byCurrent;
+      return orders.find((order) => !state.deliveredIds.includes(Number(order.id)) && order.status !== 'entregue') || orders[0] || null;
+    }
+
+    function setCurrentStop(orderId) {
+      const state = getLocalState();
+      state.currentStopId = Number(orderId) || null;
+      saveLocalState(state);
+      renderNavigationView();
+    }
+
+    function toggleLocalCollection(orderId) {
+      const state = getLocalState();
+      const numericId = Number(orderId);
+      state.collectedIds = state.collectedIds.includes(numericId)
+        ? state.collectedIds.filter((id) => id !== numericId)
+        : [...state.collectedIds, numericId];
+      saveLocalState(state);
+      renderOperationalHeader();
+      renderCollectionView();
+    }
+
+    function toggleLocalDelivered(orderId) {
+      const state = getLocalState();
+      const numericId = Number(orderId);
+      if (state.deliveredIds.includes(numericId)) {
+        state.deliveredIds = state.deliveredIds.filter((id) => id !== numericId);
+      } else {
+        state.deliveredIds = [...state.deliveredIds, numericId];
+      }
+      const nextOpen = getOrderedOrders().find((order) => Number(order.id) !== numericId && !state.deliveredIds.includes(Number(order.id)) && order.status !== 'entregue');
+      state.currentStopId = nextOpen?.id || numericId;
+      saveLocalState(state);
+      renderOperationalHeader();
+      renderRouteView();
+      renderNavigationView();
+    }
+
+    function markAllCollected() {
+      const state = getLocalState();
+      state.collectedIds = getOrderedOrders().map((order) => Number(order.id));
+      saveLocalState(state);
+      renderOperationalHeader();
+      renderCollectionView();
+      showSuccess('Checklist de coleta marcado no aparelho.');
+    }
+
+    function clearCollectedChecklist() {
+      const state = getLocalState();
+      state.collectedIds = [];
+      saveLocalState(state);
+      renderOperationalHeader();
+      renderCollectionView();
+      showSuccess('Checklist de coleta limpo.');
+    }
+
+    function aggregatePickupItems() {
+      const summary = new Map();
+      getOrderedOrders().forEach((order) => {
+        const items = Array.isArray(order.items) ? order.items : [];
+        items.forEach((item) => {
+          const accompaniments = Array.isArray(item.accompaniments) && item.accompaniments.length
+            ? item.accompaniments.map((acc) => acc?.name || acc).filter(Boolean).join(', ')
+            : '';
+          const key = `${String(item.name || 'Item sem nome').trim()}::${accompaniments}`;
+          const previous = summary.get(key) || { qty: 0, name: item.name || 'Item sem nome', accompaniments };
+          previous.qty += Number(item.qty) || 1;
+          summary.set(key, previous);
+        });
+      });
+      return Array.from(summary.values()).sort((a, b) => b.qty - a.qty || String(a.name).localeCompare(String(b.name), 'pt-BR'));
+    }
+
+    function orderStatusAccent(order) {
+      if (order.status === 'entregue') return 'success';
+      if (getLocalState().deliveredIds.includes(Number(order.id))) return 'success';
+      return 'info';
+    }
+
+    function renderOperationalHeader() {
+      if (!currentBatch) return;
+      const progress = getBatchProgress();
+      const batchStatus = batchStatusLabel(currentBatch.batchStatus);
+      const acceptedAt = currentBatch.acceptedAt ? `Aceito em ${formatTime(currentBatch.acceptedAt)}` : 'Sem aceite registrado';
+      const releasedAt = currentBatch.kitchenConfirmedAt ? `Liberado em ${formatTime(currentBatch.kitchenConfirmedAt)}` : 'Sem liberacao da cozinha';
+      const publicUrl = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}`;
+
+      document.getElementById('batch-title').textContent = `Lote ${currentBatch.batchCode}`;
+      document.getElementById('batch-subtitle').textContent = currentBatch.batchStatus === 'liberado_cozinha'
+        ? 'Rota ativa para entrega. Use o rodape fixo para alternar entre coleta, rota, navegacao e apoio.'
+        : currentBatch.batchStatus === 'aceito_motoboy'
+          ? 'Lote aceito. Aguarde a confirmacao da cozinha para liberar mapa e modo navegacao.'
+          : 'Aceite o lote e confira a coleta antes de sair com as marmitas.';
+
+      document.getElementById('hero-badges').innerHTML = `
+        <span class="badge brand">${iconHtml('<path d="M12 2l3.09 6.26L22 9.27l-5 4.86L18.18 22 12 18.56 5.82 22 7 14.13l-5-4.86 6.91-1.01L12 2z">')}Lote ${LaCoccinaSecurity.escapeHtml(currentBatch.batchCode || '-')}</span>
+        <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${iconHtml('<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path>')} ${LaCoccinaSecurity.escapeHtml(batchStatus)}</span>
+        <span class="badge info">${iconHtml('<path d="M4 7h16"></path><path d="M7 4v6"></path><path d="M17 4v6"></path><rect x="4" y="7" width="16" height="13" rx="2"></rect>')} ${progress.total} paradas</span>
+      `;
+
+      document.getElementById('hero-pills').innerHTML = `
+        <div class="pill"><span>${iconHtml('<path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-6"></path>')}</span><div><strong>${progress.delivered}/${progress.total}</strong><span>entregas locais marcadas</span></div></div>
+        <div class="pill"><span>${iconHtml('<path d="M5 12l4 4L19 6"></path>')}</span><div><strong>${progress.collected}/${progress.total}</strong><span>pedidos conferidos na coleta</span></div></div>
+        <div class="pill"><span>${iconHtml('<path d="M22 16.92V19a2 2 0 0 1-2.18 2"></path><path d="M2 5a2 2 0 0 1 2-2h2.09"></path><path d="M22 8.09V5a2 2 0 0 0-2-2h-2.09"></path><path d="M2 15.91V19a2 2 0 0 0 2 2h3.09"></path><path d="M7 12h10"></path><path d="M12 7l5 5-5 5"></path>')}</span><div><strong>${LaCoccinaSecurity.escapeHtml(currentBatch.mapsUrl ? 'Rota pronta' : 'Sem link')}</strong><span>atalho do Google Maps salvo</span></div></div>
+      `;
+
+      document.getElementById('progress-copy').textContent = `${progress.percent}%`;
+      document.getElementById('progress-bar-fill').style.width = `${progress.percent}%`;
+      document.getElementById('progress-label').textContent = progress.total
+        ? `${progress.delivered} de ${progress.total} entregas marcadas`
+        : 'Sem entregas no lote';
+
+      document.getElementById('stat-stops').textContent = String(progress.total);
+      document.getElementById('stat-collected').textContent = `${progress.collected}/${progress.total}`;
+      document.getElementById('stat-delivered').textContent = `${progress.delivered}/${progress.total}`;
+      document.getElementById('stat-plate').textContent = currentBatch.driver?.vehiclePlate || getSavedDriverProfile()?.vehiclePlate || '-';
+
+      document.getElementById('origin-address').textContent = currentBatch.originAddress || '-';
+      document.getElementById('support-batch-code').textContent = currentBatch.batchCode || '-';
+      document.getElementById('support-batch-status').textContent = batchStatus;
+      document.getElementById('support-origin').textContent = currentBatch.originAddress || '-';
+      document.getElementById('support-link').textContent = publicUrl;
+      document.getElementById('side-open-route').href = currentBatch.mapsUrl || '#';
+      document.getElementById('support-open-route').href = currentBatch.mapsUrl || '#';
+      document.getElementById('open-maps-btn').href = currentBatch.mapsUrl || '#';
+
+      document.getElementById('side-badges').innerHTML = `
+        <span class="badge brand">Lote ${LaCoccinaSecurity.escapeHtml(currentBatch.batchCode || '-')}</span>
+        <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${LaCoccinaSecurity.escapeHtml(batchStatus)}</span>
+      `;
+
+      const driver = currentBatch.driver?.name ? currentBatch.driver : getSavedDriverProfile();
+      document.getElementById('side-driver-summary').innerHTML = renderDriverSummary(driver);
+
+      const statusBanner = document.getElementById('status-banner');
+      const bannerTitle = document.getElementById('status-banner-title');
+      const bannerCopy = document.getElementById('status-banner-copy');
+      if (currentBatch.batchStatus === 'preparado') {
+        bannerTitle.textContent = 'Primeiro passo: aceite o lote';
+        bannerCopy.textContent = 'Preencha ou reaproveite seu cadastro-base no modo Apoio. Depois do aceite, a cozinha ainda precisa liberar a saida.';
+        statusBanner.style.display = 'flex';
+      } else if (currentBatch.batchStatus === 'aceito_motoboy') {
+        bannerTitle.textContent = 'Lote aceito. Falta a liberacao da cozinha';
+        bannerCopy.textContent = 'A coleta ja pode ser conferida, mas o mapa e o modo navegacao so liberam depois da confirmacao da cozinha.';
+        statusBanner.style.display = 'flex';
+      } else {
+        bannerTitle.textContent = 'Rota liberada';
+        bannerCopy.textContent = `Ultimos eventos: ${acceptedAt}. ${releasedAt}.`;
+        statusBanner.style.display = 'flex';
+      }
+    }
+
+    function renderDriverCard() {
+      const savedProfile = getSavedDriverProfile();
+      const summary = document.getElementById('driver-summary');
+      const actions = document.getElementById('driver-actions');
+      const form = document.getElementById('driver-form');
+      const desc = document.getElementById('driver-card-desc');
+
+      if (!currentBatch) return;
+
+      if (currentBatch.batchStatus !== 'preparado') {
+        const driver = currentBatch.driver?.name ? currentBatch.driver : savedProfile;
+        desc.textContent = currentBatch.driver?.name
+          ? 'Este lote ja esta vinculado a um motoboy. O cadastro-base continua salvo neste aparelho.'
+          : 'Aguardando dados do motoboy.';
+        summary.innerHTML = renderDriverSummary(driver);
+        actions.innerHTML = savedProfile
+          ? '<button type="button" class="btn compact" onclick="startEditingDriver()">Editar cadastro-base</button>'
+          : '';
+        form.classList.remove('open');
+        return;
+      }
+
+      if (savedProfile && isDriverProfileComplete(savedProfile) && !editingDriver) {
+        desc.textContent = 'Cadastro-base encontrado. Voce pode aceitar o lote direto ou ajustar os dados antes de seguir.';
+        summary.innerHTML = renderDriverSummary(savedProfile);
+        actions.innerHTML = `
+          <button type="button" class="btn" onclick="startEditingDriver()">Editar dados</button>
+          <button type="button" class="btn primary" onclick="acceptBatch()">Aceitar lote</button>
+        `;
+        form.classList.remove('open');
+        return;
+      }
+
+      desc.textContent = 'Preencha os dados do motoboy para aceitar o lote. Esse cadastro fica salvo so neste aparelho.';
+      summary.innerHTML = '';
+      fillDriverForm(savedProfile);
+      form.classList.add('open');
+      actions.innerHTML = `
+        ${savedProfile ? '<button type="button" class="btn" onclick="cancelEditingDriver()">Usar dados salvos</button>' : ''}
+        <button type="submit" form="driver-form" class="btn primary">Salvar e aceitar lote</button>
+      `;
+    }
+
+    function startEditingDriver() {
+      setEditingDriver(true);
       fillDriverForm(getSavedDriverProfile());
-      await renderBatch();
-      startPolling();
-    } catch (error) {
-      console.error(error);
-      showError(error.message);
+      renderDriverCard();
     }
-  })();
-</script>
+
+    function cancelEditingDriver() {
+      setEditingDriver(false);
+      renderDriverCard();
+    }
+
+    function renderCollectionView() {
+      const summaryList = document.getElementById('pickup-summary-list');
+      const summaryPills = document.getElementById('pickup-summary-pills');
+      const ordersList = document.getElementById('pickup-orders-list');
+      const orders = getOrderedOrders();
+      const aggregated = aggregatePickupItems();
+      const state = getLocalState();
+
+      summaryList.innerHTML = aggregated.length ? aggregated.map((item) => `
+        <div class="summary-row">
+          <div class="summary-count">${item.qty}x</div>
+          <div>
+            <strong>${LaCoccinaSecurity.escapeHtml(item.name)}</strong>
+            <span>${item.accompaniments ? `Acompanhamentos: ${LaCoccinaSecurity.escapeHtml(item.accompaniments)}` : 'Sem acompanhamentos extras informados'}</span>
+          </div>
+          <div class="badge brand">Retirar</div>
+        </div>
+      `).join('') : '<div class="empty-state">Nao ha itens detalhados no lote para resumir a coleta.</div>';
+
+      summaryPills.innerHTML = `
+        <div class="pill"><div><strong>${orders.length}</strong><span>pedidos no lote</span></div></div>
+        <div class="pill"><div><strong>${state.collectedIds.length}</strong><span>conferidos localmente</span></div></div>
+        <div class="pill"><div><strong>${aggregated.length}</strong><span>linhas de item agregadas</span></div></div>
+      `;
+
+      ordersList.innerHTML = orders.length ? orders.map((order) => {
+        const isCollected = state.collectedIds.includes(Number(order.id));
+        const items = Array.isArray(order.items) ? order.items : [];
+        return `
+          <article class="pickup-order ${isCollected ? 'done' : ''}">
+            <div class="checklist-row-head">
+              <div>
+                <strong>Parada ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente sem nome')}</strong>
+                <p>${LaCoccinaSecurity.escapeHtml(order.address || 'Endereco nao informado')}</p>
+              </div>
+              <button type="button" class="btn compact ${isCollected ? '' : 'primary'}" onclick="toggleLocalCollection(${Number(order.id)})">
+                ${isCollected ? 'Conferido' : 'Conferir'}
+              </button>
+            </div>
+            <div class="stop-meta">
+              <span class="badge ${orderStatusAccent(order)}">Status: ${LaCoccinaSecurity.escapeHtml(order.status || '-')}</span>
+              <span class="badge info">Telefone: ${LaCoccinaSecurity.escapeHtml(order.phone || 'nao informado')}</span>
+              ${order.obs ? `<span class="badge warn">Obs: ${LaCoccinaSecurity.escapeHtml(order.obs)}</span>` : ''}
+            </div>
+            <div class="order-items">
+              ${items.length ? items.map((item) => `
+                <div class="order-item">
+                  <div class="order-item-qty">${Number(item.qty) || 1}x</div>
+                  <div class="order-item-copy">
+                    <strong style="display:block;color:var(--text);margin-bottom:4px;">${LaCoccinaSecurity.escapeHtml(item.name || 'Item')}</strong>
+                    <span>${Array.isArray(item.accompaniments) && item.accompaniments.length
+                      ? `Acompanhamentos: ${LaCoccinaSecurity.escapeHtml(item.accompaniments.map((acc) => acc?.name || acc).join(', '))}`
+                      : 'Sem acompanhamentos adicionais'}</span>
+                  </div>
+                </div>
+              `).join('') : '<div class="empty-state">Esse pedido nao possui itens estruturados para conferencia.</div>'}
+            </div>
+          </article>
+        `;
+      }).join('') : '<div class="empty-state">Nenhum pedido no lote.</div>';
+    }
+
+    async function ensureGoogleMapsLoaded() {
+      if (window.google?.maps) return window.google.maps;
+      if (!googleMapsPromise) {
+        googleMapsPromise = fetch(`${API}/api/settings/public-delivery`)
+          .then((res) => {
+            if (!res.ok) throw new Error('Google Maps nao configurado no servidor.');
+            return res.json();
+          })
+          .then((data) => new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(data.googleMapsApiKey)}`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => resolve(window.google.maps);
+            script.onerror = () => reject(new Error('Falha ao carregar Google Maps.'));
+            document.head.appendChild(script);
+          }));
+      }
+      return googleMapsPromise;
+    }
+
+    async function renderRouteMap() {
+      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') return;
+      await ensureGoogleMapsLoaded();
+      const mapEl = document.getElementById('route-map');
+      mapInstance = new google.maps.Map(mapEl, {
+        center: { lat: -27.5954, lng: -48.548 },
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      directionsRenderer = new google.maps.DirectionsRenderer({ map: mapInstance });
+      const directionsService = new google.maps.DirectionsService();
+      const orders = getOrderedOrders();
+      const destination = orders[orders.length - 1]?.address || currentBatch.originAddress;
+      const waypoints = orders.slice(0, -1).map((order) => ({ location: order.address, stopover: true }));
+
+      await new Promise((resolve, reject) => {
+        directionsService.route({
+          origin: currentBatch.originAddress,
+          destination,
+          waypoints,
+          travelMode: google.maps.TravelMode.DRIVING,
+          optimizeWaypoints: false,
+        }, (result, status) => {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(result);
+            resolve(result);
+          } else {
+            reject(new Error('Nao foi possivel renderizar o mapa do lote.'));
+          }
+        });
+      });
+    }
+
+    function renderRouteView() {
+      const locked = document.getElementById('route-locked-state');
+      const content = document.getElementById('route-content');
+      const stopsList = document.getElementById('route-stop-list');
+      const pills = document.getElementById('route-summary-pills');
+      const state = getLocalState();
+      const orders = getOrderedOrders();
+
+      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') {
+        locked.style.display = 'block';
+        content.style.display = 'none';
+        stopsList.innerHTML = '';
+        pills.innerHTML = '';
+        return;
+      }
+
+      locked.style.display = 'none';
+      content.style.display = 'block';
+      pills.innerHTML = `
+        <div class="pill"><div><strong>${orders.length}</strong><span>paradas ativas</span></div></div>
+        <div class="pill"><div><strong>${orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length}</strong><span>marcadas como entregues</span></div></div>
+        <div class="pill"><div><strong>${orders.filter((order) => state.collectedIds.includes(Number(order.id))).length}</strong><span>conferidas na cozinha</span></div></div>
+      `;
+
+      stopsList.innerHTML = orders.map((order) => {
+        const done = state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue';
+        const isCurrent = Number(getCurrentStop()?.id) === Number(order.id);
+        const phone = sanitizePhone(order.phone);
+        return `
+          <article class="stop-card ${done ? 'done' : ''}">
+            <div class="stop-card-head">
+              <div>
+                <strong>Parada ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente')}</strong>
+                <p>${LaCoccinaSecurity.escapeHtml(order.address || 'Endereco nao informado')}</p>
+              </div>
+              <button type="button" class="btn compact ${isCurrent ? 'primary' : ''}" onclick="setCurrentStop(${Number(order.id)})">
+                ${isCurrent ? 'Atual' : 'Abrir'}
+              </button>
+            </div>
+            <div class="stop-meta">
+              <span class="badge ${done ? 'success' : 'info'}">${done ? 'Entregue local' : 'Pendente'}</span>
+              <span class="badge info">${LaCoccinaSecurity.escapeHtml(order.phone || 'Sem telefone')}</span>
+              <span class="badge warn">Status admin: ${LaCoccinaSecurity.escapeHtml(order.status || '-')}</span>
+            </div>
+            <div class="btn-row" style="margin-top:12px;">
+              <a href="${stopMapsUrlFromAddress(order.address)}" target="_blank" rel="noopener" class="link-btn">Abrir parada</a>
+              ${phone ? `<a href="tel:${phone}" class="link-btn">Ligar</a>` : ''}
+              <button type="button" class="btn" onclick="toggleLocalDelivered(${Number(order.id)})">${done ? 'Desmarcar local' : 'Marcar entregue local'}</button>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      renderRouteMap().catch((error) => {
+        console.error(error);
+        showError(error.message);
+      });
+    }
+
+    function renderNavigationView() {
+      const locked = document.getElementById('nav-locked-state');
+      const content = document.getElementById('nav-content');
+      const currentStop = getCurrentStop();
+      const orders = getOrderedOrders();
+      const state = getLocalState();
+
+      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha' || !orders.length) {
+        locked.style.display = 'block';
+        content.style.display = 'none';
+        return;
+      }
+
+      locked.style.display = 'none';
+      content.style.display = 'block';
+
+      const currentIndex = Math.max(0, orders.findIndex((order) => Number(order.id) === Number(currentStop?.id)));
+      const deliveredCount = orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length;
+      const isDelivered = currentStop && (state.deliveredIds.includes(Number(currentStop.id)) || currentStop.status === 'entregue');
+      const phone = sanitizePhone(currentStop?.phone);
+      const whatsappLink = phone ? `https://wa.me/55${phone}` : '#';
+
+      document.getElementById('nav-stop-chips').innerHTML = orders.map((order) => `
+        <button type="button" class="stop-chip ${Number(order.id) === Number(currentStop?.id) ? 'active' : ''}" onclick="setCurrentStop(${Number(order.id)})">
+          ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente')}
+        </button>
+      `).join('');
+
+      document.getElementById('nav-kicker').textContent = `Parada ${currentIndex + 1} de ${orders.length}`;
+      document.getElementById('nav-customer').textContent = currentStop?.customer || 'Nenhuma parada';
+      document.getElementById('nav-address').textContent = currentStop?.address || 'Endereco nao informado';
+      document.getElementById('nav-progress').textContent = `${deliveredCount} / ${orders.length}`;
+      document.getElementById('nav-status').textContent = currentStop ? batchStatusLabel(currentStop.status) : '-';
+      document.getElementById('nav-phone').textContent = currentStop?.phone || 'Sem telefone';
+      document.getElementById('nav-obs').textContent = currentStop?.obs || 'Sem observacoes';
+      document.getElementById('nav-open-stop').href = currentStop ? stopMapsUrlFromAddress(currentStop.address) : '#';
+      document.getElementById('nav-call-stop').href = phone ? `tel:${phone}` : '#';
+      document.getElementById('nav-wa-stop').href = phone ? whatsappLink : '#';
+      document.getElementById('nav-toggle-delivered').textContent = isDelivered ? 'Desmarcar entregue local' : 'Marcar entregue local';
+      document.getElementById('nav-toggle-delivered').disabled = !currentStop;
+    }
+
+    function changeStop(step) {
+      const orders = getOrderedOrders();
+      if (!orders.length) return;
+      const currentStop = getCurrentStop();
+      const currentIndex = Math.max(0, orders.findIndex((order) => Number(order.id) === Number(currentStop?.id)));
+      const nextIndex = Math.min(Math.max(currentIndex + step, 0), orders.length - 1);
+      setCurrentStop(orders[nextIndex].id);
+    }
+
+    function renderSupportView() {
+      if (!currentBatch) return;
+      renderDriverCard();
+      updateInstallButtons();
+    }
+
+    function setView(view) {
+      currentView = view;
+      localStorage.setItem(VIEW_KEY, view);
+      document.querySelectorAll('.panel').forEach((panel) => {
+        panel.classList.toggle('active', panel.getAttribute('data-panel') === view);
+      });
+      document.querySelectorAll('.footer-tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.getAttribute('data-view') === view);
+      });
+
+      if (view === 'coleta') renderCollectionView();
+      if (view === 'rota') renderRouteView();
+      if (view === 'nav') renderNavigationView();
+      if (view === 'apoio') renderSupportView();
+    }
+
+    async function renderBatch() {
+      if (!currentBatch) return;
+      syncLocalStateWithBatch();
+      showApp();
+      renderOperationalHeader();
+      renderCollectionView();
+      renderRouteView();
+      renderNavigationView();
+      renderSupportView();
+      setView(currentView);
+    }
+
+    async function fetchBatch() {
+      const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Lote nao encontrado.');
+      }
+      currentBatch = await res.json();
+      return currentBatch;
+    }
+
+    async function refreshBatch(options = {}) {
+      if (isRefreshing) return;
+      isRefreshing = true;
+      if (!options.silent) showNotice('loading', 'Atualizando lote...');
+      try {
+        await fetchBatch();
+        await renderBatch();
+        setLive(true);
+      } catch (error) {
+        console.error(error);
+        showError(error.message);
+        setLive(false);
+      } finally {
+        isRefreshing = false;
+        clearNotice('loading');
+      }
+    }
+
+    async function acceptBatch() {
+      let payload = getSavedDriverProfile();
+      if (editingDriver || !isDriverProfileComplete(payload)) {
+        payload = readDriverProfileFromForm();
+      }
+      if (!isDriverProfileComplete(payload)) {
+        setEditingDriver(true);
+        renderDriverCard();
+        showError('Preencha nome, whatsapp, CPF, modelo e placa para aceitar o lote.');
+        setView('apoio');
+        return;
+      }
+
+      try {
+        showNotice('loading', 'Registrando aceite do lote...');
+        const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Nao foi possivel registrar o aceite do lote.');
+        saveDriverProfile(payload);
+        currentBatch = data.batch;
+        setEditingDriver(false);
+        await renderBatch();
+        showSuccess('Lote aceito com sucesso.');
+      } catch (error) {
+        console.error(error);
+        showError(error.message);
+      } finally {
+        clearNotice('loading');
+      }
+    }
+
+    function startPolling() {
+      stopPolling();
+      pollTimer = setInterval(() => {
+        refreshBatch({ silent: true }).catch(() => {});
+      }, 10000);
+    }
+
+    function stopPolling() {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+
+    function updateInstallButtons() {
+      const shouldShow = Boolean(deferredInstallPrompt);
+      ['install-btn', 'status-install-btn', 'support-install-btn'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    async function installApp() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const result = await deferredInstallPrompt.userChoice.catch(() => null);
+      if (result?.outcome === 'accepted') {
+        showSuccess('Aplicativo adicionado ao aparelho.');
+      }
+      deferredInstallPrompt = null;
+      updateInstallButtons();
+    }
+
+    async function copyPublicLink() {
+      const url = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        showSuccess('Link do lote copiado.');
+      } catch {
+        showError('Nao foi possivel copiar o link neste aparelho.');
+      }
+    }
+
+    function restoreTokenFromStorage() {
+      return localStorage.getItem(LAST_TOKEN_KEY) || '';
+    }
+
+    function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.register('driver-sw.js').catch(() => {});
+    }
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      updateInstallButtons();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      updateInstallButtons();
+      showSuccess('App instalado no aparelho.');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && currentToken) {
+        refreshBatch({ silent: true }).catch(() => {});
+      }
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', () => refreshBatch());
+    document.getElementById('status-refresh-btn').addEventListener('click', () => refreshBatch());
+    document.getElementById('side-refresh-btn').addEventListener('click', () => refreshBatch());
+    document.getElementById('support-refresh-btn').addEventListener('click', () => refreshBatch());
+    document.getElementById('mark-all-collected-btn').addEventListener('click', markAllCollected);
+    document.getElementById('clear-collected-btn').addEventListener('click', clearCollectedChecklist);
+    document.getElementById('prev-stop-btn').addEventListener('click', () => changeStop(-1));
+    document.getElementById('next-stop-btn').addEventListener('click', () => changeStop(1));
+    document.getElementById('nav-toggle-delivered').addEventListener('click', () => {
+      const currentStop = getCurrentStop();
+      if (currentStop) toggleLocalDelivered(currentStop.id);
+    });
+    document.getElementById('install-btn').addEventListener('click', installApp);
+    document.getElementById('status-install-btn').addEventListener('click', installApp);
+    document.getElementById('support-install-btn').addEventListener('click', installApp);
+    document.getElementById('support-copy-link-btn').addEventListener('click', copyPublicLink);
+    document.querySelectorAll('.footer-tab').forEach((tab) => {
+      tab.addEventListener('click', () => setView(tab.getAttribute('data-view')));
+    });
+
+    (async function init() {
+      const params = new URLSearchParams(window.location.search);
+      currentToken = params.get('token') || restoreTokenFromStorage();
+      if (!currentToken) {
+        showError('Token do lote nao informado. Abra o lote pelo link ou QR Code.');
+        return;
+      }
+
+      localStorage.setItem(LAST_TOKEN_KEY, currentToken);
+      fillDriverForm(getSavedDriverProfile());
+      registerServiceWorker();
+
+      try {
+        await refreshBatch();
+        startPolling();
+      } catch (error) {
+        console.error(error);
+        showError(error.message);
+      }
+    })();
+  </script>
 </body>
 </html>
