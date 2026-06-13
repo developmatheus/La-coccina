@@ -830,6 +830,20 @@
     return url.toString();
   }
 
+  function getOrderCoords(order) {
+    const lat = Number(order?.addressLat ?? order?.address_lat);
+    const lng = Number(order?.addressLng ?? order?.address_lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
+  }
+
+  function stopToResolvedStop(stop) {
+    const lat = Number(stop?.lat ?? stop?.location?.lat?.() ?? stop?.location?.lat);
+    const lng = Number(stop?.lng ?? stop?.location?.lng?.() ?? stop?.location?.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { id: stop.id, lat, lng };
+  }
+
   async function renderRouteMap(originAddress, orderedStops) {
     const mapEl = document.getElementById('route-map');
     routeMap = new google.maps.Map(mapEl, {
@@ -924,6 +938,7 @@
       ...routePreview,
       orderedStops,
       orderedOrderIds: orderedStops.map((stop) => stop.id),
+      resolvedStops: orderedStops.map(stopToResolvedStop).filter(Boolean),
       mapsUrl: buildGoogleMapsUrl(deliverySettings.restaurantOriginAddress, orderedStops),
     };
     renderRouteStopList(orderedStops);
@@ -979,11 +994,28 @@
       const originLocation = await geocodeAddress(deliverySettings.restaurantOriginAddress);
       const stops = [];
       for (const order of eligibleOrders) {
-        const location = await geocodeAddress(order.address);
-        stops.push({ id: order.id, customer: order.customer, address: order.address, phone: order.phone, location });
+        const savedCoords = getOrderCoords(order);
+        const location = savedCoords
+          ? new google.maps.LatLng(savedCoords.lat, savedCoords.lng)
+          : await geocodeAddress(order.address);
+        stops.push({
+          id: order.id,
+          customer: order.customer,
+          address: order.address,
+          phone: order.phone,
+          location,
+          lat: savedCoords?.lat ?? location.lat(),
+          lng: savedCoords?.lng ?? location.lng(),
+        });
       }
       const orderedStops = computeNearestNeighbor(originLocation, stops);
-      routePreview = { orderIds: eligibleOrders.map((order) => order.id), orderedOrderIds: [], orderedStops: [], mapsUrl: '' };
+      routePreview = {
+        orderIds: eligibleOrders.map((order) => order.id),
+        orderedOrderIds: [],
+        orderedStops: [],
+        resolvedStops: [],
+        mapsUrl: '',
+      };
       await applyManualRouteOrder(orderedStops, 'Rota sugerida pronta. Voce pode arrastar as paradas ou inverter a sequencia antes de confirmar.');
     } catch (error) {
       console.error(error);
@@ -1003,6 +1035,7 @@
         body: JSON.stringify({
           orderIds: routePreview.orderIds,
           orderedOrderIds: routePreview.orderedOrderIds,
+          resolvedStops: routePreview.resolvedStops,
           mapsUrl: routePreview.mapsUrl,
           originAddress: deliverySettings.restaurantOriginAddress,
         }),

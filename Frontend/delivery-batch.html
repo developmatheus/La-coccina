@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Central do Motoboy - La Coccina</title>
+  <title>Motoboy Compacto - La Coccina</title>
   <meta name="theme-color" content="#0f0f11">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,113 +13,167 @@
   <link rel="icon" type="image/png" sizes="32x32" href="ASSETS/imagens/favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com https://maps.gstatic.com; img-src 'self' https: data: blob:; connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com; frame-ancestors 'none'; base-uri 'self';">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    @font-face { font-family:'SomeTimeLater'; src:url('ASSETS/fonts/Some Time Later.otf') format('opentype'); }
     :root {
       color-scheme: dark;
       --bg: #09090b;
-      --surface: rgba(20, 20, 24, 0.92);
-      --surface-soft: rgba(28, 28, 34, 0.92);
-      --surface-strong: rgba(13, 13, 17, 0.98);
-      --border: rgba(255, 255, 255, 0.08);
+      --surface: rgba(17, 17, 20, 0.96);
+      --surface-soft: rgba(27, 27, 33, 0.92);
+      --border: rgba(255, 255, 255, 0.09);
       --text: #f4f4f5;
       --muted: #a1a1aa;
-      --muted-2: #71717a;
       --brand: #ffcc00;
-      --brand-strong: #f59e0b;
       --success: #22c55e;
-      --info: #38bdf8;
       --danger: #ef4444;
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+      --info: #38bdf8;
+      --warn: #f59e0b;
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
       --radius-lg: 22px;
       --radius-md: 18px;
       --radius-sm: 14px;
-      --footer-h: 88px;
+      --actions-h: 176px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
-    html { min-height: 100%; background: var(--bg); }
-    body {
+    * { box-sizing: border-box; }
+
+    html, body {
       margin: 0;
-      min-height: 100vh;
+      min-height: 100%;
       background:
         radial-gradient(circle at top, rgba(255, 204, 0, 0.16), transparent 28%),
         linear-gradient(180deg, #111214 0%, #09090b 42%, #050507 100%);
       color: var(--text);
       font-family: 'Inter', sans-serif;
-      padding: calc(env(safe-area-inset-top, 0px) + 16px) 14px calc(env(safe-area-inset-bottom, 0px) + var(--footer-h) + 20px);
     }
 
-    a { color: inherit; }
-    button, input, textarea { font: inherit; }
-    button { border: 0; }
+    body {
+      padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + var(--actions-h) + 16px);
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button { border: 0; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
 
     .shell {
-      width: min(100%, 1180px);
+      width: min(100%, 980px);
       margin: 0 auto;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
-      gap: 18px;
-      align-items: start;
+      gap: 12px;
     }
 
-    .main-column { min-width: 0; }
-    .side-column { min-width: 0; position: sticky; top: 16px; }
+    .card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .hidden { display: none !important; }
 
     .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
       position: sticky;
       top: calc(env(safe-area-inset-top, 0px) + 8px);
       z-index: 20;
-      margin-bottom: 14px;
       backdrop-filter: blur(18px);
     }
 
-    .topbar-inner {
+    .brand strong {
+      display: block;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .top-actions, .mini-row, .badge-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: rgba(10, 10, 12, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      padding: 10px 12px 10px 16px;
-      box-shadow: var(--shadow);
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .brand-wrap { min-width: 0; }
-    .brand { font-family: 'SomeTimeLater', cursive; font-size: 1.92rem; line-height: 1; color: var(--brand); }
-    .brand-sub { font-size: 0.72rem; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
+    .btn, .link-btn {
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+    }
 
-    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn:hover, .link-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
 
-    .card {
-      background: var(--surface);
+    .btn:disabled, .link-btn[aria-disabled="true"] {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      pointer-events: none;
+    }
+
+    .btn.primary, .link-btn.primary {
+      background: var(--brand);
+      color: #09090b;
+      border-color: rgba(255, 204, 0, 0.42);
+    }
+
+    .btn.success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #bbf7d0;
+      border-color: rgba(34, 197, 94, 0.28);
+    }
+
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fecaca;
+      border-color: rgba(239, 68, 68, 0.28);
+    }
+
+    .btn.ghost { background: transparent; }
+    .btn.small { min-height: 38px; padding: 8px 12px; font-size: 0.84rem; }
+
+    .notice {
+      display: none;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      line-height: 1.45;
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      padding: 18px;
     }
 
-    .card + .card { margin-top: 16px; }
+    .notice.show { display: block; }
+    .notice.error { background: rgba(127, 29, 29, 0.3); border-color: rgba(239, 68, 68, 0.28); color: #fecaca; }
+    .notice.success { background: rgba(20, 83, 45, 0.34); border-color: rgba(34, 197, 94, 0.28); color: #dcfce7; }
+    .notice.info { background: rgba(17, 24, 39, 0.78); border-color: rgba(56, 189, 248, 0.22); color: #dbeafe; }
 
     .hero {
-      overflow: hidden;
-      position: relative;
-      background:
-        linear-gradient(135deg, rgba(255, 204, 0, 0.14), rgba(255, 204, 0, 0.02)),
-        linear-gradient(180deg, rgba(20, 20, 24, 0.96), rgba(10, 10, 12, 0.96));
-    }
-
-    .hero::after {
-      content: '';
-      position: absolute;
-      inset: auto -30% -30% auto;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(255, 204, 0, 0.18), transparent 70%);
-      pointer-events: none;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+      gap: 14px;
+      align-items: stretch;
     }
 
     .eyebrow {
@@ -127,13 +181,14 @@
       align-items: center;
       gap: 8px;
       color: var(--brand);
-      font-size: 0.74rem;
-      letter-spacing: 0.12em;
+      font-size: 0.75rem;
       text-transform: uppercase;
+      letter-spacing: 0.12em;
       font-weight: 800;
     }
 
-    .eyebrow-dot {
+    .eyebrow::before {
+      content: '';
       width: 8px;
       height: 8px;
       border-radius: 999px;
@@ -141,341 +196,46 @@
       box-shadow: 0 0 0 6px rgba(255, 204, 0, 0.12);
     }
 
-    .hero-grid {
-      margin-top: 12px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-      gap: 16px;
-      align-items: stretch;
+    .hero h1 {
+      margin: 10px 0 6px;
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      line-height: 1.08;
     }
 
-    .hero-title {
-      margin: 8px 0 6px;
-      font-size: clamp(1.55rem, 2.3vw, 2.1rem);
-      line-height: 1.05;
-      font-weight: 800;
-    }
-
-    .hero-copy {
+    .hero p {
       margin: 0;
       color: var(--muted);
       line-height: 1.55;
       font-size: 0.92rem;
-      max-width: 62ch;
     }
 
-    .badge-row, .stat-grid, .chip-row, .mini-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border: 1px solid transparent;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-    }
-
-    .badge.brand { background: rgba(255, 204, 0, 0.12); color: var(--brand); border-color: rgba(255, 204, 0, 0.25); }
-    .badge.info { background: rgba(56, 189, 248, 0.12); color: #8fe4ff; border-color: rgba(56, 189, 248, 0.25); }
-    .badge.success { background: rgba(34, 197, 94, 0.12); color: #86efac; border-color: rgba(34, 197, 94, 0.25); }
-    .badge.warn { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border-color: rgba(245, 158, 11, 0.25); }
-
-    .hero-side {
-      background: rgba(7, 7, 9, 0.62);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 20px;
-      padding: 16px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .stat-grid {
+    .stat-grid, .details-grid, .input-grid, .panel-grid, .reason-grid {
       display: grid;
+      gap: 10px;
+    }
+
+    .stat-grid, .details-grid, .input-grid, .reason-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 4px;
     }
 
-    .stat {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 18px;
-      padding: 14px;
-      min-width: 0;
+    .panel-grid {
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+      align-items: start;
     }
 
-    .stat-label {
-      display: block;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.68rem;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .stat-value {
-      display: block;
-      font-size: 1.22rem;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .progress-wrap { margin-top: 16px; }
-    .progress-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .progress-bar {
-      height: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-bar > span {
-      display: block;
-      height: 100%;
-      width: 0;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--brand), #fde68a);
-      transition: width 0.24s ease;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .section-title {
-      margin: 0;
-      font-size: 1.02rem;
-      font-weight: 800;
-    }
-
-    .section-copy {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .btn, .link-btn {
-      min-height: 44px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      text-decoration: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-    }
-
-    .btn:hover, .link-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .btn.primary, .link-btn.primary {
-      background: var(--brand);
-      color: #09090b;
-      border-color: rgba(255, 204, 0, 0.4);
-    }
-
-    .btn.primary:hover, .link-btn.primary:hover { background: #ffd633; }
-    .btn.ghost { background: transparent; }
-    .btn.block, .link-btn.block { width: 100%; }
-    .btn.compact { min-height: 38px; padding: 8px 12px; font-size: 0.8rem; }
-
-    .icon {
-      width: 18px;
-      height: 18px;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .notice {
-      display: none;
-      border-radius: 18px;
-      padding: 14px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 14px;
-      font-size: 0.88rem;
-      line-height: 1.5;
-    }
-
-    .notice.error { background: rgba(127, 29, 29, 0.35); border-color: rgba(239, 68, 68, 0.25); color: #fecaca; }
-    .notice.info { background: rgba(17, 24, 39, 0.72); border-color: rgba(59, 130, 246, 0.2); color: #dbeafe; }
-    .notice.success { background: rgba(20, 83, 45, 0.45); border-color: rgba(34, 197, 94, 0.25); color: #dcfce7; }
-
-    .status-banner {
-      display: none;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 16px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(20, 20, 24, 0.92), rgba(10, 10, 12, 0.92));
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      margin-top: 16px;
-    }
-
-    .status-banner h2 {
-      margin: 0 0 6px;
-      font-size: 0.98rem;
-    }
-
-    .status-banner p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-
-    .live-wrap {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 0.8rem;
-      margin-top: 14px;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #52525b;
-    }
-
-    .live-dot.active {
-      background: var(--success);
-      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
-      animation: pulse 1.8s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .split-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .list-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .surface-soft {
-      background: rgba(255, 255, 255, 0.04);
+    .stat, .detail, .route-item, .status-lock {
+      border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 18px;
-      padding: 14px;
+      background: var(--surface-soft);
     }
 
-    .surface-soft h3 {
-      margin: 0 0 8px;
-      font-size: 0.92rem;
+    .stat, .detail {
+      padding: 12px;
     }
 
-    .surface-soft p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.5;
-    }
-
-    .pill-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.8rem;
-      min-width: 0;
-    }
-
-    .pill strong {
-      font-size: 0.92rem;
-      color: var(--text);
-    }
-
-    .driver-summary, .info-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .driver-line, .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 0.84rem;
-    }
-
-    .driver-line span:first-child, .info-row span:first-child {
-      color: var(--muted-2);
-      flex-shrink: 0;
-    }
-
-    .driver-line span:last-child, .info-row span:last-child {
-      color: var(--text);
-      text-align: right;
-      word-break: break-word;
-    }
-
-    label {
+    .stat span, .detail span, .field label {
       display: block;
-      color: var(--muted-2);
+      color: var(--muted);
       font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -483,9 +243,177 @@
       font-weight: 700;
     }
 
-    input {
-      width: 100%;
+    .stat strong {
+      font-size: 1.12rem;
+      line-height: 1.1;
+    }
+
+    .detail strong, .detail a {
+      font-size: 0.94rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .badge.brand { color: var(--brand); border-color: rgba(255, 204, 0, 0.28); background: rgba(255, 204, 0, 0.1); }
+    .badge.info { color: #bae6fd; border-color: rgba(56, 189, 248, 0.28); background: rgba(8, 47, 73, 0.28); }
+    .badge.success { color: #bbf7d0; border-color: rgba(34, 197, 94, 0.28); background: rgba(20, 83, 45, 0.25); }
+    .badge.warn { color: #fcd34d; border-color: rgba(245, 158, 11, 0.28); background: rgba(146, 64, 14, 0.25); }
+    .badge.danger { color: #fecaca; border-color: rgba(239, 68, 68, 0.28); background: rgba(127, 29, 29, 0.25); }
+
+    .pending-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: rgba(146, 64, 14, 0.24);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
       margin-bottom: 12px;
+    }
+
+    .section-head h2, .section-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .current-stop-card { display: flex; flex-direction: column; gap: 12px; }
+
+    .current-stop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .current-stop-header strong {
+      display: block;
+      font-size: 1.16rem;
+      line-height: 1.15;
+    }
+
+    .current-stop-address {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
+    }
+
+    .route-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .route-item {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .route-item.active {
+      border-color: rgba(255, 204, 0, 0.28);
+      background: rgba(255, 204, 0, 0.08);
+    }
+
+    .route-item.done {
+      border-color: rgba(34, 197, 94, 0.22);
+      background: rgba(20, 83, 45, 0.22);
+    }
+
+    .route-step {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--brand);
+      background: rgba(255, 204, 0, 0.12);
+      border: 1px solid rgba(255, 204, 0, 0.22);
+    }
+
+    .route-item strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .route-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .status-lock {
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.55;
+      background: rgba(255, 255, 255, 0.03);
+      border-style: dashed;
+    }
+
+    .support-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .support-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+
+    .support-row span:first-child {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .support-row span:last-child {
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .field input, .field textarea {
+      width: 100%;
       border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background: rgba(255, 255, 255, 0.04);
@@ -493,621 +421,367 @@
       padding: 12px 14px;
     }
 
-    input:focus {
+    .field textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .field input:focus, .field textarea:focus {
       outline: none;
-      border-color: rgba(255, 204, 0, 0.65);
+      border-color: rgba(255, 204, 0, 0.5);
       box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.12);
     }
 
-    #driver-form { display: none; margin-top: 14px; }
-    #driver-form.open { display: block; }
-
-    .checklist-row, .stop-card, .pickup-order {
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: rgba(255, 255, 255, 0.03);
-      padding: 14px;
-    }
-
-    .checklist-row.done, .pickup-order.done, .stop-card.done {
-      border-color: rgba(34, 197, 94, 0.22);
-      background: rgba(20, 83, 45, 0.24);
-    }
-
-    .checklist-row-head, .stop-card-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .checklist-row strong, .stop-card strong, .pickup-order strong {
-      display: block;
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-    }
-
-    .checklist-row p, .stop-card p, .pickup-order p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.5;
-    }
-
-    .order-items {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .order-item {
-      display: grid;
-      grid-template-columns: 56px minmax(0, 1fr);
-      gap: 10px;
-      align-items: start;
-      font-size: 0.8rem;
-    }
-
-    .order-item-qty {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 34px;
-      border-radius: 12px;
-      background: rgba(255, 204, 0, 0.12);
-      color: var(--brand);
-      border: 1px solid rgba(255, 204, 0, 0.22);
-      font-weight: 800;
-    }
-
-    .order-item-copy { color: var(--muted); }
-
-    .summary-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .summary-row {
-      display: grid;
-      grid-template-columns: 54px minmax(0, 1fr) auto;
-      gap: 12px;
-      align-items: center;
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .summary-count {
-      width: 54px;
-      height: 54px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 16px;
-      background: rgba(255, 204, 0, 0.1);
-      color: var(--brand);
-      font-weight: 800;
-      font-size: 1.1rem;
-      border: 1px solid rgba(255, 204, 0, 0.22);
-    }
-
-    .summary-row strong { display: block; font-size: 0.88rem; margin-bottom: 4px; }
-    .summary-row span { display: block; color: var(--muted); font-size: 0.76rem; line-height: 1.45; }
-
-    .route-map {
-      min-height: 420px;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: #0f1013;
-      margin-top: 14px;
-    }
-
-    .route-stops {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .stop-meta {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .stop-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      font-size: 0.74rem;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .stop-chip.active {
-      background: rgba(255, 204, 0, 0.12);
-      border-color: rgba(255, 204, 0, 0.24);
-      color: var(--brand);
-    }
-
-    .nav-console {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 220px;
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .nav-stage {
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border-radius: 22px;
-      padding: 18px;
-      background:
-        radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 35%),
-        linear-gradient(180deg, #111827 0%, #0b1020 100%);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-    }
-
-    .nav-stage small {
-      color: #93c5fd;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 800;
-      font-size: 0.7rem;
-    }
-
-    .nav-stage h3 {
-      margin: 10px 0 8px;
-      font-size: clamp(1.45rem, 2vw, 2rem);
-      line-height: 1.1;
-    }
-
-    .nav-stage p {
-      margin: 0;
-      color: #dbeafe;
-      font-size: 0.95rem;
-      line-height: 1.55;
-    }
-
-    .nav-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .nav-actions .btn, .nav-actions .link-btn { min-height: 56px; }
-
-    .nav-side {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .nav-metric {
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .nav-metric span {
-      display: block;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.68rem;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .nav-metric strong {
-      display: block;
-      font-size: 1.14rem;
-      line-height: 1.1;
-    }
-
-    .footer-nav {
+    .fixed-actions {
       position: fixed;
       left: 50%;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
       transform: translateX(-50%);
-      width: min(calc(100vw - 20px), 720px);
-      z-index: 40;
+      width: min(calc(100vw - 16px), 980px);
+      z-index: 30;
     }
 
-    .footer-nav-inner {
+    .fixed-actions-inner {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
-      background: rgba(9, 9, 11, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
       padding: 10px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(9, 9, 11, 0.94);
       backdrop-filter: blur(18px);
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
     }
 
-    .footer-tab {
-      min-height: 64px;
-      border-radius: 18px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
+    .fixed-actions .btn, .fixed-actions .link-btn {
+      min-height: 54px;
+      font-size: 0.92rem;
+    }
+
+    .fixed-actions .wide {
+      grid-column: span 2;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      font-size: 0.74rem;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 40;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(100%, 460px);
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+
+    .modal-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.88rem;
+    }
+
+    .reason-option {
+      min-height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 10px 12px;
+      text-align: center;
       font-weight: 700;
     }
 
-    .footer-tab svg { width: 20px; height: 20px; }
-    .footer-tab.active {
+    .reason-option.active {
       color: var(--brand);
+      border-color: rgba(255, 204, 0, 0.28);
       background: rgba(255, 204, 0, 0.1);
-      border-color: rgba(255, 204, 0, 0.18);
     }
 
-    .footer-tab:disabled {
-      opacity: 0.58;
-      cursor: not-allowed;
-    }
-
-    .empty-state {
-      padding: 18px;
-      border-radius: 18px;
-      border: 1px dashed rgba(255, 255, 255, 0.12);
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.6;
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .support-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      word-break: break-all;
-      font-size: 0.78rem;
-    }
-
-    .hide-desktop { display: none; }
-
-    @media (max-width: 1024px) {
-      .shell {
+    @media (max-width: 860px) {
+      .hero, .panel-grid {
         grid-template-columns: 1fr;
       }
-
-      .side-column {
-        position: static;
-      }
-
-      .hide-desktop { display: block; }
-      .hide-mobile { display: none; }
     }
 
-    @media (max-width: 820px) {
-      .hero-grid, .split-grid, .nav-console, .support-grid {
-        grid-template-columns: 1fr;
+    @media (max-width: 480px) {
+      body {
+        padding-left: 10px;
+        padding-right: 10px;
       }
 
-      .route-map { min-height: 320px; }
-      .topbar-inner { border-radius: 24px; align-items: flex-start; }
+      .fixed-actions-inner {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .fixed-actions .wide {
+        grid-column: span 2;
+      }
+
+      .route-item {
+        grid-template-columns: 42px minmax(0, 1fr);
+      }
+
+      .route-item .btn {
+        grid-column: 1 / -1;
+      }
     }
 
-    @media (max-width: 640px) {
-      body { padding-left: 12px; padding-right: 12px; }
-      .card { padding: 16px; border-radius: 20px; }
-      .topbar { margin-bottom: 12px; }
-      .topbar-inner { padding: 12px 14px; }
-      .hero-side { padding: 14px; }
-      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .summary-row { grid-template-columns: 44px minmax(0, 1fr); }
-      .summary-count { width: 44px; height: 44px; border-radius: 14px; font-size: 0.96rem; }
-      .nav-actions { grid-template-columns: 1fr 1fr; }
-      .status-banner { flex-direction: column; }
-      .footer-nav { width: calc(100vw - 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); }
-      .footer-nav-inner { gap: 6px; padding: 8px; border-radius: 22px; }
-      .footer-tab { min-height: 60px; font-size: 0.68rem; }
+    @media (max-height: 450px) {
+      :root { --actions-h: 148px; }
+
+      body {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+      }
+
+      .brand span, .hero p, #split-guide, .eyebrow {
+        display: none;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .hero h1 {
+        margin: 4px 0 0;
+        font-size: 1.18rem;
+      }
+
+      .route-list {
+        max-height: 200px;
+      }
+
+      .fixed-actions .btn, .fixed-actions .link-btn {
+        min-height: 48px;
+      }
+    }
+
+    @media (max-height: 350px) {
+      :root { --actions-h: 132px; }
+
+      .topbar, #install-btn {
+        display: none;
+      }
+
+      body {
+        padding-top: 8px;
+      }
+
+      .card {
+        border-radius: 16px;
+        padding: 10px;
+      }
+
+      .hero .stat-grid {
+        display: none;
+      }
+
+      .current-stop-header strong {
+        font-size: 1rem;
+      }
+
+      .current-stop-address, .detail strong, .detail a {
+        font-size: 0.84rem;
+      }
+
+      .route-list {
+        max-height: 120px;
+      }
+
+      .fixed-actions .btn, .fixed-actions .link-btn {
+        min-height: 42px;
+        font-size: 0.82rem;
+      }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand-wrap">
-        <div class="brand">La Coccina</div>
-        <div class="brand-sub">Central de trabalho do motoboy</div>
+  <div class="shell">
+    <header class="card topbar">
+      <div class="brand">
+        <strong>La Coccina Driver</strong>
+        <span>Modo motoboy compacto para Android em tela dividida</span>
       </div>
-      <div class="topbar-actions">
-        <button type="button" class="btn compact ghost" id="install-btn" style="display:none;">Instalar app</button>
-        <button type="button" class="btn compact" id="refresh-btn">Atualizar</button>
+      <div class="top-actions">
+        <button type="button" class="btn small ghost hidden" id="install-btn">Instalar</button>
+        <button type="button" class="btn small" id="refresh-btn">Atualizar</button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <div class="notice error" id="error-msg"></div>
-  <div class="notice success" id="success-msg"></div>
-  <div class="notice info" id="loading-msg">Carregando lote...</div>
+    <div id="error-msg" class="notice"></div>
+    <div id="success-msg" class="notice"></div>
+    <div id="info-msg" class="notice show info">Carregando lote...</div>
 
-  <div id="app" style="display:none;">
-    <section class="card hero">
-      <div class="eyebrow"><span class="eyebrow-dot"></span>Ferramenta de campo</div>
-      <div class="hero-grid">
+    <main id="app" class="hidden">
+      <section class="card hero">
         <div>
+          <div class="eyebrow">Operacao em campo</div>
           <div class="badge-row" id="hero-badges"></div>
-          <h1 class="hero-title" id="batch-title">Lote</h1>
-          <p class="hero-copy" id="batch-subtitle">Carregando dados do lote...</p>
-          <div class="progress-wrap">
-            <div class="progress-head">
-              <span id="progress-label">Progresso operacional</span>
-              <strong id="progress-copy">0%</strong>
-            </div>
-            <div class="progress-bar"><span id="progress-bar-fill"></span></div>
-          </div>
-          <div class="live-wrap">
-            <span class="live-dot" id="live-dot"></span>
-            <span id="live-label">Sincronizando dados do lote...</span>
+          <h1 id="batch-title">Lote</h1>
+          <p id="batch-copy">Carregando dados do lote...</p>
+          <div class="mini-row" style="margin-top:12px;">
+            <span class="badge info" id="live-badge">Sincronizando...</span>
+            <span class="badge brand" id="mode-badge">Modo compacto</span>
+            <span class="pending-chip hidden" id="pending-chip">0 pendencias</span>
           </div>
         </div>
-
-        <div class="hero-side">
-          <div class="stat-grid">
-            <div class="stat">
-              <span class="stat-label">Paradas</span>
-              <span class="stat-value" id="stat-stops">-</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Coletadas</span>
-              <span class="stat-value" id="stat-collected">-</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Entregas locais</span>
-              <span class="stat-value" id="stat-delivered">-</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Placa</span>
-              <span class="stat-value" id="stat-plate">-</span>
-            </div>
-          </div>
-          <div class="pill-grid" id="hero-pills"></div>
+        <div class="stat-grid">
+          <div class="stat"><span>Entrega</span><strong id="stat-step">-</strong></div>
+          <div class="stat"><span>Concluidas</span><strong id="stat-done">-</strong></div>
+          <div class="stat"><span>Status</span><strong id="stat-batch-status">-</strong></div>
+          <div class="stat"><span>Placa</span><strong id="stat-plate">-</strong></div>
         </div>
-      </div>
+      </section>
 
-      <div class="status-banner" id="status-banner">
-        <div>
-          <h2 id="status-banner-title">Aguardando fluxo</h2>
-          <p id="status-banner-copy">A cozinha ainda nao liberou a rota.</p>
-        </div>
-        <div class="btn-row">
-          <button type="button" class="btn" id="status-refresh-btn">Atualizar agora</button>
-          <button type="button" class="btn ghost" id="status-install-btn" style="display:none;">Instalar app</button>
-        </div>
-      </div>
-    </section>
-
-    <div class="shell">
-      <main class="main-column">
-        <section class="card panel active" data-panel="coleta">
+      <section class="panel-grid">
+        <section class="card current-stop-card">
           <div class="section-head">
             <div>
-              <h2 class="section-title">Modo Coleta</h2>
-              <p class="section-copy">Resumo do que precisa sair da cozinha, com checklist local por pedido para evitar falta de marmita ou troca de sacola.</p>
+              <h2 id="current-stop-title">Entrega atual</h2>
+              <p id="current-stop-copy">Use Maps ou Waze ao lado e confirme a entrega sem sair desta tela.</p>
             </div>
-            <div class="btn-row">
-              <button type="button" class="btn compact" id="mark-all-collected-btn">Marcar tudo</button>
-              <button type="button" class="btn compact ghost" id="clear-collected-btn">Limpar checklist</button>
-            </div>
-          </div>
-          <div class="split-grid">
-            <div class="surface-soft">
-              <h3>Resumo de retirada</h3>
-              <p>Os itens abaixo sao agrupados a partir dos pedidos do lote para facilitar a conferencia com a cozinha.</p>
-              <div class="summary-list" id="pickup-summary-list"></div>
-            </div>
-            <div class="surface-soft">
-              <h3>Checklist por pedido</h3>
-              <p>Confira cliente, telefone, observacoes e itens antes de sair. Esse controle e local no aparelho do motoboy.</p>
-              <div class="pill-grid" id="pickup-summary-pills"></div>
+            <div class="badge-row">
+              <span class="badge info" id="stop-status-badge">Carregando</span>
             </div>
           </div>
-          <div class="list-stack" id="pickup-orders-list" style="margin-top:14px;"></div>
-        </section>
 
-        <section class="card panel" data-panel="rota">
-          <div class="section-head">
-            <div>
-              <h2 class="section-title">Modo Rota</h2>
-              <p class="section-copy">Mapa embutido, progresso da rodada e paradas ordenadas. Quando a cozinha libera, o lote vira guia de execucao da rota.</p>
-            </div>
-            <div class="btn-row">
-              <a href="#" target="_blank" rel="noopener" class="link-btn primary" id="open-maps-btn">Abrir no Google Maps</a>
-            </div>
-          </div>
-          <div id="route-locked-state" class="empty-state">A rota sera liberada assim que o lote estiver aceito e confirmado pela cozinha.</div>
-          <div id="route-content" style="display:none;">
-            <div class="pill-grid" id="route-summary-pills"></div>
-            <div class="route-map" id="route-map"></div>
-            <div class="route-stops" id="route-stop-list"></div>
-          </div>
-        </section>
+          <div id="route-lock" class="status-lock hidden"></div>
 
-        <section class="card panel" data-panel="nav">
-          <div class="section-head">
-            <div>
-              <h2 class="section-title">Modo Navegacao</h2>
-              <p class="section-copy">Layout de consulta rapida, com foco na proxima parada, botao grande para abrir rota e atalhos de contato em estilo painel de bordo.</p>
-            </div>
-            <div class="btn-row">
-              <button type="button" class="btn compact" id="prev-stop-btn">Anterior</button>
-              <button type="button" class="btn compact" id="next-stop-btn">Proxima</button>
-            </div>
-          </div>
-          <div id="nav-locked-state" class="empty-state">O modo navegacao fica pronto quando a cozinha liberar o lote para entrega.</div>
-          <div id="nav-content" style="display:none;">
-            <div class="pill-grid" id="nav-stop-chips"></div>
-            <div class="nav-console" style="margin-top:14px;">
-              <div class="nav-stage">
-                <div>
-                  <small id="nav-kicker">Parada ativa</small>
-                  <h3 id="nav-customer">Aguardando rota</h3>
-                  <p id="nav-address">Assim que a cozinha liberar, esta area passa a destacar a proxima entrega.</p>
-                </div>
-                <div class="nav-actions">
-                  <a href="#" class="link-btn primary" id="nav-open-stop" target="_blank" rel="noopener">Abrir parada</a>
-                  <a href="#" class="link-btn" id="nav-call-stop">Ligar</a>
-                  <a href="#" class="link-btn" id="nav-wa-stop" target="_blank" rel="noopener">Whatsapp</a>
-                  <button type="button" class="btn" id="nav-toggle-delivered">Marcar entregue local</button>
-                </div>
+          <div id="current-stop-content">
+            <div class="current-stop-header">
+              <div>
+                <span class="badge brand" id="stop-progress-badge">Entrega -/-</span>
+                <strong id="stop-customer">Aguardando rota</strong>
               </div>
-              <div class="nav-side">
-                <div class="nav-metric">
-                  <span>Andamento</span>
-                  <strong id="nav-progress">0 / 0</strong>
-                </div>
-                <div class="nav-metric">
-                  <span>Status atual</span>
-                  <strong id="nav-status">-</strong>
-                </div>
-                <div class="nav-metric">
-                  <span>Telefone</span>
-                  <strong id="nav-phone">-</strong>
-                </div>
-                <div class="nav-metric">
-                  <span>Observacao</span>
-                  <strong id="nav-obs">Sem observacoes</strong>
-                </div>
-              </div>
+            </div>
+            <div class="current-stop-address" id="stop-address">Assim que o lote carregar, esta area passa a destacar a parada atual.</div>
+            <div class="details-grid">
+              <div class="detail"><span>Telefone</span><a href="#" id="phone-link">-</a></div>
+              <div class="detail"><span>WhatsApp</span><a href="#" id="wa-link" target="_blank" rel="noopener">-</a></div>
+              <div class="detail"><span>Pagamento</span><strong id="stop-payment">-</strong></div>
+              <div class="detail"><span>Valor</span><strong id="stop-total">-</strong></div>
+              <div class="detail"><span>Observacao</span><strong id="stop-obs">Sem observacao</strong></div>
+              <div class="detail"><span>Ultima tentativa</span><strong id="stop-attempt">-</strong></div>
             </div>
           </div>
         </section>
 
-        <section class="card panel" data-panel="apoio">
+        <aside class="card">
           <div class="section-head">
             <div>
-              <h2 class="section-title">Modo Apoio</h2>
-              <p class="section-copy">Atalhos uteis para operacao diaria, informacoes do lote, instalacao do PWA e dados do motoboy no mesmo lugar.</p>
+              <h3>Proximas entregas</h3>
+              <p>O Google Maps abre apenas a entrega atual e as proximas 3 pendentes.</p>
             </div>
+            <button type="button" class="btn small" id="retry-btn">Reenviar</button>
           </div>
-          <div class="support-grid">
-            <div class="surface-soft">
-              <h3>Atalhos rapidos</h3>
-              <div class="btn-row" style="margin-top:12px;">
-                <button type="button" class="btn" id="support-refresh-btn">Atualizar lote</button>
-                <button type="button" class="btn" id="support-install-btn" style="display:none;">Instalar app</button>
-                <a href="#" class="link-btn" id="support-open-route" target="_blank" rel="noopener">Abrir rota completa</a>
-                <button type="button" class="btn" id="support-copy-link-btn">Copiar link</button>
-              </div>
-            </div>
-            <div class="surface-soft">
-              <h3>Orientacao de uso</h3>
-              <p>Boa pratica: use o modo Coleta para retirar as marmitas, confira a liberacao no modo Rota e troque para Navegacao quando sair para a rua. As marcacoes locais ajudam o ritmo do motoboy sem mexer no painel admin.</p>
-            </div>
-          </div>
-          <div class="split-grid" style="margin-top:14px;">
-            <div class="surface-soft">
-              <h3>Resumo do lote</h3>
-              <div class="info-list">
-                <div class="info-row"><span>Lote</span><span id="support-batch-code">-</span></div>
-                <div class="info-row"><span>Status</span><span id="support-batch-status">-</span></div>
-                <div class="info-row"><span>Origem</span><span id="support-origin">-</span></div>
-                <div class="info-row"><span>Link publico</span><span class="mono" id="support-link">-</span></div>
-              </div>
-            </div>
-            <div class="surface-soft">
+          <div class="route-list" id="route-list"></div>
+        </aside>
+      </section>
+
+      <section class="panel-grid">
+        <section class="card" id="driver-card">
+          <div class="section-head">
+            <div>
               <h3>Cadastro do motoboy</h3>
-              <p id="driver-card-desc">Use seu cadastro-base para aceitar este lote.</p>
-              <div id="driver-summary" class="driver-summary" style="margin-top:12px;"></div>
-              <form id="driver-form" onsubmit="event.preventDefault(); acceptBatch();">
+              <p id="driver-copy">Use seu cadastro-base para aceitar este lote.</p>
+            </div>
+          </div>
+
+          <form id="driver-form">
+            <div class="input-grid">
+              <div class="field">
                 <label for="driver-name">Nome</label>
                 <input id="driver-name" type="text" autocomplete="name" required>
-
-                <label for="driver-whatsapp">Whatsapp</label>
+              </div>
+              <div class="field">
+                <label for="driver-whatsapp">WhatsApp</label>
                 <input id="driver-whatsapp" type="text" inputmode="tel" required>
-
+              </div>
+              <div class="field">
                 <label for="driver-cpf">CPF</label>
                 <input id="driver-cpf" type="text" inputmode="numeric" required>
-
-                <label for="driver-model">Modelo</label>
+              </div>
+              <div class="field">
+                <label for="driver-model">Moto</label>
                 <input id="driver-model" type="text" required>
-
+              </div>
+              <div class="field" style="grid-column:1 / -1;">
                 <label for="driver-plate">Placa</label>
                 <input id="driver-plate" type="text" autocomplete="off" required>
-              </form>
-              <div class="btn-row" id="driver-actions" style="margin-top:14px;"></div>
+              </div>
             </div>
-          </div>
+            <div class="mini-row">
+              <button type="submit" class="btn primary" id="accept-btn">Salvar e aceitar lote</button>
+              <button type="button" class="btn ghost" id="reuse-driver-btn">Usar dados salvos</button>
+            </div>
+          </form>
         </section>
-      </main>
 
-      <aside class="side-column hide-mobile">
-        <section class="card">
-          <div class="section-head" style="margin-bottom:12px;">
+        <aside class="card" id="split-guide">
+          <div class="section-head">
             <div>
-              <h2 class="section-title">Painel rapido</h2>
-              <p class="section-copy">Visao lateral fixa para consulta durante a operacao.</p>
+              <h3>Uso em Android</h3>
+              <p>Ative a tela dividida manualmente com seu navegador e o app de navegacao.</p>
             </div>
           </div>
-          <div class="badge-row" id="side-badges"></div>
-          <div class="surface-soft" style="margin-top:14px;">
-            <h3>Origem</h3>
-            <p id="origin-address">-</p>
+          <div class="support-list">
+            <div class="support-row"><span>Lote</span><span id="support-batch-code">-</span></div>
+            <div class="support-row"><span>Status</span><span id="support-batch-status">-</span></div>
+            <div class="support-row"><span>Origem</span><span id="support-origin">-</span></div>
+            <div class="support-row"><span>Motoboy</span><span id="support-driver">-</span></div>
+            <div class="support-row"><span>Conexao</span><span id="support-connection">-</span></div>
           </div>
-          <div class="surface-soft" style="margin-top:12px;">
-            <h3>Motoboy vinculado</h3>
-            <div id="side-driver-summary" class="driver-summary" style="margin-top:12px;"></div>
+          <div class="mini-row">
+            <button type="button" class="btn small" id="copy-link-btn">Copiar link</button>
+            <button type="button" class="btn small ghost hidden" id="support-install-btn">Instalar</button>
           </div>
-          <div class="surface-soft" style="margin-top:12px;">
-            <h3>Controles</h3>
-            <div class="btn-row" style="margin-top:12px;">
-              <button type="button" class="btn block" id="side-refresh-btn">Atualizar lote</button>
-              <a href="#" class="link-btn block" id="side-open-route" target="_blank" rel="noopener">Abrir rota</a>
-            </div>
-          </div>
-        </section>
-      </aside>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div class="fixed-actions" id="actions-bar">
+    <div class="fixed-actions-inner">
+      <a href="#" class="link-btn primary" id="maps-btn" target="_blank" rel="noopener">Trecho Maps</a>
+      <a href="#" class="link-btn" id="waze-btn" target="_blank" rel="noopener">Waze atual</a>
+      <button type="button" class="btn" id="call-btn">Ligar</button>
+      <button type="button" class="btn success wide" id="delivered-btn">Entregue</button>
+      <button type="button" class="btn danger" id="failed-btn">Nao entregue</button>
+      <button type="button" class="btn" id="prev-btn">Anterior</button>
+      <button type="button" class="btn" id="next-btn">Proxima</button>
     </div>
   </div>
 
-  <nav class="footer-nav" aria-label="Navegacao do motoboy">
-    <div class="footer-nav-inner">
-      <button type="button" class="footer-tab active" data-view="coleta">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
-        <span>Coleta</span>
-      </button>
-      <button type="button" class="footer-tab" data-view="rota">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-4 2 2-4 8-8 2 2-8 8z"/><path d="M14 5l2-2 5 5-2 2"/><path d="M3 3h6"/><path d="M15 21h6"/></svg>
-        <span>Rota</span>
-      </button>
-      <button type="button" class="footer-tab" data-view="nav">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 18-7-4-7 4 7-18z"/><path d="M12 3v14"/></svg>
-        <span>Navegar</span>
-      </button>
-      <button type="button" class="footer-tab" data-view="apoio">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/><path d="M8 3l1.5 3"/><path d="M16 3l-1.5 3"/></svg>
-        <span>Apoio</span>
-      </button>
+  <div class="modal" id="failed-modal">
+    <div class="modal-card">
+      <h3>Motivo da nao entrega</h3>
+      <p>Escolha um motivo rapido e, se quiser, registre uma observacao curta.</p>
+      <div class="reason-grid" id="reason-grid"></div>
+      <div class="field">
+        <label for="failed-note">Observacao</label>
+        <textarea id="failed-note" maxlength="280" placeholder="Opcional"></textarea>
+      </div>
+      <div class="mini-row" style="margin-top:12px;">
+        <button type="button" class="btn danger" id="confirm-failed-btn">Salvar nao entrega</button>
+        <button type="button" class="btn ghost" id="cancel-failed-btn">Cancelar</button>
+      </div>
     </div>
-  </nav>
+  </div>
 
   <script src="ASSETS/js/config.js"></script>
   <script src="ASSETS/js/security.js"></script>
@@ -1115,7 +789,17 @@
     const API = LaCoccinaSecurity.API_BASE;
     const DRIVER_KEY = 'lc_driver_profile';
     const LAST_TOKEN_KEY = 'lc_last_delivery_batch_token';
-    const VIEW_KEY = 'lc_driver_current_view';
+    const CACHE_PREFIX = 'lc_batch_cache_';
+    const STATE_PREFIX = 'lc_batch_state_';
+    const QUEUE_PREFIX = 'lc_batch_queue_';
+    const SESSION_PREFIX = 'lc_batch_session_';
+    const MAX_IDLE_REFRESH_MS = 5 * 60 * 1000;
+    const FAILURE_REASONS = [
+      { key: 'cliente_ausente', label: 'Cliente ausente' },
+      { key: 'endereco_incorreto', label: 'Endereco incorreto' },
+      { key: 'pedido_cancelado', label: 'Pedido cancelado' },
+      { key: 'outro', label: 'Outro' },
+    ];
     const BATCH_STATUS_LABELS = {
       preparado: 'Aguardando aceite do motoboy',
       aceito_motoboy: 'Aguardando liberacao da cozinha',
@@ -1124,103 +808,45 @@
 
     let currentToken = '';
     let currentBatch = null;
-    let currentView = localStorage.getItem(VIEW_KEY) || 'coleta';
-    let editingDriver = false;
+    let currentSession = null;
     let pollTimer = null;
-    let googleMapsPromise = null;
-    let mapInstance = null;
-    let directionsRenderer = null;
     let deferredInstallPrompt = null;
     let isRefreshing = false;
+    let selectedFailureReason = 'cliente_ausente';
+    let lastAppliedBatchSignature = '';
+    let lastAppliedBatchAt = 0;
 
-    function iconHtml(path, viewBox = '0 0 24 24') {
-      return `<svg class="icon" viewBox="${viewBox}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+    function esc(value) {
+      return LaCoccinaSecurity.escapeHtml(String(value ?? ''));
     }
 
-    function showNotice(type, message) {
-      const ids = ['error-msg', 'success-msg', 'loading-msg'];
-      ids.forEach((id) => {
-        const el = document.getElementById(id);
-        el.style.display = 'none';
-      });
-
-      const map = {
-        error: 'error-msg',
-        success: 'success-msg',
-        loading: 'loading-msg',
-      };
-      const id = map[type];
-      if (!id || !message) return;
-      const el = document.getElementById(id);
-      el.textContent = message;
-      el.style.display = 'block';
+    function queryParam(name) {
+      return new URLSearchParams(window.location.search).get(name) || '';
     }
 
-    function clearNotice(type) {
-      const map = {
-        error: 'error-msg',
-        success: 'success-msg',
-        loading: 'loading-msg',
-      };
-      const id = map[type];
-      if (!id) return;
-      document.getElementById(id).style.display = 'none';
-    }
-
-    function showError(message) {
-      clearNotice('loading');
-      showNotice('error', message);
-    }
-
-    function showSuccess(message) {
-      clearNotice('error');
-      showNotice('success', message);
-      window.clearTimeout(showSuccess.timer);
-      showSuccess.timer = window.setTimeout(() => clearNotice('success'), 2200);
-    }
-
-    function showApp() {
-      clearNotice('loading');
-      document.getElementById('app').style.display = '';
-    }
-
-    function setLive(connected) {
-      const dot = document.getElementById('live-dot');
-      const label = document.getElementById('live-label');
-      dot.className = connected ? 'live-dot active' : 'live-dot';
-      label.textContent = connected ? 'Atualizando o lote automaticamente a cada 10s' : 'Sem conexao com o lote. Tentando reconectar...';
-    }
-
-    function batchStatusLabel(status) {
-      return BATCH_STATUS_LABELS[status] || status || 'Sem status';
-    }
-
-    function formatTime(dateString) {
-      if (!dateString) return '-';
-      const normalized = dateString.includes('Z') ? dateString : `${dateString}Z`;
-      const date = new Date(normalized);
-      if (Number.isNaN(date.getTime())) return '-';
-      return date.toLocaleString('pt-BR');
-    }
-
-    function sanitizePhone(phone) {
-      return String(phone || '').replace(/\D/g, '');
-    }
-
-    function stopMapsUrlFromAddress(address) {
-      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address || '')}&travelmode=driving`;
-    }
-
-    function getSavedDriverProfile() {
+    function readJson(key, fallback) {
       try {
-        return JSON.parse(localStorage.getItem(DRIVER_KEY) || 'null');
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
       } catch {
-        return null;
+        return fallback;
       }
     }
 
+    function writeJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function stateKey(prefix) {
+      return `${prefix}${currentToken}`;
+    }
+
+    function getSavedDriverProfile() {
+      return readJson(DRIVER_KEY, null);
+    }
+
     function saveDriverProfile(profile) {
-      localStorage.setItem(DRIVER_KEY, JSON.stringify(profile));
+      writeJson(DRIVER_KEY, profile);
     }
 
     function fillDriverForm(profile) {
@@ -1231,7 +857,7 @@
       document.getElementById('driver-plate').value = profile?.vehiclePlate || '';
     }
 
-    function readDriverProfileFromForm() {
+    function readDriverForm() {
       return {
         name: document.getElementById('driver-name').value.trim(),
         whatsapp: document.getElementById('driver-whatsapp').value.trim(),
@@ -1241,611 +867,798 @@
       };
     }
 
-    function isDriverProfileComplete(profile) {
+    function isProfileComplete(profile) {
       return Boolean(profile?.name && profile?.whatsapp && profile?.cpf && profile?.vehicleModel && profile?.vehiclePlate);
     }
 
-    function setEditingDriver(enabled) {
-      editingDriver = enabled;
-      document.getElementById('driver-form').classList.toggle('open', enabled);
+    function getUiState() {
+      return readJson(stateKey(STATE_PREFIX), { currentOrderId: null, history: [] });
     }
 
-    function renderDriverSummary(profile) {
-      if (!profile) {
-        return '<p style="margin:0;color:var(--muted);font-size:0.84rem;">Nenhum cadastro-base salvo neste aparelho.</p>';
+    function saveUiState(state) {
+      writeJson(stateKey(STATE_PREFIX), {
+        currentOrderId: Number(state?.currentOrderId) || null,
+        history: Array.isArray(state?.history)
+          ? state.history.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0).slice(-12)
+          : [],
+      });
+    }
+
+    function patchUiState(patch) {
+      saveUiState({ ...getUiState(), ...patch });
+    }
+
+    function pushHistory(orderId) {
+      const normalized = Number(orderId);
+      if (!Number.isInteger(normalized) || normalized <= 0) return;
+      const state = getUiState();
+      const history = Array.isArray(state.history) ? state.history.slice() : [];
+      if (history[history.length - 1] !== normalized) {
+        history.push(normalized);
       }
-      return `
-        <div class="driver-line"><span>Nome</span><span>${LaCoccinaSecurity.escapeHtml(profile.name || '-')}</span></div>
-        <div class="driver-line"><span>Whatsapp</span><span>${LaCoccinaSecurity.escapeHtml(profile.whatsapp || '-')}</span></div>
-        <div class="driver-line"><span>CPF</span><span>${LaCoccinaSecurity.escapeHtml(profile.cpf || '-')}</span></div>
-        <div class="driver-line"><span>Modelo</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehicleModel || '-')}</span></div>
-        <div class="driver-line"><span>Placa</span><span>${LaCoccinaSecurity.escapeHtml(profile.vehiclePlate || '-')}</span></div>
-      `;
+      saveUiState({ ...state, history });
     }
 
-    function getOrderedOrders() {
+    function popHistoryOrderId() {
+      const state = getUiState();
+      const history = Array.isArray(state.history) ? state.history.slice() : [];
+      const previousOrderId = Number(history.pop()) || null;
+      saveUiState({ ...state, history });
+      return previousOrderId;
+    }
+
+    function getPendingQueue() {
+      return readJson(stateKey(QUEUE_PREFIX), []);
+    }
+
+    function savePendingQueue(queue) {
+      writeJson(stateKey(QUEUE_PREFIX), queue);
+    }
+
+    function getCachedBatch() {
+      return readJson(stateKey(CACHE_PREFIX), null);
+    }
+
+    function saveCachedBatch(batch) {
+      writeJson(stateKey(CACHE_PREFIX), batch);
+    }
+
+    function getSavedSession() {
+      return readJson(stateKey(SESSION_PREFIX), null);
+    }
+
+    function saveSession(token, expiresAt) {
+      currentSession = { token, expiresAt };
+      writeJson(stateKey(SESSION_PREFIX), currentSession);
+    }
+
+    function isSessionValid(session) {
+      if (!session?.token || !session?.expiresAt) return false;
+      const expiresAt = Date.parse(session.expiresAt);
+      return Number.isFinite(expiresAt) && expiresAt > Date.now() + 30000;
+    }
+
+    function batchStatusLabel(status) {
+      return BATCH_STATUS_LABELS[status] || status || 'Sem status';
+    }
+
+    function normalizeStopSnapshot(stop) {
+      if (!stop) return null;
+      return {
+        orderId: Number(stop.orderId ?? stop.id ?? 0) || null,
+        sequence: Number(stop.sequence ?? stop.delivery_sequence ?? 0) || null,
+        customerName: String(stop.customerName || stop.customer || ''),
+        address: String(stop.address || ''),
+        address_lat: Number.isFinite(Number(stop.address_lat ?? stop.addressLat))
+          ? Number(stop.address_lat ?? stop.addressLat)
+          : null,
+        address_lng: Number.isFinite(Number(stop.address_lng ?? stop.addressLng))
+          ? Number(stop.address_lng ?? stop.addressLng)
+          : null,
+        status: String(stop.status || ''),
+      };
+    }
+
+    function buildBatchRefreshSignature(batch) {
+      if (!batch) return '';
+      const compactOrders = Array.isArray(batch.orders) ? batch.orders.map((order) => ({
+        id: Number(order.id || 0) || null,
+        sequence: Number(order.delivery_sequence ?? order.sequence ?? 0) || null,
+        status: String(order.status || ''),
+        deliveryFailedReason: String(order.deliveryFailedReason || order.delivery_failed_reason || ''),
+        deliveryFailedNote: String(order.deliveryFailedNote || order.delivery_failed_note || ''),
+        deliveryAttemptedAt: String(order.deliveryAttemptedAt || order.delivery_attempted_at || ''),
+        deliveredAt: String(order.deliveredAt || order.delivered_at || ''),
+      })) : [];
+      return JSON.stringify({
+        id: Number(batch.id || 0) || null,
+        batchCode: String(batch.batchCode || ''),
+        batchStatus: String(batch.batchStatus || ''),
+        originAddress: String(batch.originAddress || ''),
+        currentOrderId: Number(batch.currentOrderId || 0) || null,
+        currentStop: normalizeStopSnapshot(batch.currentStop),
+        nextStops: Array.isArray(batch.nextStops) ? batch.nextStops.map(normalizeStopSnapshot) : [],
+        routeWindow: Array.isArray(batch.routeWindow) ? batch.routeWindow.map(normalizeStopSnapshot) : [],
+        links: {
+          googleMapsCurrent: String(batch.links?.googleMapsCurrent || ''),
+          googleMapsWindow: String(batch.links?.googleMapsWindow || ''),
+          wazeCurrent: String(batch.links?.wazeCurrent || ''),
+        },
+        driver: {
+          name: String(batch.driver?.name || ''),
+          whatsapp: String(batch.driver?.whatsapp || ''),
+          vehiclePlate: String(batch.driver?.vehiclePlate || ''),
+        },
+        orders: compactOrders,
+      });
+    }
+
+    function markBatchApplied(batch) {
+      lastAppliedBatchSignature = buildBatchRefreshSignature(batch);
+      lastAppliedBatchAt = Date.now();
+    }
+
+    function shouldApplyBatch(batch, options = {}) {
+      if (!batch) {
+        return { apply: false, changed: false, forced: false, signature: '' };
+      }
+      const signature = buildBatchRefreshSignature(batch);
+      const changed = !lastAppliedBatchSignature || signature !== lastAppliedBatchSignature;
+      const forced = Boolean(options.force) || !lastAppliedBatchAt || (Date.now() - lastAppliedBatchAt >= MAX_IDLE_REFRESH_MS);
+      return {
+        apply: changed || forced,
+        changed,
+        forced,
+        signature,
+      };
+    }
+
+    function applyBatchSnapshot(batch, options = {}) {
+      if (!batch) return { applied: false, changed: false, forced: false };
+      const decision = shouldApplyBatch(batch, options);
+      if (!decision.apply) {
+        return { applied: false, changed: false, forced: false };
+      }
+      currentBatch = batch;
+      saveCachedBatch(currentBatch);
+      patchUiState({ currentOrderId: Number(currentBatch.currentOrderId) || null });
+      lastAppliedBatchSignature = decision.signature;
+      lastAppliedBatchAt = Date.now();
+      if (options.render !== false) {
+        renderBatch();
+      }
+      return { applied: true, changed: decision.changed, forced: decision.forced };
+    }
+
+    function sanitizePhone(phone) {
+      return String(phone || '').replace(/\D/g, '');
+    }
+
+    function formatMoney(value) {
+      const amount = Number(value || 0);
+      return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '-';
+      const normalized = value.includes('Z') ? value : `${value}Z`;
+      const date = new Date(normalized);
+      return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('pt-BR');
+    }
+
+    function currentModeLabel() {
+      if (queryParam('modo') === 'compacto') return 'Modo compacto';
+      if (window.innerHeight <= 450) return 'Tela dividida';
+      if (window.innerWidth <= 820) return 'Compacto automatico';
+      return 'Motorista';
+    }
+
+    function renderNotice(kind, message) {
+      const map = {
+        error: document.getElementById('error-msg'),
+        success: document.getElementById('success-msg'),
+        info: document.getElementById('info-msg'),
+      };
+      Object.values(map).forEach((element) => {
+        element.className = 'notice';
+        element.textContent = '';
+      });
+      if (!message) return;
+      const element = map[kind];
+      if (!element) return;
+      element.className = `notice show ${kind}`;
+      element.textContent = message;
+    }
+
+    function setLiveState(isOnline, stale) {
+      const label = stale ? 'Exibindo ultimo lote salvo' : isOnline ? 'Sincronizado com o servidor' : 'Sem internet';
+      const css = stale ? 'warn' : isOnline ? 'success' : 'danger';
+      const badge = document.getElementById('live-badge');
+      badge.className = `badge ${css}`;
+      badge.textContent = label;
+      document.getElementById('support-connection').textContent = label;
+    }
+
+    function ordersSorted() {
       if (!currentBatch?.orders?.length) return [];
-      return currentBatch.orders.slice().sort((a, b) => (a.delivery_sequence || 999) - (b.delivery_sequence || 999));
+      return currentBatch.orders.slice().sort((a, b) => (a.delivery_sequence || 999999) - (b.delivery_sequence || 999999));
     }
 
-    function getLocalState() {
-      if (!currentToken) return { collectedIds: [], deliveredIds: [], currentStopId: null };
-      try {
-        const raw = localStorage.getItem(`lc_driver_ops_${currentToken}`);
-        const parsed = raw ? JSON.parse(raw) : {};
-        return {
-          collectedIds: Array.isArray(parsed.collectedIds) ? parsed.collectedIds.map(Number).filter(Boolean) : [],
-          deliveredIds: Array.isArray(parsed.deliveredIds) ? parsed.deliveredIds.map(Number).filter(Boolean) : [],
-          currentStopId: parsed.currentStopId ? Number(parsed.currentStopId) : null,
+    function isDeliveryFailed(order) {
+      return Boolean(order?.deliveryFailed || order?.delivery_failed_reason || order?.delivery_failed_note || order?.delivery_attempted_at);
+    }
+
+    function getPendingActionMap() {
+      const queue = getPendingQueue();
+      return queue.reduce((acc, item) => {
+        acc[item.orderId] = item;
+        return acc;
+      }, {});
+    }
+
+    function getCurrentOrder() {
+      return currentBatch?.currentStop || null;
+    }
+
+    function getCurrentOrderIndex(order) {
+      if (!order) return -1;
+      const sequence = Number(order.sequence ?? order.delivery_sequence);
+      if (Number.isInteger(sequence) && sequence > 0) return sequence - 1;
+      const orderId = Number(order.orderId ?? order.id);
+      return ordersSorted().findIndex((item) => Number(item.id) === orderId);
+    }
+
+    function getOrderCoords(order) {
+      const lat = Number(order?.addressLat ?? order?.address_lat);
+      const lng = Number(order?.addressLng ?? order?.address_lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    }
+
+    function getRouteWindow() {
+      return Array.isArray(currentBatch?.routeWindow) ? currentBatch.routeWindow : [];
+    }
+
+    function getNextStops() {
+      return Array.isArray(currentBatch?.nextStops) ? currentBatch.nextStops : [];
+    }
+
+    function buildGoogleMapsCurrentFallback(order) {
+      const coords = getOrderCoords(order);
+      if (coords) {
+        return `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}&travelmode=driving`;
+      }
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order?.address || '')}`;
+    }
+
+    function buildGoogleMapsWindowFallback(stops) {
+      const routeStops = Array.isArray(stops) ? stops.filter(Boolean).slice(0, 4) : [];
+      if (!routeStops.length) return '';
+      if (routeStops.length === 1) return buildGoogleMapsCurrentFallback(routeStops[0]);
+      const destination = routeStops[routeStops.length - 1];
+      const destinationCoords = getOrderCoords(destination);
+      const destinationValue = destinationCoords
+        ? `${destinationCoords.lat},${destinationCoords.lng}`
+        : (destination?.address ? encodeURIComponent(destination.address) : '');
+      if (!destinationValue) return '';
+      const url = new URL('https://www.google.com/maps/dir/');
+      url.searchParams.set('api', '1');
+      url.searchParams.set('destination', destinationValue);
+      const waypoints = routeStops.slice(0, -1).map((stop) => {
+        const coords = getOrderCoords(stop);
+        return coords ? `${coords.lat},${coords.lng}` : encodeURIComponent(stop?.address || '');
+      }).filter(Boolean);
+      if (waypoints.length) {
+        url.searchParams.set('waypoints', waypoints.join('|'));
+      }
+      url.searchParams.set('travelmode', 'driving');
+      return url.toString();
+    }
+
+    function buildWazeCurrentFallback(order) {
+      const coords = getOrderCoords(order);
+      if (coords) {
+        return `https://waze.com/ul?ll=${coords.lat},${coords.lng}&navigate=yes`;
+      }
+      return `https://waze.com/ul?q=${encodeURIComponent(order?.address || '')}&navigate=yes`;
+    }
+
+    function setButtonLink(id, href) {
+      const element = document.getElementById(id);
+      if (!href || href === '#') {
+        element.href = '#';
+        element.setAttribute('aria-disabled', 'true');
+      } else {
+        element.href = href;
+        element.removeAttribute('aria-disabled');
+      }
+    }
+
+    function updatePendingBadge() {
+      const queue = getPendingQueue();
+      const chip = document.getElementById('pending-chip');
+      chip.classList.toggle('hidden', queue.length === 0);
+      chip.textContent = `${queue.length} pendencia${queue.length === 1 ? '' : 's'}`;
+    }
+
+    function applyOptimisticAction(action) {
+      if (!currentBatch) return;
+      const order = currentBatch.orders.find((item) => Number(item.id) === Number(action.orderId));
+      if (!order) return;
+      const currentStopId = Number(currentBatch.currentStop?.orderId || 0);
+      const now = new Date().toISOString();
+      if (action.action === 'delivered') {
+        order.status = 'entregue';
+        order.deliveredAt = now;
+        order.delivered_at = now;
+        order.deliveryFailed = false;
+        order.deliveryFailedReason = '';
+        order.deliveryFailedNote = '';
+        order.delivery_failed_reason = '';
+        order.delivery_failed_note = '';
+        order.delivery_attempted_at = null;
+      } else {
+        order.status = 'a_caminho';
+        order.deliveryFailed = true;
+        order.deliveryFailedReason = action.reason;
+        order.deliveryFailedNote = action.note || '';
+        order.delivery_failed_reason = action.reason;
+        order.delivery_failed_note = action.note || '';
+        order.deliveryAttemptedAt = now;
+        order.delivery_attempted_at = now;
+        order.deliveredAt = null;
+        order.delivered_at = null;
+      }
+
+      if (currentStopId === Number(action.orderId)) {
+        const shiftedNextStops = getNextStops().slice();
+        const nextCurrent = action.advance === false ? currentBatch.currentStop : (shiftedNextStops.shift() || null);
+        const routeWindow = nextCurrent ? [nextCurrent, ...shiftedNextStops] : [];
+        currentBatch.currentOrderId = nextCurrent?.orderId || null;
+        currentBatch.currentStop = nextCurrent;
+        currentBatch.nextStops = shiftedNextStops;
+        currentBatch.routeWindow = routeWindow;
+        currentBatch.links = {
+          googleMapsCurrent: buildGoogleMapsCurrentFallback(nextCurrent),
+          googleMapsWindow: buildGoogleMapsWindowFallback(routeWindow),
+          wazeCurrent: buildWazeCurrentFallback(nextCurrent),
         };
-      } catch {
-        return { collectedIds: [], deliveredIds: [], currentStopId: null };
       }
+
+      patchUiState({ currentOrderId: Number(currentBatch.currentOrderId) || null });
+      saveCachedBatch(currentBatch);
+      renderBatch();
     }
 
-    function saveLocalState(state) {
-      if (!currentToken) return;
-      localStorage.setItem(`lc_driver_ops_${currentToken}`, JSON.stringify(state));
+    function enqueueAction(action) {
+      const queue = getPendingQueue();
+      queue.push(action);
+      savePendingQueue(queue);
+      updatePendingBadge();
+      applyOptimisticAction(action);
     }
 
-    function syncLocalStateWithBatch() {
-      const state = getLocalState();
-      const deliveredIds = new Set(state.deliveredIds);
-      getOrderedOrders().forEach((order) => {
-        if (order.status === 'entregue') deliveredIds.add(Number(order.id));
-      });
-      state.deliveredIds = Array.from(deliveredIds);
-      if (!state.currentStopId) {
-        const nextOrder = getOrderedOrders().find((order) => !state.deliveredIds.includes(Number(order.id)));
-        state.currentStopId = nextOrder?.id || getOrderedOrders()[0]?.id || null;
+    function getDisplayStatus(order) {
+      const pendingMap = getPendingActionMap();
+      const orderId = Number(order?.orderId ?? order?.id);
+      if (pendingMap[orderId]) {
+        return { label: 'Pendente de sincronizacao', css: 'warn' };
       }
-      saveLocalState(state);
-      return state;
-    }
-
-    function getBatchProgress() {
-      const orders = getOrderedOrders();
-      const state = getLocalState();
-      const total = orders.length;
-      const collected = orders.filter((order) => state.collectedIds.includes(Number(order.id))).length;
-      const delivered = orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length;
-      const percent = total ? Math.round((delivered / total) * 100) : 0;
-      return { total, collected, delivered, percent };
-    }
-
-    function getCurrentStop() {
-      const orders = getOrderedOrders();
-      const state = getLocalState();
-      const byCurrent = orders.find((order) => Number(order.id) === Number(state.currentStopId));
-      if (byCurrent) return byCurrent;
-      return orders.find((order) => !state.deliveredIds.includes(Number(order.id)) && order.status !== 'entregue') || orders[0] || null;
-    }
-
-    function setCurrentStop(orderId) {
-      const state = getLocalState();
-      state.currentStopId = Number(orderId) || null;
-      saveLocalState(state);
-      renderNavigationView();
-    }
-
-    function toggleLocalCollection(orderId) {
-      const state = getLocalState();
-      const numericId = Number(orderId);
-      state.collectedIds = state.collectedIds.includes(numericId)
-        ? state.collectedIds.filter((id) => id !== numericId)
-        : [...state.collectedIds, numericId];
-      saveLocalState(state);
-      renderOperationalHeader();
-      renderCollectionView();
-    }
-
-    function toggleLocalDelivered(orderId) {
-      const state = getLocalState();
-      const numericId = Number(orderId);
-      if (state.deliveredIds.includes(numericId)) {
-        state.deliveredIds = state.deliveredIds.filter((id) => id !== numericId);
-      } else {
-        state.deliveredIds = [...state.deliveredIds, numericId];
+      if (order.status === 'entregue') {
+        return { label: 'Entregue', css: 'success' };
       }
-      const nextOpen = getOrderedOrders().find((order) => Number(order.id) !== numericId && !state.deliveredIds.includes(Number(order.id)) && order.status !== 'entregue');
-      state.currentStopId = nextOpen?.id || numericId;
-      saveLocalState(state);
-      renderOperationalHeader();
-      renderRouteView();
-      renderNavigationView();
-    }
-
-    function markAllCollected() {
-      const state = getLocalState();
-      state.collectedIds = getOrderedOrders().map((order) => Number(order.id));
-      saveLocalState(state);
-      renderOperationalHeader();
-      renderCollectionView();
-      showSuccess('Checklist de coleta marcado no aparelho.');
-    }
-
-    function clearCollectedChecklist() {
-      const state = getLocalState();
-      state.collectedIds = [];
-      saveLocalState(state);
-      renderOperationalHeader();
-      renderCollectionView();
-      showSuccess('Checklist de coleta limpo.');
-    }
-
-    function aggregatePickupItems() {
-      const summary = new Map();
-      getOrderedOrders().forEach((order) => {
-        const items = Array.isArray(order.items) ? order.items : [];
-        items.forEach((item) => {
-          const accompaniments = Array.isArray(item.accompaniments) && item.accompaniments.length
-            ? item.accompaniments.map((acc) => acc?.name || acc).filter(Boolean).join(', ')
-            : '';
-          const key = `${String(item.name || 'Item sem nome').trim()}::${accompaniments}`;
-          const previous = summary.get(key) || { qty: 0, name: item.name || 'Item sem nome', accompaniments };
-          previous.qty += Number(item.qty) || 1;
-          summary.set(key, previous);
-        });
-      });
-      return Array.from(summary.values()).sort((a, b) => b.qty - a.qty || String(a.name).localeCompare(String(b.name), 'pt-BR'));
-    }
-
-    function orderStatusAccent(order) {
-      if (order.status === 'entregue') return 'success';
-      if (getLocalState().deliveredIds.includes(Number(order.id))) return 'success';
-      return 'info';
-    }
-
-    function renderOperationalHeader() {
-      if (!currentBatch) return;
-      const progress = getBatchProgress();
-      const batchStatus = batchStatusLabel(currentBatch.batchStatus);
-      const acceptedAt = currentBatch.acceptedAt ? `Aceito em ${formatTime(currentBatch.acceptedAt)}` : 'Sem aceite registrado';
-      const releasedAt = currentBatch.kitchenConfirmedAt ? `Liberado em ${formatTime(currentBatch.kitchenConfirmedAt)}` : 'Sem liberacao da cozinha';
-      const publicUrl = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}`;
-
-      document.getElementById('batch-title').textContent = `Lote ${currentBatch.batchCode}`;
-      document.getElementById('batch-subtitle').textContent = currentBatch.batchStatus === 'liberado_cozinha'
-        ? 'Rota ativa para entrega. Use o rodape fixo para alternar entre coleta, rota, navegacao e apoio.'
-        : currentBatch.batchStatus === 'aceito_motoboy'
-          ? 'Lote aceito. Aguarde a confirmacao da cozinha para liberar mapa e modo navegacao.'
-          : 'Aceite o lote e confira a coleta antes de sair com as marmitas.';
-
-      document.getElementById('hero-badges').innerHTML = `
-        <span class="badge brand">${iconHtml('<path d="M12 2l3.09 6.26L22 9.27l-5 4.86L18.18 22 12 18.56 5.82 22 7 14.13l-5-4.86 6.91-1.01L12 2z">')}Lote ${LaCoccinaSecurity.escapeHtml(currentBatch.batchCode || '-')}</span>
-        <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${iconHtml('<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path>')} ${LaCoccinaSecurity.escapeHtml(batchStatus)}</span>
-        <span class="badge info">${iconHtml('<path d="M4 7h16"></path><path d="M7 4v6"></path><path d="M17 4v6"></path><rect x="4" y="7" width="16" height="13" rx="2"></rect>')} ${progress.total} paradas</span>
-      `;
-
-      document.getElementById('hero-pills').innerHTML = `
-        <div class="pill"><span>${iconHtml('<path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-6"></path>')}</span><div><strong>${progress.delivered}/${progress.total}</strong><span>entregas locais marcadas</span></div></div>
-        <div class="pill"><span>${iconHtml('<path d="M5 12l4 4L19 6"></path>')}</span><div><strong>${progress.collected}/${progress.total}</strong><span>pedidos conferidos na coleta</span></div></div>
-        <div class="pill"><span>${iconHtml('<path d="M22 16.92V19a2 2 0 0 1-2.18 2"></path><path d="M2 5a2 2 0 0 1 2-2h2.09"></path><path d="M22 8.09V5a2 2 0 0 0-2-2h-2.09"></path><path d="M2 15.91V19a2 2 0 0 0 2 2h3.09"></path><path d="M7 12h10"></path><path d="M12 7l5 5-5 5"></path>')}</span><div><strong>${LaCoccinaSecurity.escapeHtml(currentBatch.mapsUrl ? 'Rota pronta' : 'Sem link')}</strong><span>atalho do Google Maps salvo</span></div></div>
-      `;
-
-      document.getElementById('progress-copy').textContent = `${progress.percent}%`;
-      document.getElementById('progress-bar-fill').style.width = `${progress.percent}%`;
-      document.getElementById('progress-label').textContent = progress.total
-        ? `${progress.delivered} de ${progress.total} entregas marcadas`
-        : 'Sem entregas no lote';
-
-      document.getElementById('stat-stops').textContent = String(progress.total);
-      document.getElementById('stat-collected').textContent = `${progress.collected}/${progress.total}`;
-      document.getElementById('stat-delivered').textContent = `${progress.delivered}/${progress.total}`;
-      document.getElementById('stat-plate').textContent = currentBatch.driver?.vehiclePlate || getSavedDriverProfile()?.vehiclePlate || '-';
-
-      document.getElementById('origin-address').textContent = currentBatch.originAddress || '-';
-      document.getElementById('support-batch-code').textContent = currentBatch.batchCode || '-';
-      document.getElementById('support-batch-status').textContent = batchStatus;
-      document.getElementById('support-origin').textContent = currentBatch.originAddress || '-';
-      document.getElementById('support-link').textContent = publicUrl;
-      document.getElementById('side-open-route').href = currentBatch.mapsUrl || '#';
-      document.getElementById('support-open-route').href = currentBatch.mapsUrl || '#';
-      document.getElementById('open-maps-btn').href = currentBatch.mapsUrl || '#';
-
-      document.getElementById('side-badges').innerHTML = `
-        <span class="badge brand">Lote ${LaCoccinaSecurity.escapeHtml(currentBatch.batchCode || '-')}</span>
-        <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${LaCoccinaSecurity.escapeHtml(batchStatus)}</span>
-      `;
-
-      const driver = currentBatch.driver?.name ? currentBatch.driver : getSavedDriverProfile();
-      document.getElementById('side-driver-summary').innerHTML = renderDriverSummary(driver);
-
-      const statusBanner = document.getElementById('status-banner');
-      const bannerTitle = document.getElementById('status-banner-title');
-      const bannerCopy = document.getElementById('status-banner-copy');
-      if (currentBatch.batchStatus === 'preparado') {
-        bannerTitle.textContent = 'Primeiro passo: aceite o lote';
-        bannerCopy.textContent = 'Preencha ou reaproveite seu cadastro-base no modo Apoio. Depois do aceite, a cozinha ainda precisa liberar a saida.';
-        statusBanner.style.display = 'flex';
-      } else if (currentBatch.batchStatus === 'aceito_motoboy') {
-        bannerTitle.textContent = 'Lote aceito. Falta a liberacao da cozinha';
-        bannerCopy.textContent = 'A coleta ja pode ser conferida, mas o mapa e o modo navegacao so liberam depois da confirmacao da cozinha.';
-        statusBanner.style.display = 'flex';
-      } else {
-        bannerTitle.textContent = 'Rota liberada';
-        bannerCopy.textContent = `Ultimos eventos: ${acceptedAt}. ${releasedAt}.`;
-        statusBanner.style.display = 'flex';
+      if (isDeliveryFailed(order)) {
+        return { label: 'Tentativa falhou', css: 'danger' };
       }
+      return { label: batchStatusLabel(order.status), css: 'info' };
     }
 
-    function renderDriverCard() {
+    function updateDriverCard() {
       const savedProfile = getSavedDriverProfile();
-      const summary = document.getElementById('driver-summary');
-      const actions = document.getElementById('driver-actions');
-      const form = document.getElementById('driver-form');
-      const desc = document.getElementById('driver-card-desc');
-
-      if (!currentBatch) return;
-
-      if (currentBatch.batchStatus !== 'preparado') {
-        const driver = currentBatch.driver?.name ? currentBatch.driver : savedProfile;
-        desc.textContent = currentBatch.driver?.name
-          ? 'Este lote ja esta vinculado a um motoboy. O cadastro-base continua salvo neste aparelho.'
-          : 'Aguardando dados do motoboy.';
-        summary.innerHTML = renderDriverSummary(driver);
-        actions.innerHTML = savedProfile
-          ? '<button type="button" class="btn compact" onclick="startEditingDriver()">Editar cadastro-base</button>'
-          : '';
-        form.classList.remove('open');
-        return;
-      }
-
-      if (savedProfile && isDriverProfileComplete(savedProfile) && !editingDriver) {
-        desc.textContent = 'Cadastro-base encontrado. Voce pode aceitar o lote direto ou ajustar os dados antes de seguir.';
-        summary.innerHTML = renderDriverSummary(savedProfile);
-        actions.innerHTML = `
-          <button type="button" class="btn" onclick="startEditingDriver()">Editar dados</button>
-          <button type="button" class="btn primary" onclick="acceptBatch()">Aceitar lote</button>
-        `;
-        form.classList.remove('open');
-        return;
-      }
-
-      desc.textContent = 'Preencha os dados do motoboy para aceitar o lote. Esse cadastro fica salvo so neste aparelho.';
-      summary.innerHTML = '';
       fillDriverForm(savedProfile);
-      form.classList.add('open');
-      actions.innerHTML = `
-        ${savedProfile ? '<button type="button" class="btn" onclick="cancelEditingDriver()">Usar dados salvos</button>' : ''}
-        <button type="submit" form="driver-form" class="btn primary">Salvar e aceitar lote</button>
-      `;
+      if (!currentBatch) return;
+
+      const form = document.getElementById('driver-form');
+      const copy = document.getElementById('driver-copy');
+      const acceptBtn = document.getElementById('accept-btn');
+      const readonly = currentBatch.batchStatus !== 'preparado';
+
+      copy.textContent = readonly
+        ? (currentBatch.driver?.name ? `Motoboy vinculado: ${currentBatch.driver.name}` : 'Lote ja aceito e pronto para operacao.')
+        : 'Use seu cadastro-base para aceitar este lote.';
+      Array.from(form.querySelectorAll('input')).forEach((input) => {
+        input.disabled = readonly;
+      });
+      acceptBtn.classList.toggle('hidden', readonly);
+      document.getElementById('reuse-driver-btn').classList.toggle('hidden', readonly);
     }
 
-    function startEditingDriver() {
-      setEditingDriver(true);
-      fillDriverForm(getSavedDriverProfile());
-      renderDriverCard();
-    }
-
-    function cancelEditingDriver() {
-      setEditingDriver(false);
-      renderDriverCard();
-    }
-
-    function renderCollectionView() {
-      const summaryList = document.getElementById('pickup-summary-list');
-      const summaryPills = document.getElementById('pickup-summary-pills');
-      const ordersList = document.getElementById('pickup-orders-list');
-      const orders = getOrderedOrders();
-      const aggregated = aggregatePickupItems();
-      const state = getLocalState();
-
-      summaryList.innerHTML = aggregated.length ? aggregated.map((item) => `
-        <div class="summary-row">
-          <div class="summary-count">${item.qty}x</div>
-          <div>
-            <strong>${LaCoccinaSecurity.escapeHtml(item.name)}</strong>
-            <span>${item.accompaniments ? `Acompanhamentos: ${LaCoccinaSecurity.escapeHtml(item.accompaniments)}` : 'Sem acompanhamentos extras informados'}</span>
+    function renderRouteList(currentOrder) {
+      const list = document.getElementById('route-list');
+      const pendingMap = getPendingActionMap();
+      const items = getNextStops();
+      list.innerHTML = items.length ? items.map((order, index) => {
+        const status = getDisplayStatus(order);
+        const pending = pendingMap[order.orderId];
+        return `
+          <div class="route-item">
+            <div class="route-step">${order.sequence || index + 1}</div>
+            <div>
+              <strong>${esc(order.customerName || 'Cliente')}</strong>
+              <span>${esc(order.address || 'Endereco nao informado')}</span>
+              <span>${pending ? 'Aguardando sincronizacao' : esc(status.label)}</span>
+            </div>
+            <button type="button" class="btn small" data-order-id="${order.orderId}">Tornar atual</button>
           </div>
-          <div class="badge brand">Retirar</div>
-        </div>
-      `).join('') : '<div class="empty-state">Nao ha itens detalhados no lote para resumir a coleta.</div>';
+        `;
+      }).join('') : '<div class="status-lock">Nenhuma proxima entrega pendente nesta janela.</div>';
 
-      summaryPills.innerHTML = `
-        <div class="pill"><div><strong>${orders.length}</strong><span>pedidos no lote</span></div></div>
-        <div class="pill"><div><strong>${state.collectedIds.length}</strong><span>conferidos localmente</span></div></div>
-        <div class="pill"><div><strong>${aggregated.length}</strong><span>linhas de item agregadas</span></div></div>
+      list.querySelectorAll('[data-order-id]').forEach((button) => {
+        button.addEventListener('click', () => setCurrentOrder(Number(button.dataset.orderId), true, true));
+      });
+    }
+
+    function renderBatch() {
+      if (!currentBatch) return;
+      document.getElementById('app').classList.remove('hidden');
+      renderNotice('info', '');
+      updatePendingBadge();
+      updateDriverCard();
+
+      const orders = ordersSorted();
+      const deliveredCount = orders.filter((order) => order.status === 'entregue').length;
+      const currentOrder = getCurrentOrder();
+      const currentIndex = Math.max(getCurrentOrderIndex(currentOrder), 0);
+      const currentStatus = currentOrder ? getDisplayStatus(currentOrder) : { label: 'Sem parada', css: 'info' };
+      const profile = currentBatch.driver?.name ? currentBatch.driver : getSavedDriverProfile();
+      const phone = sanitizePhone(currentOrder?.phone);
+      const state = getUiState();
+      const hasPrevious = Array.isArray(state.history) && state.history.length > 0;
+      const nextStops = getNextStops();
+      const mapsWindowUrl = currentBatch?.links?.googleMapsWindow || buildGoogleMapsWindowFallback(getRouteWindow());
+      const wazeCurrentUrl = currentBatch?.links?.wazeCurrent || buildWazeCurrentFallback(currentOrder);
+
+      document.getElementById('mode-badge').textContent = currentModeLabel();
+      document.getElementById('batch-title').textContent = `Lote ${currentBatch.batchCode || '-'}`;
+      document.getElementById('batch-copy').textContent = currentBatch.batchStatus === 'liberado_cozinha'
+        ? 'O celular mostra apenas a entrega atual e as proximas 3 pendentes. A navegacao abre em app externo.'
+        : currentBatch.batchStatus === 'aceito_motoboy'
+          ? 'Lote aceito. Aguarde a liberacao da cozinha para iniciar as entregas.'
+          : 'Preencha seus dados para aceitar o lote e liberar a operacao do motoboy.';
+      document.getElementById('hero-badges').innerHTML = `
+        <span class="badge brand">Lote ${esc(currentBatch.batchCode || '-')}</span>
+        <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${esc(batchStatusLabel(currentBatch.batchStatus))}</span>
+        <span class="badge info">${orders.length} parada${orders.length === 1 ? '' : 's'}</span>
       `;
 
-      ordersList.innerHTML = orders.length ? orders.map((order) => {
-        const isCollected = state.collectedIds.includes(Number(order.id));
-        const items = Array.isArray(order.items) ? order.items : [];
-        return `
-          <article class="pickup-order ${isCollected ? 'done' : ''}">
-            <div class="checklist-row-head">
-              <div>
-                <strong>Parada ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente sem nome')}</strong>
-                <p>${LaCoccinaSecurity.escapeHtml(order.address || 'Endereco nao informado')}</p>
-              </div>
-              <button type="button" class="btn compact ${isCollected ? '' : 'primary'}" onclick="toggleLocalCollection(${Number(order.id)})">
-                ${isCollected ? 'Conferido' : 'Conferir'}
-              </button>
-            </div>
-            <div class="stop-meta">
-              <span class="badge ${orderStatusAccent(order)}">Status: ${LaCoccinaSecurity.escapeHtml(order.status || '-')}</span>
-              <span class="badge info">Telefone: ${LaCoccinaSecurity.escapeHtml(order.phone || 'nao informado')}</span>
-              ${order.obs ? `<span class="badge warn">Obs: ${LaCoccinaSecurity.escapeHtml(order.obs)}</span>` : ''}
-            </div>
-            <div class="order-items">
-              ${items.length ? items.map((item) => `
-                <div class="order-item">
-                  <div class="order-item-qty">${Number(item.qty) || 1}x</div>
-                  <div class="order-item-copy">
-                    <strong style="display:block;color:var(--text);margin-bottom:4px;">${LaCoccinaSecurity.escapeHtml(item.name || 'Item')}</strong>
-                    <span>${Array.isArray(item.accompaniments) && item.accompaniments.length
-                      ? `Acompanhamentos: ${LaCoccinaSecurity.escapeHtml(item.accompaniments.map((acc) => acc?.name || acc).join(', '))}`
-                      : 'Sem acompanhamentos adicionais'}</span>
-                  </div>
-                </div>
-              `).join('') : '<div class="empty-state">Esse pedido nao possui itens estruturados para conferencia.</div>'}
-            </div>
-          </article>
-        `;
-      }).join('') : '<div class="empty-state">Nenhum pedido no lote.</div>';
-    }
+      document.getElementById('stat-step').textContent = orders.length ? `${currentIndex + 1}/${orders.length}` : '-';
+      document.getElementById('stat-done').textContent = `${deliveredCount}/${orders.length}`;
+      document.getElementById('stat-batch-status').textContent = batchStatusLabel(currentBatch.batchStatus);
+      document.getElementById('stat-plate').textContent = currentBatch.driver?.vehiclePlate || profile?.vehiclePlate || '-';
 
-    async function ensureGoogleMapsLoaded() {
-      if (window.google?.maps) return window.google.maps;
-      if (!googleMapsPromise) {
-        googleMapsPromise = fetch(`${API}/api/settings/public-delivery`)
-          .then((res) => {
-            if (!res.ok) throw new Error('Google Maps nao configurado no servidor.');
-            return res.json();
-          })
-          .then((data) => new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(data.googleMapsApiKey)}`;
-            script.async = true;
-            script.defer = true;
-            script.onload = () => resolve(window.google.maps);
-            script.onerror = () => reject(new Error('Falha ao carregar Google Maps.'));
-            document.head.appendChild(script);
-          }));
-      }
-      return googleMapsPromise;
-    }
+      document.getElementById('stop-progress-badge').textContent = currentOrder
+        ? `Entrega ${currentOrder.sequence || currentIndex + 1}/${orders.length || currentOrder.sequence || 1}`
+        : 'Sem entregas';
+      document.getElementById('stop-customer').textContent = currentOrder?.customerName || 'Nenhuma parada ativa';
+      document.getElementById('stop-address').textContent = currentOrder?.address || 'Endereco nao informado';
+      document.getElementById('stop-payment').textContent = currentOrder?.paymentMethod || '-';
+      document.getElementById('stop-total').textContent = formatMoney(currentOrder?.amount);
+      document.getElementById('stop-obs').textContent = currentOrder?.obs || 'Sem observacao';
+      const currentOrderDetails = orders.find((order) => Number(order.id) === Number(currentOrder?.orderId));
+      document.getElementById('stop-attempt').textContent = formatDateTime(currentOrderDetails?.deliveryAttemptedAt || currentOrderDetails?.delivery_attempted_at);
+      document.getElementById('stop-status-badge').className = `badge ${currentStatus.css}`;
+      document.getElementById('stop-status-badge').textContent = currentStatus.label;
+      document.getElementById('current-stop-title').textContent = currentOrder ? 'Entrega atual' : 'Aguardando rota';
+      document.getElementById('current-stop-copy').textContent = currentOrder
+        ? 'Ao confirmar, a proxima janela do motoboy vem pronta do backend sem recarregar a pagina.'
+        : 'Assim que houver uma parada disponivel, esta area mostrara os detalhes essenciais.';
 
-    async function renderRouteMap() {
-      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') return;
-      await ensureGoogleMapsLoaded();
-      const mapEl = document.getElementById('route-map');
-      mapInstance = new google.maps.Map(mapEl, {
-        center: { lat: -27.5954, lng: -48.548 },
-        zoom: 12,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
+      setButtonLink('maps-btn', currentOrder ? mapsWindowUrl : '#');
+      setButtonLink('waze-btn', currentOrder ? wazeCurrentUrl : '#');
+      setButtonLink('wa-link', phone ? `https://wa.me/55${phone}` : '#');
+      const phoneLink = document.getElementById('phone-link');
+      phoneLink.textContent = currentOrder?.phone || '-';
+      phoneLink.href = phone ? `tel:${phone}` : '#';
+      phoneLink.setAttribute('aria-disabled', phone ? 'false' : 'true');
+      document.getElementById('support-batch-code').textContent = currentBatch.batchCode || '-';
+      document.getElementById('support-batch-status').textContent = batchStatusLabel(currentBatch.batchStatus);
+      document.getElementById('support-origin').textContent = currentBatch.originAddress || '-';
+      document.getElementById('support-driver').textContent = profile?.name || currentBatch.driver?.name || '-';
+
+      const routeLocked = currentBatch.batchStatus !== 'liberado_cozinha';
+      const lockText = currentBatch.batchStatus === 'preparado'
+        ? 'Aceite o lote primeiro. Depois a cozinha ainda precisa liberar a saida.'
+        : routeLocked
+          ? 'A cozinha ainda nao liberou a rota. Maps, Waze e confirmacao de entrega ficam bloqueados ate a liberacao.'
+          : '';
+      document.getElementById('route-lock').classList.toggle('hidden', !routeLocked);
+      document.getElementById('route-lock').textContent = lockText;
+
+      renderRouteList(currentOrder);
+
+      ['maps-btn', 'waze-btn', 'call-btn', 'delivered-btn', 'failed-btn', 'prev-btn', 'next-btn'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element.tagName === 'A') {
+          element.setAttribute('aria-disabled', (!currentOrder || routeLocked) ? 'true' : 'false');
+        } else {
+          element.disabled = !currentOrder || routeLocked;
+        }
       });
-      directionsRenderer = new google.maps.DirectionsRenderer({ map: mapInstance });
-      const directionsService = new google.maps.DirectionsService();
-      const orders = getOrderedOrders();
-      const destination = orders[orders.length - 1]?.address || currentBatch.originAddress;
-      const waypoints = orders.slice(0, -1).map((order) => ({ location: order.address, stopover: true }));
-
-      await new Promise((resolve, reject) => {
-        directionsService.route({
-          origin: currentBatch.originAddress,
-          destination,
-          waypoints,
-          travelMode: google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: false,
-        }, (result, status) => {
-          if (status === 'OK') {
-            directionsRenderer.setDirections(result);
-            resolve(result);
-          } else {
-            reject(new Error('Nao foi possivel renderizar o mapa do lote.'));
-          }
-        });
-      });
-    }
-
-    function renderRouteView() {
-      const locked = document.getElementById('route-locked-state');
-      const content = document.getElementById('route-content');
-      const stopsList = document.getElementById('route-stop-list');
-      const pills = document.getElementById('route-summary-pills');
-      const state = getLocalState();
-      const orders = getOrderedOrders();
-
-      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha') {
-        locked.style.display = 'block';
-        content.style.display = 'none';
-        stopsList.innerHTML = '';
-        pills.innerHTML = '';
-        return;
-      }
-
-      locked.style.display = 'none';
-      content.style.display = 'block';
-      pills.innerHTML = `
-        <div class="pill"><div><strong>${orders.length}</strong><span>paradas ativas</span></div></div>
-        <div class="pill"><div><strong>${orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length}</strong><span>marcadas como entregues</span></div></div>
-        <div class="pill"><div><strong>${orders.filter((order) => state.collectedIds.includes(Number(order.id))).length}</strong><span>conferidas na cozinha</span></div></div>
-      `;
-
-      stopsList.innerHTML = orders.map((order) => {
-        const done = state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue';
-        const isCurrent = Number(getCurrentStop()?.id) === Number(order.id);
-        const phone = sanitizePhone(order.phone);
-        return `
-          <article class="stop-card ${done ? 'done' : ''}">
-            <div class="stop-card-head">
-              <div>
-                <strong>Parada ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente')}</strong>
-                <p>${LaCoccinaSecurity.escapeHtml(order.address || 'Endereco nao informado')}</p>
-              </div>
-              <button type="button" class="btn compact ${isCurrent ? 'primary' : ''}" onclick="setCurrentStop(${Number(order.id)})">
-                ${isCurrent ? 'Atual' : 'Abrir'}
-              </button>
-            </div>
-            <div class="stop-meta">
-              <span class="badge ${done ? 'success' : 'info'}">${done ? 'Entregue local' : 'Pendente'}</span>
-              <span class="badge info">${LaCoccinaSecurity.escapeHtml(order.phone || 'Sem telefone')}</span>
-              <span class="badge warn">Status admin: ${LaCoccinaSecurity.escapeHtml(order.status || '-')}</span>
-            </div>
-            <div class="btn-row" style="margin-top:12px;">
-              <a href="${stopMapsUrlFromAddress(order.address)}" target="_blank" rel="noopener" class="link-btn">Abrir parada</a>
-              ${phone ? `<a href="tel:${phone}" class="link-btn">Ligar</a>` : ''}
-              <button type="button" class="btn" onclick="toggleLocalDelivered(${Number(order.id)})">${done ? 'Desmarcar local' : 'Marcar entregue local'}</button>
-            </div>
-          </article>
-        `;
-      }).join('');
-
-      renderRouteMap().catch((error) => {
-        console.error(error);
-        showError(error.message);
-      });
-    }
-
-    function renderNavigationView() {
-      const locked = document.getElementById('nav-locked-state');
-      const content = document.getElementById('nav-content');
-      const currentStop = getCurrentStop();
-      const orders = getOrderedOrders();
-      const state = getLocalState();
-
-      if (!currentBatch || currentBatch.batchStatus !== 'liberado_cozinha' || !orders.length) {
-        locked.style.display = 'block';
-        content.style.display = 'none';
-        return;
-      }
-
-      locked.style.display = 'none';
-      content.style.display = 'block';
-
-      const currentIndex = Math.max(0, orders.findIndex((order) => Number(order.id) === Number(currentStop?.id)));
-      const deliveredCount = orders.filter((order) => state.deliveredIds.includes(Number(order.id)) || order.status === 'entregue').length;
-      const isDelivered = currentStop && (state.deliveredIds.includes(Number(currentStop.id)) || currentStop.status === 'entregue');
-      const phone = sanitizePhone(currentStop?.phone);
-      const whatsappLink = phone ? `https://wa.me/55${phone}` : '#';
-
-      document.getElementById('nav-stop-chips').innerHTML = orders.map((order) => `
-        <button type="button" class="stop-chip ${Number(order.id) === Number(currentStop?.id) ? 'active' : ''}" onclick="setCurrentStop(${Number(order.id)})">
-          ${order.delivery_sequence || '-'} - ${LaCoccinaSecurity.escapeHtml(order.customer || 'Cliente')}
-        </button>
-      `).join('');
-
-      document.getElementById('nav-kicker').textContent = `Parada ${currentIndex + 1} de ${orders.length}`;
-      document.getElementById('nav-customer').textContent = currentStop?.customer || 'Nenhuma parada';
-      document.getElementById('nav-address').textContent = currentStop?.address || 'Endereco nao informado';
-      document.getElementById('nav-progress').textContent = `${deliveredCount} / ${orders.length}`;
-      document.getElementById('nav-status').textContent = currentStop ? batchStatusLabel(currentStop.status) : '-';
-      document.getElementById('nav-phone').textContent = currentStop?.phone || 'Sem telefone';
-      document.getElementById('nav-obs').textContent = currentStop?.obs || 'Sem observacoes';
-      document.getElementById('nav-open-stop').href = currentStop ? stopMapsUrlFromAddress(currentStop.address) : '#';
-      document.getElementById('nav-call-stop').href = phone ? `tel:${phone}` : '#';
-      document.getElementById('nav-wa-stop').href = phone ? whatsappLink : '#';
-      document.getElementById('nav-toggle-delivered').textContent = isDelivered ? 'Desmarcar entregue local' : 'Marcar entregue local';
-      document.getElementById('nav-toggle-delivered').disabled = !currentStop;
-    }
-
-    function changeStop(step) {
-      const orders = getOrderedOrders();
-      if (!orders.length) return;
-      const currentStop = getCurrentStop();
-      const currentIndex = Math.max(0, orders.findIndex((order) => Number(order.id) === Number(currentStop?.id)));
-      const nextIndex = Math.min(Math.max(currentIndex + step, 0), orders.length - 1);
-      setCurrentStop(orders[nextIndex].id);
-    }
-
-    function renderSupportView() {
-      if (!currentBatch) return;
-      renderDriverCard();
-      updateInstallButtons();
-    }
-
-    function setView(view) {
-      currentView = view;
-      localStorage.setItem(VIEW_KEY, view);
-      document.querySelectorAll('.panel').forEach((panel) => {
-        panel.classList.toggle('active', panel.getAttribute('data-panel') === view);
-      });
-      document.querySelectorAll('.footer-tab').forEach((tab) => {
-        tab.classList.toggle('active', tab.getAttribute('data-view') === view);
-      });
-
-      if (view === 'coleta') renderCollectionView();
-      if (view === 'rota') renderRouteView();
-      if (view === 'nav') renderNavigationView();
-      if (view === 'apoio') renderSupportView();
-    }
-
-    async function renderBatch() {
-      if (!currentBatch) return;
-      syncLocalStateWithBatch();
-      showApp();
-      renderOperationalHeader();
-      renderCollectionView();
-      renderRouteView();
-      renderNavigationView();
-      renderSupportView();
-      setView(currentView);
+      document.getElementById('call-btn').disabled = !phone || routeLocked;
+      document.getElementById('prev-btn').disabled = !currentOrder || routeLocked || !hasPrevious;
+      document.getElementById('next-btn').disabled = !currentOrder || routeLocked || !nextStops.length;
     }
 
     async function fetchBatch() {
-      const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}`);
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Lote nao encontrado.');
+      const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}`);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Lote nao encontrado.');
+      return data;
+    }
+
+    async function ensureDriverSession(force) {
+      if (!currentBatch || currentBatch.batchStatus === 'preparado') return false;
+      if (!force && isSessionValid(currentSession)) return true;
+      const profile = getSavedDriverProfile();
+      if (!isProfileComplete(profile)) return false;
+      const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: profile.name,
+          whatsapp: profile.whatsapp,
+          vehiclePlate: profile.vehiclePlate,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Nao foi possivel renovar a sessao do motoboy.');
+      if (data.driverSessionToken && data.driverSessionExpiresAt) {
+        saveSession(data.driverSessionToken, data.driverSessionExpiresAt);
       }
-      currentBatch = await res.json();
-      return currentBatch;
+      if (data.batch) {
+        applyBatchSnapshot(data.batch, { force: true, render: false });
+      }
+      return true;
     }
 
     async function refreshBatch(options = {}) {
       if (isRefreshing) return;
       isRefreshing = true;
-      if (!options.silent) showNotice('loading', 'Atualizando lote...');
+      if (!options.silent) renderNotice('info', 'Atualizando lote...');
       try {
-        await fetchBatch();
-        await renderBatch();
-        setLive(true);
+        const nextBatch = await fetchBatch();
+        currentSession = getSavedSession();
+        if (!isSessionValid(currentSession) && nextBatch.batchStatus !== 'preparado') {
+          await ensureDriverSession(false).catch(() => {});
+        }
+        setLiveState(navigator.onLine, false);
+        const applied = applyBatchSnapshot(nextBatch, { force: options.force === true, render: false });
+        if (applied.applied) {
+          renderBatch();
+          if (!options.silent && applied.forced && !applied.changed) {
+            renderNotice('info', 'Sem mudancas nos dados ou no trajeto. Refresh forcado apos 5 minutos.');
+          }
+        } else if (!options.silent) {
+          renderNotice('info', 'Sem mudancas nos dados ou no trajeto. Refresh ignorado.');
+        }
+        await flushPendingQueue();
       } catch (error) {
         console.error(error);
-        showError(error.message);
-        setLive(false);
+        const cachedBatch = getCachedBatch();
+        if (cachedBatch) {
+          currentBatch = cachedBatch;
+          markBatchApplied(currentBatch);
+          setLiveState(navigator.onLine, true);
+          renderNotice('info', 'Sem resposta do servidor. Exibindo o ultimo lote salvo no aparelho.');
+          renderBatch();
+        } else {
+          renderNotice('error', error.message);
+        }
       } finally {
         isRefreshing = false;
-        clearNotice('loading');
       }
     }
 
     async function acceptBatch() {
-      let payload = getSavedDriverProfile();
-      if (editingDriver || !isDriverProfileComplete(payload)) {
-        payload = readDriverProfileFromForm();
-      }
-      if (!isDriverProfileComplete(payload)) {
-        setEditingDriver(true);
-        renderDriverCard();
-        showError('Preencha nome, whatsapp, CPF, modelo e placa para aceitar o lote.');
-        setView('apoio');
+      const profile = readDriverForm();
+      if (!isProfileComplete(profile)) {
+        renderNotice('error', 'Preencha nome, WhatsApp, CPF, moto e placa para aceitar o lote.');
         return;
       }
 
       try {
-        showNotice('loading', 'Registrando aceite do lote...');
-        const res = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/accept`, {
+        renderNotice('info', 'Registrando aceite do lote...');
+        const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/accept`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(profile),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Nao foi possivel registrar o aceite do lote.');
-        saveDriverProfile(payload);
-        currentBatch = data.batch;
-        setEditingDriver(false);
-        await renderBatch();
-        showSuccess('Lote aceito com sucesso.');
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Nao foi possivel aceitar o lote.');
+        saveDriverProfile(profile);
+        if (data.driverSessionToken && data.driverSessionExpiresAt) {
+          saveSession(data.driverSessionToken, data.driverSessionExpiresAt);
+        }
+        applyBatchSnapshot(data.batch);
+        renderNotice('success', 'Lote aceito com sucesso.');
       } catch (error) {
         console.error(error);
-        showError(error.message);
-      } finally {
-        clearNotice('loading');
+        renderNotice('error', error.message);
       }
+    }
+
+    function createClientActionId() {
+      return `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+    }
+
+    function authorizedHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${currentSession?.token || ''}`,
+      };
+    }
+
+    async function setCurrentOrder(orderId, remote = true, pushToHistoryBeforeMove = false) {
+      if (!orderId) return;
+      const currentOrderId = Number(currentBatch?.currentOrderId || currentBatch?.currentStop?.orderId || 0);
+      if (pushToHistoryBeforeMove && currentOrderId && currentOrderId !== Number(orderId)) {
+        pushHistory(currentOrderId);
+      }
+      patchUiState({ currentOrderId: Number(orderId) });
+      if (currentBatch) currentBatch.currentOrderId = Number(orderId);
+      renderBatch();
+
+      if (!remote || !navigator.onLine || !currentBatch || currentBatch.batchStatus === 'preparado') return;
+      try {
+        await ensureDriverSession(false);
+        const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/current-stop`, {
+          method: 'PATCH',
+          headers: authorizedHeaders(),
+          body: JSON.stringify({ orderId: Number(orderId) }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a parada atual.');
+        applyBatchSnapshot(data.batch);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function sendStatusAction(action, extra = {}) {
+      const currentOrder = getCurrentOrder();
+      if (!currentOrder) return;
+
+      const payload = {
+        clientActionId: createClientActionId(),
+        orderId: Number(currentOrder.orderId ?? currentOrder.id),
+        action,
+        reason: extra.reason || '',
+        note: extra.note || '',
+        advance: extra.advance !== false,
+      };
+
+      if (!navigator.onLine) {
+        enqueueAction(payload);
+        renderNotice('info', 'Sem internet. A acao foi salva e sera reenviada automaticamente.');
+        return;
+      }
+
+      try {
+        await ensureDriverSession(false);
+        const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/orders/${Number(currentOrder.orderId ?? currentOrder.id)}/status`, {
+          method: 'PATCH',
+          headers: authorizedHeaders(),
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Nao foi possivel atualizar a entrega.');
+        applyBatchSnapshot(data.batch);
+        renderNotice('success', action === 'delivered' ? 'Entrega confirmada.' : 'Nao entrega registrada.');
+      } catch (error) {
+        console.error(error);
+        if (!navigator.onLine || /sessao|internet|network/i.test(error.message)) {
+          enqueueAction(payload);
+          renderNotice('info', 'A acao foi salva localmente e sera reenviada quando houver conexao.');
+          return;
+        }
+        renderNotice('error', error.message);
+      }
+    }
+
+    async function flushPendingQueue() {
+      const queue = getPendingQueue();
+      if (!queue.length || !navigator.onLine) return;
+      try {
+        await ensureDriverSession(false);
+      } catch {
+        return;
+      }
+
+      const remaining = [];
+      for (const item of queue) {
+        try {
+          const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/orders/${Number(item.orderId)}/status`, {
+            method: 'PATCH',
+            headers: authorizedHeaders(),
+            body: JSON.stringify(item),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || 'Falha ao reenviar pendencia.');
+          applyBatchSnapshot(data.batch, { render: false, force: true });
+        } catch (error) {
+          console.error(error);
+          remaining.push(item);
+        }
+      }
+
+      savePendingQueue(remaining);
+      updatePendingBadge();
+      renderBatch();
+    }
+
+    function openFailedModal() {
+      selectedFailureReason = 'cliente_ausente';
+      document.getElementById('failed-note').value = '';
+      document.getElementById('failed-modal').classList.add('open');
+      renderReasonOptions();
+    }
+
+    function closeFailedModal() {
+      document.getElementById('failed-modal').classList.remove('open');
+    }
+
+    function renderReasonOptions() {
+      const grid = document.getElementById('reason-grid');
+      grid.innerHTML = FAILURE_REASONS.map((reason) => `
+        <button type="button" class="reason-option ${reason.key === selectedFailureReason ? 'active' : ''}" data-reason="${reason.key}">
+          ${esc(reason.label)}
+        </button>
+      `).join('');
+      grid.querySelectorAll('[data-reason]').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedFailureReason = button.dataset.reason;
+          renderReasonOptions();
+        });
+      });
+    }
+
+    function moveCurrent(step) {
+      const current = getCurrentOrder();
+      if (!current) return;
+      if (step < 0) {
+        const previousOrderId = popHistoryOrderId();
+        if (previousOrderId) {
+          setCurrentOrder(previousOrderId, true, false);
+        }
+        return;
+      }
+
+      const nextOrderId = Number(getNextStops()[0]?.orderId || 0);
+      if (nextOrderId) {
+        setCurrentOrder(nextOrderId, true, true);
+      }
+    }
+
+    function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.register('driver-sw.js').catch(() => {});
+    }
+
+    function updateInstallButtons() {
+      const visible = Boolean(deferredInstallPrompt);
+      document.getElementById('install-btn').classList.toggle('hidden', !visible);
+      document.getElementById('support-install-btn').classList.toggle('hidden', !visible);
+    }
+
+    async function installApp() {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice.catch(() => null);
+      if (choice?.outcome === 'accepted') {
+        renderNotice('success', 'Aplicativo adicionado ao aparelho.');
+      }
+      deferredInstallPrompt = null;
+      updateInstallButtons();
     }
 
     function startPolling() {
@@ -1860,42 +1673,18 @@
       pollTimer = null;
     }
 
-    function updateInstallButtons() {
-      const shouldShow = Boolean(deferredInstallPrompt);
-      ['install-btn', 'status-install-btn', 'support-install-btn'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = shouldShow ? '' : 'none';
-      });
-    }
-
-    async function installApp() {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      const result = await deferredInstallPrompt.userChoice.catch(() => null);
-      if (result?.outcome === 'accepted') {
-        showSuccess('Aplicativo adicionado ao aparelho.');
-      }
-      deferredInstallPrompt = null;
-      updateInstallButtons();
-    }
-
     async function copyPublicLink() {
-      const url = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}`;
+      const url = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}&modo=compacto`;
       try {
         await navigator.clipboard.writeText(url);
-        showSuccess('Link do lote copiado.');
+        renderNotice('success', 'Link do lote copiado.');
       } catch {
-        showError('Nao foi possivel copiar o link neste aparelho.');
+        renderNotice('error', 'Nao foi possivel copiar o link neste aparelho.');
       }
     }
 
-    function restoreTokenFromStorage() {
-      return localStorage.getItem(LAST_TOKEN_KEY) || '';
-    }
-
-    function registerServiceWorker() {
-      if (!('serviceWorker' in navigator)) return;
-      navigator.serviceWorker.register('driver-sw.js').catch(() => {});
+    function restoreToken() {
+      return queryParam('token') || localStorage.getItem(LAST_TOKEN_KEY) || '';
     }
 
     window.addEventListener('beforeinstallprompt', (event) => {
@@ -1907,7 +1696,16 @@
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
       updateInstallButtons();
-      showSuccess('App instalado no aparelho.');
+      renderNotice('success', 'App instalado no aparelho.');
+    });
+
+    window.addEventListener('online', () => {
+      setLiveState(true, false);
+      flushPendingQueue().catch(() => {});
+    });
+
+    window.addEventListener('offline', () => {
+      setLiveState(false, false);
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -1917,44 +1715,55 @@
     });
 
     document.getElementById('refresh-btn').addEventListener('click', () => refreshBatch());
-    document.getElementById('status-refresh-btn').addEventListener('click', () => refreshBatch());
-    document.getElementById('side-refresh-btn').addEventListener('click', () => refreshBatch());
-    document.getElementById('support-refresh-btn').addEventListener('click', () => refreshBatch());
-    document.getElementById('mark-all-collected-btn').addEventListener('click', markAllCollected);
-    document.getElementById('clear-collected-btn').addEventListener('click', clearCollectedChecklist);
-    document.getElementById('prev-stop-btn').addEventListener('click', () => changeStop(-1));
-    document.getElementById('next-stop-btn').addEventListener('click', () => changeStop(1));
-    document.getElementById('nav-toggle-delivered').addEventListener('click', () => {
-      const currentStop = getCurrentStop();
-      if (currentStop) toggleLocalDelivered(currentStop.id);
+    document.getElementById('driver-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      acceptBatch();
     });
-    document.getElementById('install-btn').addEventListener('click', installApp);
-    document.getElementById('status-install-btn').addEventListener('click', installApp);
+    document.getElementById('reuse-driver-btn').addEventListener('click', () => fillDriverForm(getSavedDriverProfile()));
+    document.getElementById('retry-btn').addEventListener('click', () => flushPendingQueue().then(() => renderNotice('success', 'Fila de sincronizacao processada.')).catch(() => {}));
+    document.getElementById('copy-link-btn').addEventListener('click', copyPublicLink);
     document.getElementById('support-install-btn').addEventListener('click', installApp);
-    document.getElementById('support-copy-link-btn').addEventListener('click', copyPublicLink);
-    document.querySelectorAll('.footer-tab').forEach((tab) => {
-      tab.addEventListener('click', () => setView(tab.getAttribute('data-view')));
+    document.getElementById('install-btn').addEventListener('click', installApp);
+    document.getElementById('call-btn').addEventListener('click', () => {
+      const phone = sanitizePhone(getCurrentOrder()?.phone);
+      if (phone) window.location.href = `tel:${phone}`;
+    });
+    document.getElementById('prev-btn').addEventListener('click', () => moveCurrent(-1));
+    document.getElementById('next-btn').addEventListener('click', () => moveCurrent(1));
+    document.getElementById('delivered-btn').addEventListener('click', () => sendStatusAction('delivered'));
+    document.getElementById('failed-btn').addEventListener('click', openFailedModal);
+    document.getElementById('cancel-failed-btn').addEventListener('click', closeFailedModal);
+    document.getElementById('confirm-failed-btn').addEventListener('click', async () => {
+      await sendStatusAction('failed', {
+        reason: selectedFailureReason,
+        note: document.getElementById('failed-note').value.trim(),
+      });
+      closeFailedModal();
     });
 
     (async function init() {
-      const params = new URLSearchParams(window.location.search);
-      currentToken = params.get('token') || restoreTokenFromStorage();
+      currentToken = restoreToken();
       if (!currentToken) {
-        showError('Token do lote nao informado. Abra o lote pelo link ou QR Code.');
+        renderNotice('error', 'Token do lote nao informado. Abra o lote pelo link ou QR Code.');
         return;
       }
 
       localStorage.setItem(LAST_TOKEN_KEY, currentToken);
+      currentSession = getSavedSession();
       fillDriverForm(getSavedDriverProfile());
+      renderReasonOptions();
       registerServiceWorker();
 
-      try {
-        await refreshBatch();
-        startPolling();
-      } catch (error) {
-        console.error(error);
-        showError(error.message);
+      const cachedBatch = getCachedBatch();
+      if (cachedBatch) {
+        currentBatch = cachedBatch;
+        markBatchApplied(currentBatch);
+        setLiveState(navigator.onLine, true);
+        renderBatch();
       }
+
+      await refreshBatch({ force: true });
+      startPolling();
     })();
   </script>
 </body>

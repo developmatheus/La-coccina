@@ -59,7 +59,7 @@ app.use(cors({
     callback(new Error('Origem não permitida pelo CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -94,6 +94,13 @@ app.use('/api/', rateLimit({
 app.use('/api/login', rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 15
+}));
+
+app.use('/api/settings/unlock', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false
 }));
 
 app.use('/uploads', express.static(
