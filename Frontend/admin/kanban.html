@@ -109,10 +109,18 @@
     .route-map-status { padding: 12px 16px; font-size: 0.78rem; color: #777; border-top: 1px solid #1a1a1a; }
     .route-side { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
     .route-summary { background: #151515; border: 1px solid #1f1f1f; border-radius: 12px; padding: 12px; }
+    .route-list-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
     .route-list { display: flex; flex-direction: column; gap: 8px; }
-    .route-stop { background: #151515; border: 1px solid #1f1f1f; border-radius: 10px; padding: 10px; }
+    .route-stop { background: #151515; border: 1px solid #1f1f1f; border-radius: 10px; padding: 10px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease; }
+    .route-stop.dragging { opacity: 0.55; border-color: #5ca8e0; }
+    .route-stop.drop-target { border-color: #ffcc00; background: #191611; }
+    .route-stop-handle { width: 34px; min-height: 34px; border-radius: 8px; border: 1px dashed #303030; display: flex; align-items: center; justify-content: center; color: #888; font-size: 0.95rem; cursor: grab; user-select: none; }
+    .route-stop-handle:active { cursor: grabbing; }
+    .route-stop-body { min-width: 0; }
     .route-stop strong { color: #fff; font-size: 0.84rem; display: block; }
     .route-stop span { display: block; color: #666; font-size: 0.74rem; margin-top: 4px; line-height: 1.3; }
+    .route-stop-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .route-stop-badge { background: #101010; border: 1px solid #242424; color: #9a9a9a; border-radius: 999px; padding: 4px 8px; font-size: 0.68rem; white-space: nowrap; }
     .route-modal-footer, .batch-modal-footer { padding: 14px 20px; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .modal-btn { width: auto; }
     .batch-modal-body { padding: 18px 20px; display: grid; grid-template-columns: 220px 1fr; gap: 18px; overflow-y: auto; }
@@ -206,6 +214,9 @@
         <strong style="display:block; color:#fff; margin-bottom:6px;">Resumo do lote</strong>
         <div id="route-summary-count" style="color:#888; font-size:0.8rem;">0 pedidos</div>
         <div id="route-summary-note" style="color:#666; font-size:0.74rem; margin-top:6px;">Somente pedidos em `Preparando Rota` e sem lote ativo entram nesta preparação.</div>
+      </div>
+      <div class="route-list-toolbar">
+        <button class="modal-btn" id="route-reverse-btn" onclick="reverseRouteOrder()" disabled>Inverter ordem</button>
       </div>
       <div class="route-list" id="route-stop-list"></div>
     </div>
@@ -327,6 +338,7 @@
   let _wasDragged = false;
   let googleMapsPromise = null;
   let routePreview = null;
+  let draggedRouteStopIndex = null;
   let routeMap = null;
   let routeDirectionsRenderer = null;
   let currentBatchModalUrl = '';
@@ -763,6 +775,8 @@
   function closeRouteModal() {
     document.getElementById('route-modal-overlay').classList.remove('open');
     document.getElementById('route-modal').classList.remove('open');
+    routePreview = null;
+    draggedRouteStopIndex = null;
   }
 
   function openRouteModalShell() {
@@ -850,6 +864,92 @@
     });
   }
 
+  function renderRouteStopList(orderedStops) {
+    const listEl = document.getElementById('route-stop-list');
+    listEl.innerHTML = orderedStops.map((stop, index) => `
+      <div class="route-stop" draggable="true" data-route-index="${index}">
+        <div class="route-stop-handle" title="Arraste para mudar a ordem">⋮⋮</div>
+        <div class="route-stop-body">
+          <strong>Parada ${index + 1} • ${esc(stop.customer)}</strong>
+          <span>${esc(stop.address)}</span>
+          <span>${esc(stop.phone || 'Telefone nao informado')}</span>
+        </div>
+        <div class="route-stop-badges">
+          <div class="route-stop-badge">${index === 0 ? 'Primeira parada' : 'Entrega'}</div>
+          <div class="route-stop-badge">Pedido #${esc(String(stop.id))}</div>
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.route-stop').forEach((el) => {
+      el.addEventListener('dragstart', (event) => {
+        draggedRouteStopIndex = Number(el.dataset.routeIndex);
+        el.classList.add('dragging');
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', String(draggedRouteStopIndex));
+        }
+      });
+      el.addEventListener('dragend', () => {
+        draggedRouteStopIndex = null;
+        listEl.querySelectorAll('.route-stop').forEach((item) => item.classList.remove('dragging', 'drop-target'));
+      });
+      el.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        if (draggedRouteStopIndex === null) return;
+        if (Number(el.dataset.routeIndex) !== draggedRouteStopIndex) {
+          el.classList.add('drop-target');
+        }
+      });
+      el.addEventListener('dragleave', () => {
+        el.classList.remove('drop-target');
+      });
+      el.addEventListener('drop', async (event) => {
+        event.preventDefault();
+        const targetIndex = Number(el.dataset.routeIndex);
+        el.classList.remove('drop-target');
+        if (draggedRouteStopIndex === null || Number.isNaN(targetIndex) || draggedRouteStopIndex === targetIndex) return;
+        const reorderedStops = routePreview.orderedStops.slice();
+        const [movedStop] = reorderedStops.splice(draggedRouteStopIndex, 1);
+        reorderedStops.splice(targetIndex, 0, movedStop);
+        await applyManualRouteOrder(reorderedStops, 'Ordem manual aplicada. Revise a rota antes de criar o lote.');
+      });
+    });
+  }
+
+  async function applyManualRouteOrder(orderedStops, statusMessage) {
+    const confirmBtn = document.getElementById('route-confirm-btn');
+    const reverseBtn = document.getElementById('route-reverse-btn');
+    routePreview = {
+      ...routePreview,
+      orderedStops,
+      orderedOrderIds: orderedStops.map((stop) => stop.id),
+      mapsUrl: buildGoogleMapsUrl(deliverySettings.restaurantOriginAddress, orderedStops),
+    };
+    renderRouteStopList(orderedStops);
+    document.getElementById('route-summary-count').textContent = `${routePreview.orderIds.length} pedidos elegiveis`;
+    document.getElementById('route-summary-note').textContent = 'Arraste as paradas para ajustar a ordem ou use "Inverter ordem" para trocar o sentido da rota.';
+    confirmBtn.disabled = true;
+    reverseBtn.disabled = true;
+    document.getElementById('route-map-status').textContent = 'Atualizando mapa conforme a ordem escolhida...';
+    try {
+      await renderRouteMap(deliverySettings.restaurantOriginAddress, orderedStops);
+      document.getElementById('route-map-status').textContent = statusMessage;
+      confirmBtn.disabled = false;
+    } catch (error) {
+      console.error(error);
+      document.getElementById('route-map-status').textContent = error.message;
+      document.getElementById('route-result').textContent = `Falha ao atualizar mapa: ${error.message}`;
+    } finally {
+      reverseBtn.disabled = orderedStops.length < 2;
+    }
+  }
+
+  async function reverseRouteOrder() {
+    if (!routePreview?.orderedStops?.length || routePreview.orderedStops.length < 2) return;
+    await applyManualRouteOrder(routePreview.orderedStops.slice().reverse(), 'Rota invertida. Confirme se a sequencia faz sentido para o motoboy.');
+  }
+
   async function openRouteModal() {
     const eligibleOrders = orders.filter((order) => order.status === 'preparando_rota' && !order.delivery_batch_id);
     if (!eligibleOrders.length) {
@@ -871,6 +971,7 @@
     document.getElementById('route-stop-list').innerHTML = '<div class="route-stop"><strong>Calculando rota...</strong><span>Geocodificando enderecos e montando ordem sugerida.</span></div>';
     document.getElementById('route-result').textContent = 'Nenhum lote criado ainda.';
     document.getElementById('route-confirm-btn').disabled = true;
+    document.getElementById('route-reverse-btn').disabled = true;
     document.getElementById('route-map-status').textContent = 'Calculando melhor ordem sugerida a partir do endereco-base...';
 
     try {
@@ -882,22 +983,13 @@
         stops.push({ id: order.id, customer: order.customer, address: order.address, phone: order.phone, location });
       }
       const orderedStops = computeNearestNeighbor(originLocation, stops);
-      const mapsUrl = buildGoogleMapsUrl(deliverySettings.restaurantOriginAddress, orderedStops);
-      routePreview = { orderIds: eligibleOrders.map((order) => order.id), orderedOrderIds: orderedStops.map((stop) => stop.id), orderedStops, mapsUrl };
-      document.getElementById('route-stop-list').innerHTML = orderedStops.map((stop, index) => `
-        <div class="route-stop">
-          <strong>Parada ${index + 1} • ${esc(stop.customer)}</strong>
-          <span>${esc(stop.address)}</span>
-          <span>${esc(stop.phone || 'Telefone nao informado')}</span>
-        </div>
-      `).join('');
-      await renderRouteMap(deliverySettings.restaurantOriginAddress, orderedStops);
-      document.getElementById('route-map-status').textContent = 'Rota sugerida pronta para confirmacao.';
-      document.getElementById('route-confirm-btn').disabled = false;
+      routePreview = { orderIds: eligibleOrders.map((order) => order.id), orderedOrderIds: [], orderedStops: [], mapsUrl: '' };
+      await applyManualRouteOrder(orderedStops, 'Rota sugerida pronta. Voce pode arrastar as paradas ou inverter a sequencia antes de confirmar.');
     } catch (error) {
       console.error(error);
       document.getElementById('route-map-status').textContent = error.message;
       document.getElementById('route-stop-list').innerHTML = `<div class="route-stop"><strong>Falha ao preparar rota</strong><span>${esc(error.message)}</span></div>`;
+      document.getElementById('route-reverse-btn').disabled = true;
     }
   }
 
