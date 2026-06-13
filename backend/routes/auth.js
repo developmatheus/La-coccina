@@ -3,8 +3,7 @@
  */
 
 const express = require('express');
-const bcrypt = require('bcrypt');
-const { createSessionToken } = require('../middleware/auth');
+const { compareEnvPassword, createSessionToken } = require('../middleware/auth');
 const { trimString } = require('../utils/sanitize');
 
 const router = express.Router();
@@ -28,19 +27,12 @@ const adminPassword = process.env.ADMIN_PASSWORD;
       return res.status(401).json({ success: false, error: 'Usuário ou senha incorretos' });
     }
 
-    let passOk = false;
-    if (adminPassword.startsWith('$2')) {
-      passOk = await bcrypt.compare(password, adminPassword);
-    } else {
-      if (process.env.NODE_ENV === 'production') {
-        console.error('❌ ADMIN_PASSWORD sem hash bcrypt em produção. Use: node scripts/hash-password.js');
-        return res.status(500).json({ success: false, error: 'Configuração de senha inválida no servidor' });
-      }
-      passOk = password === adminPassword;
-      console.warn('⚠️ Use senha com hash bcrypt no .env (rode: node scripts/hash-password.js)');
-    }
+    const passwordCheck = await compareEnvPassword(password, adminPassword, 'Senha de admin');
 
-    if (!passOk) {
+    if (!passwordCheck.ok) {
+      if (passwordCheck.status === 500) {
+        return res.status(500).json({ success: false, error: passwordCheck.error });
+      }
       return res.status(401).json({ success: false, error: 'Usuário ou senha incorretos' });
     }
 

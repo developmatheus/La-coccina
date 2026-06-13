@@ -51,13 +51,29 @@
     #btn-tool-panel.active { border-color: #ffcc00; color: #ffcc00; background: #1a1505; }
 
     /* Painel da ferramenta */
-    #tool-panel { background: #0a0a0a; border-top: 2px solid #ffcc00; margin-top: 32px; }
-    .tool-panel-inner { max-width: 100%; padding: 28px 24px; }
+    body.tool-panel-open { overflow: hidden; }
+    #tool-panel { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(5, 5, 5, 0.72); backdrop-filter: blur(10px); }
+    #tool-panel[hidden] { display: none; }
+    .tool-panel-dialog { width: min(1120px, 100%); max-height: min(88vh, 920px); background: linear-gradient(180deg, #151515, #0d0d0d); border: 1px solid #2b2b2b; border-radius: 24px; box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45); overflow: hidden; display: flex; flex-direction: column; }
+    .tool-panel-inner { max-width: 100%; padding: 28px 24px; overflow-y: auto; }
     .tool-panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; }
     .tool-panel-title { margin: 0 0 4px; font-size: 1.1rem; color: #ffcc00; }
     .tool-panel-desc { margin: 0; font-size: 0.82rem; color: #555; }
     .tool-panel-close { background: none; border: 1px solid #333; color: #666; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem; width: auto; margin: 0; flex-shrink: 0; }
     .tool-panel-close:hover { border-color: #555; color: #aaa; }
+    .tool-panel-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 999px; background: rgba(255, 204, 0, 0.08); border: 1px solid rgba(255, 204, 0, 0.16); color: #e8d18a; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em; }
+    .tool-lock-panel { padding: 32px 24px; display: flex; align-items: center; justify-content: center; min-height: 420px; }
+    .tool-lock-card { width: min(460px, 100%); padding: 28px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid #242424; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03); }
+    .tool-lock-card h3 { margin: 0 0 8px; font-size: 1.2rem; color: #fff; }
+    .tool-lock-card p { margin: 0 0 18px; color: #8f8f8f; line-height: 1.5; font-size: 0.92rem; }
+    .tool-lock-form { display: flex; flex-direction: column; gap: 12px; }
+    .tool-lock-form input { margin: 0; padding: 14px 16px; border-radius: 14px; border: 1px solid #2d2d2d; background: #121212; color: #fff; font-size: 1rem; }
+    .tool-lock-form input:focus { border-color: #ffcc00; outline: none; box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.12); }
+    .tool-lock-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tool-lock-submit { background: #ffcc00; color: #171203; border: none; border-radius: 12px; padding: 12px 18px; font-weight: 700; cursor: pointer; width: auto; margin: 0; }
+    .tool-lock-submit:hover { background: #ffd84d; }
+    .tool-lock-hint { color: #6e6e6e; font-size: 0.8rem; }
+    .tool-lock-error { min-height: 1.1em; margin: 0; color: #ff7a7a; font-size: 0.82rem; }
     .tool-section { background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
     .tool-section h3 { margin: 0 0 4px; font-size: 0.95rem; color: #ccc; }
     .tool-section-desc { margin: 0 0 16px; font-size: 0.8rem; color: #555; }
@@ -768,9 +784,36 @@
       background: var(--surface-contrast);
     }
     #tool-panel {
+      background: color-mix(in srgb, var(--bg) 56%, rgba(8, 8, 8, 0.78));
+    }
+    .tool-panel-dialog {
       background: linear-gradient(180deg, var(--surface-elevated), var(--surface));
-      border-top: 1px solid var(--border-strong);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      border-color: var(--border-strong);
+      box-shadow: var(--soft-shadow);
+    }
+    .tool-lock-card {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--surface-raised) 94%, transparent 6%), var(--surface));
+      border-color: var(--border);
+      box-shadow: var(--soft-shadow);
+    }
+    .tool-lock-form input {
+      background: var(--surface-contrast);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .tool-lock-hint,
+    .tool-lock-card p {
+      color: var(--muted);
+    }
+    .tool-lock-submit {
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      color: var(--accent-contrast);
+      box-shadow: 0 10px 22px rgba(202, 165, 106, 0.24);
+    }
+    .tool-panel-status {
+      background: color-mix(in srgb, var(--surface-contrast) 82%, var(--accent) 18%);
+      border-color: color-mix(in srgb, var(--border-strong) 72%, var(--accent) 28%);
+      color: var(--accent-strong);
     }
     .tool-section h3,
     .tool-cfg-label strong,
@@ -980,6 +1023,14 @@
     }
     @media (max-width: 720px) {
       .admin-panel { padding: 16px; }
+      #tool-panel { padding: 12px; align-items: stretch; }
+      .tool-panel-dialog { width: 100%; max-height: 100vh; border-radius: 18px; }
+      .tool-panel-inner { padding: 20px 16px; }
+      .tool-lock-panel { padding: 20px 16px; min-height: 0; }
+      .tool-lock-card { padding: 22px 18px; border-radius: 18px; }
+      .tool-lock-actions { flex-direction: column; }
+      .tool-lock-submit,
+      .tool-panel-close { width: 100%; }
       .products-layout { padding: 18px; }
       .product-view-switch { width: 100%; border-radius: 16px; }
       .product-view-btn { flex: 1 1 calc(50% - 8px); text-align: center; }
@@ -1059,105 +1110,126 @@
        PAINEL DA FERRAMENTA — visível apenas via botão ⚙️
        Antecipa o nível "Admin da ferramenta" (roles futuros)
   ================================================================ -->
-  <div id="tool-panel" hidden>
-    <div class="tool-panel-inner">
+  <div id="tool-panel" hidden onclick="handleToolPanelBackdrop(event)">
+    <div class="tool-panel-dialog" role="dialog" aria-modal="true" aria-labelledby="tool-panel-title" aria-describedby="tool-panel-desc">
+      <div class="tool-panel-inner">
 
-      <div class="tool-panel-header">
-        <div>
-          <h2 class="tool-panel-title">⚙️ Painel da Ferramenta</h2>
-          <p class="tool-panel-desc">Configurações globais do sistema. Acesso restrito ao administrador da ferramenta.</p>
-        </div>
-        <button class="tool-panel-close" onclick="toggleToolPanel()" aria-label="Fechar painel">✕</button>
-      </div>
-
-      <!-- Catálogo de Acompanhamentos -->
-      <div class="tool-section">
-        <h3>🥗 Catálogo de Acompanhamentos</h3>
-        <p class="tool-section-desc">Registros globais reutilizáveis. Associe ao prato pelo botão 🥗 na tabela de produtos.</p>
-
-        <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
-          <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
-          <input type="number" id="acc-extra-price"  placeholder="Preço extra" step="0.01" min="0" value="0">
-          <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
-          <button type="submit" class="btn-tool-add">＋ Adicionar</button>
-        </form>
-
-        <div class="table-scroll" style="margin-top:12px;">
-          <table class="acc-table">
-            <thead>
-              <tr><th style="width:32px"></th><th>Nome</th><th>Preço extra</th><th>Status</th><th style="width:40px"></th></tr>
-            </thead>
-            <tbody id="acc-catalog-body">
-              <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Configurações de UX -->
-      <div class="tool-section">
-        <h3>🎨 Configurações de UX</h3>
-
-        <div class="tool-cfg-row">
-          <div class="tool-cfg-label">
-            <strong>Debounce do cardápio (ms)</strong>
-            <span>Intervalo mínimo entre atualizações automáticas após alterações. Padrão: 1000ms.</span>
+        <div class="tool-panel-header">
+          <div>
+            <h2 class="tool-panel-title" id="tool-panel-title">Configuracoes</h2>
+            <p class="tool-panel-desc" id="tool-panel-desc">Tudo agora abre em um modal grande, sem empurrar a tela para baixo.</p>
+            <div class="tool-panel-status">Acesso extra para configuracoes sensiveis</div>
           </div>
-          <div class="tool-cfg-control">
-            <input type="number" id="cfg-debounce" min="200" max="10000" step="100" style="width:100px;">
-            <button onclick="saveConfig()" class="btn-tool-save">Salvar</button>
-            <button onclick="resetConfig()" class="btn-tool-reset">Padrão</button>
-          </div>
-          <p id="cfg-msg" class="tool-cfg-msg"></p>
+          <button class="tool-panel-close" type="button" onclick="closeToolPanel()" aria-label="Fechar configurações">Fechar</button>
         </div>
 
-        <div class="tool-cfg-row">
-          <div class="tool-cfg-label">
-            <strong>Exibição de acompanhamentos no carrinho</strong>
-            <span>Como os acompanhamentos escolhidos aparecem para o cliente.</span>
+        <div id="tool-panel-lock" class="tool-lock-panel">
+          <div class="tool-lock-card">
+            <h3>Entrar nas configuracoes</h3>
+            <p>Digite a senha extra para liberar o painel completo de configuracoes do sistema.</p>
+            <form class="tool-lock-form" onsubmit="unlockToolPanel(event)">
+              <input type="password" id="tool-panel-password" placeholder="Senha de acesso" autocomplete="off">
+              <div class="tool-lock-actions">
+                <button type="submit" class="tool-lock-submit">Entrar</button>
+                <button type="button" class="btn-tool-reset" onclick="closeToolPanel()">Cancelar</button>
+              </div>
+              <p class="tool-lock-hint">A liberacao e validada no servidor e expira quando o modal fecha.</p>
+              <p id="tool-panel-error" class="tool-lock-error"></p>
+            </form>
           </div>
-          <div class="tool-cfg-control">
-            <select id="cfg-acc-display" style="width:auto; min-width:200px;">
-              <option value="tags">🏷️ Tags coloridas (padrão)</option>
-              <option value="text">📝 Texto discreto</option>
-              <option value="edit">✏️ Texto com botão Editar</option>
-            </select>
-            <button onclick="saveAccDisplayMode()" class="btn-tool-save">Salvar</button>
-          </div>
-          <p id="cfg-acc-msg" class="tool-cfg-msg"></p>
         </div>
 
-        <div class="tool-cfg-row">
-          <div class="tool-cfg-label">
-            <strong>Kanban de pedidos</strong>
-            <span>Ativa o rastreamento de status do pedido pelo cliente e o painel Kanban para o gestor. Quando ativo: pedidos são salvos no banco ao enviar pelo WhatsApp, o link de rastreio é incluído na mensagem e o cliente vê a tela de confirmação com botão "Ver status do pedido".</span>
-          </div>
-          <div class="tool-cfg-control">
-            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:#bbb; font-size:0.88rem;">
-              <input type="checkbox" id="cfg-kanban-enabled" style="width:auto; margin:0; cursor:pointer; accent-color:#ffcc00;">
-              Habilitar Kanban e rastreamento de pedidos
-            </label>
-            <button onclick="saveKanbanEnabled()" class="btn-tool-save">Salvar</button>
-          </div>
-          <p id="cfg-kanban-msg" class="tool-cfg-msg"></p>
-        </div>
+        <div id="tool-panel-content" hidden>
+          <!-- Catálogo de Acompanhamentos -->
+          <div class="tool-section">
+            <h3>🥗 Catalogo de Acompanhamentos</h3>
+            <p class="tool-section-desc">Registros globais reutilizaveis. Associe ao prato pelo botao de acompanhamentos na tabela de produtos.</p>
 
-        <div class="tool-cfg-row">
-          <div class="tool-cfg-label">
-            <strong>Endereço base para entregas</strong>
-            <span>Ponto de partida fixo usado para preparar rotas de entrega. A chave do Google Maps precisa estar configurada no servidor para ativar o mapa embutido.</span>
-          </div>
-          <div class="tool-cfg-control" style="align-items:flex-start; min-width:min(460px, 100%);">
-            <input type="text" id="cfg-delivery-origin" placeholder="Ex: Rua do Restaurante, 123 - Centro, Cidade/UF" style="min-width:min(420px, 100%);">
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
-              <span id="cfg-maps-status" style="font-size:0.76rem; color:#666;">Google Maps: verificando...</span>
+            <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
+              <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
+              <input type="number" id="acc-extra-price"  placeholder="Preco extra" step="0.01" min="0" value="0">
+              <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
+              <button type="submit" class="btn-tool-add">Adicionar</button>
+            </form>
+
+            <div class="table-scroll" style="margin-top:12px;">
+              <table class="acc-table">
+                <thead>
+                  <tr><th style="width:32px"></th><th>Nome</th><th>Preco extra</th><th>Status</th><th style="width:40px"></th></tr>
+                </thead>
+                <tbody id="acc-catalog-body">
+                  <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <p id="cfg-delivery-msg" class="tool-cfg-msg"></p>
-        </div>
-      </div>
 
+          <!-- Configurações de UX -->
+          <div class="tool-section">
+            <h3>Configuracoes de UX</h3>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Debounce do cardapio (ms)</strong>
+                <span>Intervalo minimo entre atualizacoes automaticas apos alteracoes. Padrao: 1000ms.</span>
+              </div>
+              <div class="tool-cfg-control">
+                <input type="number" id="cfg-debounce" min="200" max="10000" step="100" style="width:100px;">
+                <button onclick="saveConfig()" class="btn-tool-save">Salvar</button>
+                <button onclick="resetConfig()" class="btn-tool-reset">Padrao</button>
+              </div>
+              <p id="cfg-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Exibicao de acompanhamentos no carrinho</strong>
+                <span>Como os acompanhamentos escolhidos aparecem para o cliente.</span>
+              </div>
+              <div class="tool-cfg-control">
+                <select id="cfg-acc-display" style="width:auto; min-width:200px;">
+                  <option value="tags">Tags coloridas (padrao)</option>
+                  <option value="text">Texto discreto</option>
+                  <option value="edit">Texto com botao Editar</option>
+                </select>
+                <button onclick="saveAccDisplayMode()" class="btn-tool-save">Salvar</button>
+              </div>
+              <p id="cfg-acc-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Kanban de pedidos</strong>
+                <span>Ativa o rastreamento de status do pedido pelo cliente e o painel Kanban para o gestor. Quando ativo: pedidos sao salvos no banco ao enviar pelo WhatsApp, o link de rastreio e incluido na mensagem e o cliente ve a tela de confirmacao com botao "Ver status do pedido".</span>
+              </div>
+              <div class="tool-cfg-control">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:#bbb; font-size:0.88rem;">
+                  <input type="checkbox" id="cfg-kanban-enabled" style="width:auto; margin:0; cursor:pointer; accent-color:#ffcc00;">
+                  Habilitar Kanban e rastreamento de pedidos
+                </label>
+                <button onclick="saveKanbanEnabled()" class="btn-tool-save">Salvar</button>
+              </div>
+              <p id="cfg-kanban-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Endereco base para entregas</strong>
+                <span>Ponto de partida fixo usado para preparar rotas de entrega. A chave do Google Maps precisa estar configurada no servidor para ativar o mapa embutido.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start; min-width:min(460px, 100%);">
+                <input type="text" id="cfg-delivery-origin" placeholder="Ex: Rua do Restaurante, 123 - Centro, Cidade/UF" style="min-width:min(420px, 100%);">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
+                  <span id="cfg-maps-status" style="font-size:0.76rem; color:#666;">Google Maps: verificando...</span>
+                </div>
+              </div>
+              <p id="cfg-delivery-msg" class="tool-cfg-msg"></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -1952,16 +2024,144 @@
       }
     }
 
-    function toggleToolPanel() {
-      const panel = document.getElementById('tool-panel');
-      const btn   = document.getElementById('btn-tool-panel');
-      const isOpen = !panel.hidden;
-      panel.hidden = isOpen;
-      btn.classList.toggle('active', !isOpen);
-      if (!isOpen) {
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    let toolPanelUnlocked = false;
+    let toolAccessToken = '';
+
+    function syncToolPanelState(isOpen) {
+      const btn = document.getElementById('btn-tool-panel');
+      btn.classList.toggle('active', isOpen);
+      document.body.classList.toggle('tool-panel-open', isOpen);
+    }
+
+    function lockToolPanel(message = '') {
+      toolPanelUnlocked = false;
+      toolAccessToken = '';
+      showToolPanelLock();
+      if (message) {
+        document.getElementById('tool-panel-error').textContent = message;
       }
     }
+
+    function showToolPanelLock() {
+      const passwordInput = document.getElementById('tool-panel-password');
+      const errorEl = document.getElementById('tool-panel-error');
+      document.getElementById('tool-panel-lock').hidden = false;
+      document.getElementById('tool-panel-content').hidden = true;
+      if (errorEl) errorEl.textContent = '';
+      if (passwordInput) {
+        passwordInput.value = '';
+        setTimeout(() => passwordInput.focus(), 50);
+      }
+    }
+
+    function showToolPanelContent() {
+      document.getElementById('tool-panel-lock').hidden = true;
+      document.getElementById('tool-panel-content').hidden = false;
+    }
+
+    async function toolApiFetch(url, options = {}) {
+      if (!toolAccessToken) {
+        lockToolPanel('Digite a senha extra para acessar as configuracoes.');
+        throw new Error('Painel de configuracoes bloqueado');
+      }
+
+      const headers = {
+        ...(options.headers || {}),
+        'X-Tool-Access': `Bearer ${toolAccessToken}`,
+      };
+      const res = await apiFetch(url, { ...options, headers });
+
+      if (res.status === 403) {
+        let message = 'Acesso extra das configuracoes expirado ou invalido.';
+        try {
+          const data = await res.clone().json();
+          if (data.error) message = data.error;
+        } catch {}
+        lockToolPanel(message);
+      }
+
+      return res;
+    }
+
+    async function loadToolPanelData() {
+      await Promise.all([
+        loadAccompanimentsCatalog(),
+        loadDeliverySettings(),
+      ]);
+    }
+
+    function openToolPanel() {
+      const panel = document.getElementById('tool-panel');
+      panel.hidden = false;
+      syncToolPanelState(true);
+      showToolPanelLock();
+    }
+
+    function closeToolPanel() {
+      const panel = document.getElementById('tool-panel');
+      panel.hidden = true;
+      syncToolPanelState(false);
+      lockToolPanel();
+    }
+
+    function toggleToolPanel() {
+      const panel = document.getElementById('tool-panel');
+      if (panel.hidden) openToolPanel();
+      else closeToolPanel();
+    }
+
+    async function unlockToolPanel(event) {
+      event.preventDefault();
+      const input = document.getElementById('tool-panel-password');
+      const errorEl = document.getElementById('tool-panel-error');
+      const submitBtn = event.submitter || document.querySelector('.tool-lock-submit');
+      const attempt = input.value;
+      if (!attempt.trim()) {
+        errorEl.textContent = 'Digite a senha extra para continuar.';
+        input.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Validando...';
+      errorEl.textContent = '';
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/settings/unlock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: attempt })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.toolAccessToken) {
+          errorEl.textContent = data.error || 'Nao foi possivel validar a senha extra.';
+          input.focus();
+          input.select();
+          return;
+        }
+
+        toolAccessToken = data.toolAccessToken;
+        toolPanelUnlocked = true;
+        showToolPanelContent();
+        await loadToolPanelData();
+      } catch (e) {
+        errorEl.textContent = 'Erro de conexao ao validar a senha extra.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar';
+      }
+    }
+
+    function handleToolPanelBackdrop(event) {
+      if (event.target && event.target.id === 'tool-panel') closeToolPanel();
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      const panel = document.getElementById('tool-panel');
+      if (panel && !panel.hidden) closeToolPanel();
+    });
 
     const CONFIG_KEY = 'lc_refresh_debounce';
     const CONFIG_DEFAULT = 1000;
@@ -1996,7 +2196,8 @@
 
     async function loadAccompanimentsCatalog() {
       try {
-        const res = await apiFetch(`${API_BASE}/api/accompaniments/admin`);
+        const res = await toolApiFetch(`${API_BASE}/api/accompaniments/admin`);
+        if (!res.ok) return;
         catalogCache = await res.json();
         renderCatalog();
       } catch (e) { console.error('Erro ao carregar catálogo:', e); }
@@ -2097,7 +2298,7 @@
         else         a.name = raw;
 
         try {
-          await apiFetch(`${API_BASE}/api/accompaniments/${id}`, {
+          await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: a.active }),
@@ -2118,7 +2319,7 @@
       // Salva a nova ordem persitindo sort_order de cada item
       try {
         await Promise.all(catalogCache.map(a =>
-          apiFetch(`${API_BASE}/api/accompaniments/${a.id}`, {
+          toolApiFetch(`${API_BASE}/api/accompaniments/${a.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: a.active }),
@@ -2133,7 +2334,7 @@
       const sort_order = document.getElementById('acc-sort').value || 0;
       if (!name) { alert('Informe o nome do acompanhamento.'); return; }
       try {
-        const res = await apiFetch(`${API_BASE}/api/accompaniments`, {
+        const res = await toolApiFetch(`${API_BASE}/api/accompaniments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, extra_price, sort_order })
@@ -2150,7 +2351,7 @@
       const a = catalogCache.find(x => x.id === id);
       if (!a) return;
       try {
-        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, {
+        await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: !current })
@@ -2162,7 +2363,7 @@
     async function deleteAccompaniment(id) {
       if (!confirm('Remover este acompanhamento do catálogo?')) return;
       try {
-        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, { method: 'DELETE' });
+        await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, { method: 'DELETE' });
         await loadAccompanimentsCatalog();
       } catch (e) { alert('Erro de conexão.'); }
     }
@@ -2186,7 +2387,7 @@
 
       try {
         const [catRes, prodRes] = await Promise.all([
-          apiFetch(`${API_BASE}/api/accompaniments/admin`),
+          apiFetch(`${API_BASE}/api/accompaniments/catalog`),
           fetch(`${API_BASE}/api/accompaniments/product/${productId}`)
         ]);
         const catalog = await catRes.json();
@@ -2309,7 +2510,7 @@
 
     async function loadDeliverySettings() {
       try {
-        const res = await apiFetch(`${API_BASE}/api/settings/admin`);
+        const res = await toolApiFetch(`${API_BASE}/api/settings/admin`);
         if (!res.ok) return;
         const data = await res.json();
         document.getElementById('cfg-delivery-origin').value = data.restaurantOriginAddress || '';
@@ -2332,7 +2533,7 @@
       }
 
       try {
-        const res = await apiFetch(`${API_BASE}/api/settings/admin`, {
+        const res = await toolApiFetch(`${API_BASE}/api/settings/admin`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ restaurantOriginAddress })
@@ -2357,8 +2558,6 @@
       loadConfig();
       loadAccDisplayMode();
       loadKanbanEnabled();
-      loadDeliverySettings();
-      loadAccompanimentsCatalog();
     };
   </script>
 </body>

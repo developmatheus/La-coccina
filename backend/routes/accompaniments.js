@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin, requireToolAccess } = require('../middleware/auth');
 const { notifyClients } = require('../menuEvents');
 const {
   parsePositiveId,
@@ -56,7 +56,7 @@ router.get('/product/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Admin — catálogo global CRUD
 // ---------------------------------------------------------------------------
-router.get('/admin', requireAdmin, async (_req, res) => {
+router.get('/catalog', requireAdmin, async (_req, res) => {
   try {
     const [rows] = await db.execute(
       'SELECT * FROM accompaniments ORDER BY sort_order ASC, name ASC'
@@ -67,7 +67,18 @@ router.get('/admin', requireAdmin, async (_req, res) => {
   }
 });
 
-router.post('/', requireAdmin, async (req, res) => {
+router.get('/admin', requireAdmin, requireToolAccess, async (_req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM accompaniments ORDER BY sort_order ASC, name ASC'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar catálogo' });
+  }
+});
+
+router.post('/', requireAdmin, requireToolAccess, async (req, res) => {
   const parsed = sanitizeAccompanimentInput(req.body);
   if (parsed.error) return res.status(400).json({ error: parsed.error });
 
@@ -85,7 +96,7 @@ router.post('/', requireAdmin, async (req, res) => {
   }
 });
 
-router.put('/:id', requireAdmin, async (req, res) => {
+router.put('/:id', requireAdmin, requireToolAccess, async (req, res) => {
   const id = parsePositiveId(req.params.id);
   if (!id) return res.status(400).json({ error: 'ID inválido' });
 
@@ -110,7 +121,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
   }
 });
 
-router.delete('/:id', requireAdmin, async (req, res) => {
+router.delete('/:id', requireAdmin, requireToolAccess, async (req, res) => {
   const id = parsePositiveId(req.params.id);
   if (!id) return res.status(400).json({ error: 'ID inválido' });
 
