@@ -96,13 +96,6 @@ app.use('/api/login', rateLimit({
   max: 15
 }));
 
-app.use('/api/settings/unlock', rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false
-}));
-
 app.use('/uploads', express.static(
   uploadsDir,
   { dotfiles: 'deny', index: false, maxAge: '7d' }

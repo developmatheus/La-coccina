@@ -1347,28 +1347,11 @@
           <div>
             <h2 class="tool-panel-title" id="tool-panel-title">Configuracoes</h2>
             <p class="tool-panel-desc" id="tool-panel-desc">Tudo agora abre em um modal grande, sem empurrar a tela para baixo.</p>
-            <div class="tool-panel-status">Acesso extra para configuracoes sensiveis</div>
           </div>
           <button class="tool-panel-close" type="button" onclick="closeToolPanel()" aria-label="Fechar configurações">Fechar</button>
         </div>
 
-        <div id="tool-panel-lock" class="tool-lock-panel">
-          <div class="tool-lock-card">
-            <h3>Entrar nas configuracoes</h3>
-            <p>Digite a senha extra para liberar o painel completo de configuracoes do sistema.</p>
-            <form class="tool-lock-form" onsubmit="unlockToolPanel(event)">
-              <input type="password" id="tool-panel-password" placeholder="Senha de acesso" autocomplete="off">
-              <div class="tool-lock-actions">
-                <button type="submit" class="tool-lock-submit">Entrar</button>
-                <button type="button" class="btn-tool-reset" onclick="closeToolPanel()">Cancelar</button>
-              </div>
-              <p class="tool-lock-hint">A liberacao e validada no servidor e expira quando o modal fecha.</p>
-              <p id="tool-panel-error" class="tool-lock-error"></p>
-            </form>
-          </div>
-        </div>
-
-        <div id="tool-panel-content" hidden>
+        <div id="tool-panel-content">
           <!-- Configurações de UX -->
           <div class="tool-section">
             <h3>Configuracoes de UX</h3>
@@ -2329,63 +2312,10 @@
       }
     }
 
-    let toolPanelUnlocked = false;
-    let toolAccessToken = '';
-
     function syncToolPanelState(isOpen) {
       const btn = document.getElementById('btn-tool-panel');
       btn.classList.toggle('active', isOpen);
       document.body.classList.toggle('tool-panel-open', isOpen);
-    }
-
-    function lockToolPanel(message = '') {
-      toolPanelUnlocked = false;
-      toolAccessToken = '';
-      showToolPanelLock();
-      if (message) {
-        document.getElementById('tool-panel-error').textContent = message;
-      }
-    }
-
-    function showToolPanelLock() {
-      const passwordInput = document.getElementById('tool-panel-password');
-      const errorEl = document.getElementById('tool-panel-error');
-      document.getElementById('tool-panel-lock').hidden = false;
-      document.getElementById('tool-panel-content').hidden = true;
-      if (errorEl) errorEl.textContent = '';
-      if (passwordInput) {
-        passwordInput.value = '';
-        setTimeout(() => passwordInput.focus(), 50);
-      }
-    }
-
-    function showToolPanelContent() {
-      document.getElementById('tool-panel-lock').hidden = true;
-      document.getElementById('tool-panel-content').hidden = false;
-    }
-
-    async function toolApiFetch(url, options = {}) {
-      if (!toolAccessToken) {
-        lockToolPanel('Digite a senha extra para acessar as configuracoes.');
-        throw new Error('Painel de configuracoes bloqueado');
-      }
-
-      const headers = {
-        ...(options.headers || {}),
-        'X-Tool-Access': `Bearer ${toolAccessToken}`,
-      };
-      const res = await apiFetch(url, { ...options, headers });
-
-      if (res.status === 403) {
-        let message = 'Acesso extra das configuracoes expirado ou invalido.';
-        try {
-          const data = await res.clone().json();
-          if (data.error) message = data.error;
-        } catch {}
-        lockToolPanel(message);
-      }
-
-      return res;
     }
 
     async function loadToolPanelData() {
@@ -2398,63 +2328,19 @@
       const panel = document.getElementById('tool-panel');
       panel.hidden = false;
       syncToolPanelState(true);
-      showToolPanelLock();
+      loadToolPanelData();
     }
 
     function closeToolPanel() {
       const panel = document.getElementById('tool-panel');
       panel.hidden = true;
       syncToolPanelState(false);
-      lockToolPanel();
     }
 
     function toggleToolPanel() {
       const panel = document.getElementById('tool-panel');
       if (panel.hidden) openToolPanel();
       else closeToolPanel();
-    }
-
-    async function unlockToolPanel(event) {
-      event.preventDefault();
-      const input = document.getElementById('tool-panel-password');
-      const errorEl = document.getElementById('tool-panel-error');
-      const submitBtn = event.submitter || document.querySelector('.tool-lock-submit');
-      const attempt = input.value;
-      if (!attempt.trim()) {
-        errorEl.textContent = 'Digite a senha extra para continuar.';
-        input.focus();
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Validando...';
-      errorEl.textContent = '';
-
-      try {
-        const res = await apiFetch(`${API_BASE}/api/settings/unlock`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: attempt })
-        });
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || !data.toolAccessToken) {
-          errorEl.textContent = data.error || 'Nao foi possivel validar a senha extra.';
-          input.focus();
-          input.select();
-          return;
-        }
-
-        toolAccessToken = data.toolAccessToken;
-        toolPanelUnlocked = true;
-        showToolPanelContent();
-        await loadToolPanelData();
-      } catch (e) {
-        errorEl.textContent = 'Erro de conexao ao validar a senha extra.';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Entrar';
-      }
     }
 
     function handleToolPanelBackdrop(event) {
@@ -2824,7 +2710,7 @@
 
     async function loadDeliverySettings() {
       try {
-        const res = await toolApiFetch(`${API_BASE}/api/settings/admin`);
+        const res = await apiFetch(`${API_BASE}/api/settings/admin`);
         if (!res.ok) return;
         const data = await res.json();
         document.getElementById('cfg-delivery-origin').value = data.restaurantOriginAddress || '';
@@ -2847,7 +2733,7 @@
       }
 
       try {
-        const res = await toolApiFetch(`${API_BASE}/api/settings/admin`, {
+        const res = await apiFetch(`${API_BASE}/api/settings/admin`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ restaurantOriginAddress })
