@@ -217,17 +217,15 @@ function isRouteEligible(order) {
 
 function serializeRouteStop(order) {
   if (!order) return null;
+  const lat = Number(order.addressLat ?? order.address_lat);
+  const lng = Number(order.addressLng ?? order.address_lng);
   return {
     orderId: Number(order.id),
     sequence: order.delivery_sequence ?? null,
     customerName: order.customer || '',
     address: order.address || '',
-    address_lat: Number.isFinite(Number(order.addressLat ?? order.address_lat))
-      ? Number(order.addressLat ?? order.address_lat)
-      : null,
-    address_lng: Number.isFinite(Number(order.addressLng ?? order.address_lng))
-      ? Number(order.addressLng ?? order.address_lng)
-      : null,
+    address_lat: hasUsableCoords(lat, lng) ? lat : null,
+    address_lng: hasUsableCoords(lat, lng) ? lng : null,
     phone: order.phone || '',
     amount: Number(order.total || 0),
     paymentMethod: order.payment || '',
@@ -236,11 +234,16 @@ function serializeRouteStop(order) {
   };
 }
 
+function hasUsableCoords(lat, lng) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+  return Math.abs(lat) > 0.000001 || Math.abs(lng) > 0.000001;
+}
+
 function buildStopLocation(stop) {
   if (!stop) return '';
   const lat = Number(stop.address_lat);
   const lng = Number(stop.address_lng);
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+  if (hasUsableCoords(lat, lng)) {
     return `${lat},${lng}`;
   }
   return encodeURIComponent(stop.address || '');
@@ -250,7 +253,7 @@ function buildGoogleMapsCurrentUrl(stop) {
   if (!stop) return '';
   const lat = Number(stop.address_lat);
   const lng = Number(stop.address_lng);
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+  if (hasUsableCoords(lat, lng)) {
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
   }
   if (!stop.address) return '';
@@ -282,7 +285,7 @@ function buildWazeCurrentUrl(stop) {
   if (!stop) return '';
   const lat = Number(stop.address_lat);
   const lng = Number(stop.address_lng);
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+  if (hasUsableCoords(lat, lng)) {
     return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
   }
   if (!stop.address) return '';

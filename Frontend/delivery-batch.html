@@ -944,19 +944,22 @@
 
     function normalizeStopSnapshot(stop) {
       if (!stop) return null;
+      const lat = Number(stop.address_lat ?? stop.addressLat);
+      const lng = Number(stop.address_lng ?? stop.addressLng);
       return {
         orderId: Number(stop.orderId ?? stop.id ?? 0) || null,
         sequence: Number(stop.sequence ?? stop.delivery_sequence ?? 0) || null,
         customerName: String(stop.customerName || stop.customer || ''),
         address: String(stop.address || ''),
-        address_lat: Number.isFinite(Number(stop.address_lat ?? stop.addressLat))
-          ? Number(stop.address_lat ?? stop.addressLat)
-          : null,
-        address_lng: Number.isFinite(Number(stop.address_lng ?? stop.addressLng))
-          ? Number(stop.address_lng ?? stop.addressLng)
-          : null,
+        address_lat: hasUsableCoords(lat, lng) ? lat : null,
+        address_lng: hasUsableCoords(lat, lng) ? lng : null,
         status: String(stop.status || ''),
       };
+    }
+
+    function hasUsableCoords(lat, lng) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+      return Math.abs(lat) > 0.000001 || Math.abs(lng) > 0.000001;
     }
 
     function buildBatchRefreshSignature(batch) {
@@ -1111,7 +1114,7 @@
     function getOrderCoords(order) {
       const lat = Number(order?.addressLat ?? order?.address_lat);
       const lng = Number(order?.addressLng ?? order?.address_lng);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      if (!hasUsableCoords(lat, lng)) return null;
       return { lat, lng };
     }
 

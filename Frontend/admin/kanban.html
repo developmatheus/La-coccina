@@ -836,6 +836,7 @@
     const lat = Number(order?.addressLat ?? order?.address_lat);
     const lng = Number(order?.addressLng ?? order?.address_lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    if (Math.abs(lat) <= 0.000001 && Math.abs(lng) <= 0.000001) return null;
     return { lat, lng };
   }
 
