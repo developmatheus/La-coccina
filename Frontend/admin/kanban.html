@@ -12,8 +12,10 @@
   <style>
     @font-face { font-family: 'SomeTimeLater'; src: url('../ASSETS/fonts/Some Time Later.otf') format('opentype'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; overflow-x: hidden; }
     body { background: #0d0d0d; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-    .kb-header { background: #111; border-bottom: 1px solid #1e1e1e; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
+    .kb-header { background: #111; border-bottom: 1px solid #1e1e1e; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
     .kb-brand { font-family: 'SomeTimeLater', cursive; font-size: 1.4rem; color: #ffcc00; }
     .kb-title { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1px; }
     .kb-header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -31,11 +33,11 @@
     .protein-chip { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 50px; padding: 4px 12px; font-size: 0.78rem; color: #bbb; display: flex; align-items: center; gap: 6px; }
     .protein-chip strong { color: #ffcc00; font-size: 0.9rem; }
     #protein-summary .ps-label { font-size: 0.72rem; color: #444; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
-    .kb-board { display: flex; gap: 16px; padding: 16px 20px; flex: 1; overflow-x: auto; align-items: flex-start; }
-    .kb-col { flex: 0 0 320px; display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 14px; border: 1px solid #1e1e1e; overflow: hidden; min-height: 260px; }
-    .kb-col-header { padding: 14px 16px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; flex-wrap: wrap; }
-    .kb-col-title { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; flex: 1; }
-    .kb-col-count { background: #2a2a2a; color: #888; border-radius: 50px; padding: 1px 8px; font-size: 0.72rem; font-weight: 600; }
+    .kb-board { display: flex; gap: 10px; padding: 10px 16px; flex: 1; overflow-x: hidden; align-items: flex-start; }
+    .kb-col { flex: 1 1 0; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 10px; border: 1px solid #1e1e1e; overflow: hidden; min-height: 260px; }
+    .kb-col-header { padding: 10px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; flex-wrap: wrap; }
+    .kb-col-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; flex: 1; }
+    .kb-col-count { background: #2a2a2a; color: #888; border-radius: 10px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
     .kb-col-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .col-novo .kb-col-indicator { background: #3498db; }
     .col-novo .kb-col-title { color: #5dade2; }
@@ -47,44 +49,44 @@
     .col-preparando_rota .kb-col-title { color: #f7dc6f; }
     .col-a_caminho .kb-col-indicator { background: #9b59b6; }
     .col-a_caminho .kb-col-title { color: #bb8fce; }
-    .kb-col-body { padding: 10px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 100px; }
+    .kb-col-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 100px; }
     .kb-col-body.drag-over { background: #1a1a1a; border-radius: 8px; }
-    .kb-col-header .kb-col-action { width: 100%; justify-content: center; }
-    .kb-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 14px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
+    .kb-col-header .kb-col-action { width: 100%; justify-content: center; padding: 8px; font-size: 0.75rem; }
+    .kb-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
     .kb-card.static-card { cursor: default; }
     .kb-card:active { cursor: grabbing; }
     .kb-card.dragging { opacity: 0.4; transform: scale(0.97); }
     .kb-card:hover { border-color: #3a3a3a; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
-    .kb-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-    .kb-card-id { font-size: 0.68rem; color: #444; font-weight: 600; }
-    .kb-card-time { font-size: 0.65rem; color: #444; white-space: nowrap; }
-    .kb-card-name { font-size: 0.92rem; font-weight: 600; color: #eee; margin-bottom: 4px; }
-    .kb-card-address { font-size: 0.75rem; color: #666; margin-bottom: 8px; line-height: 1.3; }
-    .kb-card-items { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-    .kb-card-item { font-size: 0.78rem; color: #aaa; display: flex; gap: 6px; align-items: flex-start; }
+    .kb-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
+    .kb-card-id { font-size: 0.65rem; color: #444; font-weight: 600; }
+    .kb-card-time { font-size: 0.62rem; color: #444; white-space: nowrap; }
+    .kb-card-name { font-size: 0.85rem; font-weight: 600; color: #eee; margin-bottom: 3px; }
+    .kb-card-address { font-size: 0.7rem; color: #666; margin-bottom: 6px; line-height: 1.2; }
+    .kb-card-items { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+    .kb-card-item { font-size: 0.75rem; color: #aaa; display: flex; gap: 5px; align-items: flex-start; }
     .kb-card-item-qty { color: #ffcc00; font-weight: 700; flex-shrink: 0; }
-    .kb-card-acc { font-size: 0.7rem; color: #555; margin-left: 18px; margin-top: 1px; }
-    .kb-card-total { font-size: 0.82rem; color: #ffcc00; font-weight: 600; margin-bottom: 10px; }
-    .kb-card-payment { font-size: 0.7rem; color: #555; margin-top: -8px; margin-bottom: 10px; }
-    .kb-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .kb-card-actions button { border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+    .kb-card-acc { font-size: 0.65rem; color: #555; margin-left: 16px; margin-top: 1px; }
+    .kb-card-total { font-size: 0.78rem; color: #ffcc00; font-weight: 600; margin-bottom: 8px; }
+    .kb-card-payment { font-size: 0.68rem; color: #555; margin-top: -6px; margin-bottom: 8px; }
+    .kb-card-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .kb-card-actions button { border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
     .btn-move-next { background: #ffcc00; color: #000; }
     .btn-cancel { background: #1a0a0a; color: #e74c3c; border: 1px solid #2a1010 !important; }
-    .kb-card-obs { font-size: 0.72rem; color: #666; background: #141414; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; border-left: 2px solid #2a2a2a; }
+    .kb-card-obs { font-size: 0.7rem; color: #666; background: #141414; border-radius: 6px; padding: 5px 7px; margin-bottom: 6px; border-left: 2px solid #2a2a2a; }
     .kb-card.wa-pending { border-color: #e67e22; border-left: 3px solid #e67e22; }
     .kb-card.wa-confirmed { border-color: #2a2a2a; }
-    .wa-check-row { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 7px; margin-bottom: 10px; background: #0f0f0f; border: 1px solid #2a2a2a; cursor: pointer; transition: background 0.15s; }
+    .wa-check-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; margin-bottom: 8px; background: #0f0f0f; border: 1px solid #2a2a2a; cursor: pointer; transition: background 0.15s; }
     .wa-check-row:hover { background: #1a1a1a; }
     .wa-check-row.confirmed { background: #0d1f10; border-color: #1e3a22; }
-    .wa-check-box { width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; border: 1.5px solid #3a3a3a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.15s; }
+    .wa-check-box { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1.5px solid #3a3a3a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; transition: all 0.15s; }
     .wa-check-row.confirmed .wa-check-box { background: #25d366; border-color: #25d366; }
-    .wa-check-label { font-size: 0.72rem; color: #555; line-height: 1.2; flex: 1; }
+    .wa-check-label { font-size: 0.7rem; color: #555; line-height: 1.2; flex: 1; }
     .wa-check-row.confirmed .wa-check-label { color: #4caf50; }
-    .wa-pending-badge { background: #e67e22; color: #fff; border-radius: 50px; padding: 1px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
-    .kb-empty { color: #333; font-size: 0.78rem; text-align: center; padding: 20px 10px; font-style: italic; }
-    .kb-whatsapp-notice { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; color: #4caf50; display: flex; align-items: center; gap: 8px; }
-    .kb-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-    .kb-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; }
+    .wa-pending-badge { background: #e67e22; color: #fff; border-radius: 10px; padding: 2px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
+    .kb-empty { color: #333; font-size: 0.75rem; text-align: center; padding: 16px 10px; font-style: italic; }
+    .kb-whatsapp-notice { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; color: #4caf50; display: flex; align-items: center; gap: 6px; }
+    .kb-card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+    .kb-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.02em; }
     .kb-tag.batch { background: #1e1a0a; color: #ffcc00; border: 1px solid #4d3d11; }
     .kb-tag.status { background: #111827; color: #9cc3ff; border: 1px solid #21304f; }
     .kb-tag.plate { background: #1a1020; color: #d2b4de; border: 1px solid #4a2f5a; }

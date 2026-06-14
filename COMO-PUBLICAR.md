@@ -122,6 +122,59 @@ Se funcionar aí, funciona online da mesma forma.
 
 ---
 
+## Plesk com Git + httpdocs
+
+Se o **Plesk baixa o repositório em uma pasta Git separada**, a forma mais segura é publicar o site com um **worktree apontando para o `httpdocs`**.
+
+### Estrutura sugerida no servidor
+
+```bash
+/var/www/vhosts/SEUDOMINIO/
+  git/La-coccina        # repositório Git que o Plesk atualiza
+  httpdocs              # raiz pública do site
+```
+
+### Criar o worktree na primeira vez
+
+No servidor:
+
+```bash
+cd /var/www/vhosts/SEUDOMINIO/git/La-coccina
+chmod +x deploy-httpdocs-worktree.sh
+./deploy-httpdocs-worktree.sh /var/www/vhosts/SEUDOMINIO/httpdocs
+```
+
+Isso cria um worktree com a branch `deploy/httpdocs` e coloca no `httpdocs` exatamente o conteúdo de `origin/main`.
+
+### Atualizar após cada push para `main`
+
+Sempre que o Plesk baixar a `main` nova na pasta Git:
+
+```bash
+cd /var/www/vhosts/SEUDOMINIO/git/La-coccina
+./deploy-httpdocs-worktree.sh /var/www/vhosts/SEUDOMINIO/httpdocs
+```
+
+O script:
+
+- faz `fetch` da `origin/main`
+- cria o worktree se ainda não existir
+- faz `merge --ff-only` no `httpdocs`
+
+### Quando usar esse modelo
+
+- quando o **Git do Plesk não publica direto em `httpdocs`**
+- quando você quer manter o repositório Git separado da pasta pública
+- quando o deploy deve seguir exatamente o que está em `main`
+
+### Importante
+
+- o `backend/config/.env` de produção precisa existir no servidor
+- se alterar variáveis como `TOOL_PANEL_PASSWORD`, reinicie o Node/PM2
+- se o backend roda fora do `httpdocs`, ajuste o processo para apontar para a pasta correta do projeto
+
+---
+
 ## O que NÃO fazer
 
 - Não publique só a pasta `Frontend` em hospedagem de HTML — o admin não terá API.

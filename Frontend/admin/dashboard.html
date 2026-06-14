@@ -19,8 +19,9 @@
     (() => {
       try {
         const savedTheme = localStorage.getItem('lc_admin_theme');
-        if (savedTheme === 'light' || savedTheme === 'dark') {
-          document.documentElement.setAttribute('data-theme', savedTheme);
+        const normalizedTheme = savedTheme === 'dark' ? 'sunset' : savedTheme;
+        if (normalizedTheme === 'light' || normalizedTheme === 'night' || normalizedTheme === 'sunset') {
+          document.documentElement.setAttribute('data-theme', normalizedTheme);
         }
       } catch {}
     })();
@@ -37,37 +38,87 @@
     .admin-panel { padding: 24px; width: 100%; }
 
     /* Header */
-    .admin-header { background: #1a1a1a; padding: 14px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid #222; }
-    .admin-brand { display: flex; flex-direction: column; gap: 1px; }
-    .admin-brand-logo { font-family: 'SomeTimeLater', cursive; font-size: 1.5rem; color: #ffcc00; line-height: 1; letter-spacing: 0.02em; }
-    .admin-brand-tag { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; }
-    .admin-header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .admin-header-shell { position: sticky; top: 16px; z-index: 90; margin-bottom: 24px; }
+    .admin-header { background: linear-gradient(180deg, var(--surface-raised), var(--surface)); padding: 10px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--border); box-shadow: var(--soft-shadow); }
+    .admin-brand { display: flex; align-items: center; gap: 12px; }
+    .admin-brand-mark { width: 32px; height: 32px; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border); background: var(--surface-contrast); }
+    .admin-brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .admin-brand-logo { font-family: 'SomeTimeLater', cursive; font-size: 1.15rem; color: var(--accent-strong); line-height: 1; letter-spacing: 0.02em; }
+    .admin-brand-copy { display: none; }
+    .admin-header-actions { display: flex; gap: 8px; align-items: center; }
+    .admin-action-group { display: flex; gap: 6px; align-items: center; }
 
     /* Botões do header */
-    #btn-novo-prato { background: #ffcc00; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; cursor: pointer; font-size: 0.9rem; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-    #btn-novo-prato:hover { background: #ffd633; }
-    #btn-tool-panel { background: transparent; border: 1px solid #333; color: #666; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 1.1rem; width: auto; margin: 0; transition: all 0.15s; }
-    #btn-tool-panel:hover { border-color: #555; color: #aaa; background: #1a1a1a; }
-    #btn-tool-panel.active { border-color: #ffcc00; color: #ffcc00; background: #1a1505; }
+    #btn-novo-prato {
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      color: var(--accent-contrast);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 22px rgba(202, 165, 106, 0.24);
+    }
+    #btn-novo-prato:hover { filter: brightness(1.05); }
+    .admin-utility-btn,
+    #status-btn,
+    #btn-kanban-link,
+    #btn-theme-toggle,
+    #btn-tool-panel {
+      width: auto;
+      margin: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-contrast);
+      color: var(--accent-strong);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    #btn-kanban-link:hover,
+    #btn-theme-toggle:hover,
+    #btn-tool-panel:hover {
+      background: color-mix(in srgb, var(--surface-contrast) 82%, var(--accent) 18%);
+      color: var(--accent-strong);
+    }
+    #btn-tool-panel.active {
+      border-color: var(--accent-strong);
+      color: var(--accent-strong);
+      background: var(--surface-contrast);
+    }
+    #status-btn { border: none; color: #fff; cursor: pointer; padding-inline: 16px; }
 
     /* Painel da ferramenta */
     body.tool-panel-open { overflow: hidden; }
     #tool-panel { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(5, 5, 5, 0.72); backdrop-filter: blur(10px); }
     #tool-panel[hidden] { display: none; }
-    .tool-panel-dialog { width: min(1120px, 100%); max-height: min(88vh, 920px); background: linear-gradient(180deg, #151515, #0d0d0d); border: 1px solid #2b2b2b; border-radius: 24px; box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45); overflow: hidden; display: flex; flex-direction: column; }
+    .tool-panel-dialog { width: min(1120px, 100%); max-height: min(88vh, 920px); background: linear-gradient(180deg, #151515, #0d0d0d); border: 1px solid #2b2b2b; border-radius: 12px; box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45); overflow: hidden; display: flex; flex-direction: column; }
     .tool-panel-inner { max-width: 100%; padding: 28px 24px; overflow-y: auto; }
     .tool-panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; }
     .tool-panel-title { margin: 0 0 4px; font-size: 1.1rem; color: #ffcc00; }
     .tool-panel-desc { margin: 0; font-size: 0.82rem; color: #555; }
     .tool-panel-close { background: none; border: 1px solid #333; color: #666; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.9rem; width: auto; margin: 0; flex-shrink: 0; }
     .tool-panel-close:hover { border-color: #555; color: #aaa; }
-    .tool-panel-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 999px; background: rgba(255, 204, 0, 0.08); border: 1px solid rgba(255, 204, 0, 0.16); color: #e8d18a; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em; }
+    .tool-panel-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: rgba(255, 204, 0, 0.08); border: 1px solid rgba(255, 204, 0, 0.16); color: #e8d18a; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em; }
     .tool-lock-panel { padding: 32px 24px; display: flex; align-items: center; justify-content: center; min-height: 420px; }
-    .tool-lock-card { width: min(460px, 100%); padding: 28px; border-radius: 22px; background: rgba(255, 255, 255, 0.03); border: 1px solid #242424; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03); }
+    .tool-lock-card { width: min(460px, 100%); padding: 28px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid #242424; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03); }
     .tool-lock-card h3 { margin: 0 0 8px; font-size: 1.2rem; color: #fff; }
     .tool-lock-card p { margin: 0 0 18px; color: #8f8f8f; line-height: 1.5; font-size: 0.92rem; }
     .tool-lock-form { display: flex; flex-direction: column; gap: 12px; }
-    .tool-lock-form input { margin: 0; padding: 14px 16px; border-radius: 14px; border: 1px solid #2d2d2d; background: #121212; color: #fff; font-size: 1rem; }
+    .tool-lock-form input { margin: 0; padding: 14px 16px; border-radius: 10px; border: 1px solid #2d2d2d; background: #121212; color: #fff; font-size: 1rem; }
     .tool-lock-form input:focus { border-color: #ffcc00; outline: none; box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.12); }
     .tool-lock-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .tool-lock-submit { background: #ffcc00; color: #171203; border: none; border-radius: 12px; padding: 12px 18px; font-weight: 700; cursor: pointer; width: auto; margin: 0; }
@@ -101,8 +152,8 @@
     .acc-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; vertical-align: middle; }
     .acc-table tr:last-child td { border-bottom: none; }
     .acc-table .acc-empty { color: #444; text-align: center; padding: 20px; font-style: italic; }
-    .acc-badge-active { display: inline-flex; align-items: center; gap: 4px; background: #1a3a2a; color: #4caf50; border: 1px solid #2a5a3a; border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
-    .acc-badge-inactive { display: inline-flex; align-items: center; gap: 4px; background: #1e1e1e; color: #555; border: 1px solid #2a2a2a; border-radius: 50px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
+    .acc-badge-active { display: inline-flex; align-items: center; gap: 4px; background: #1a3a2a; color: #4caf50; border: 1px solid #2a5a3a; border-radius: 10px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+    .acc-badge-inactive { display: inline-flex; align-items: center; gap: 4px; background: #1e1e1e; color: #555; border: 1px solid #2a2a2a; border-radius: 10px; padding: 3px 10px; font-size: 0.75rem; cursor: pointer; }
     .acc-badge-del { background: none; border: none; color: #555; cursor: pointer; font-size: 1rem; padding: 4px 6px; border-radius: 4px; }
     .acc-badge-del:hover { color: #e74c3c; background: #1a0a0a; }
     .acc-cell-edit { cursor: pointer; display: inline-block; border-radius: 4px; padding: 2px 4px; }
@@ -115,7 +166,7 @@
     #acc-catalog-body tr.drag-over { outline: 2px solid #ffcc00; outline-offset: -2px; border-radius: 4px; }
 
     /* Blocos principais */
-    .card-admin { background: #1a1a1a; padding: 22px; border-radius: 16px; }
+    .card-admin { background: #1a1a1a; padding: 22px; border-radius: 10px; }
     .card-admin + .card-admin { margin-top: 24px; }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; min-width: 600px; }
@@ -140,7 +191,7 @@
       align-items: center;
       gap: 6px;
       padding: 8px 12px;
-      border-radius: 999px;
+      border-radius: 10px;
       background: #111;
       border: 1px solid #252525;
       color: #bbb;
@@ -152,7 +203,7 @@
       align-items: center;
       gap: 8px;
       padding: 6px;
-      border-radius: 999px;
+      border-radius: 12px;
       background: #111;
       border: 1px solid #252525;
       flex-wrap: wrap;
@@ -161,44 +212,45 @@
       width: auto;
       margin: 0;
       padding: 9px 12px;
-      border-radius: 999px;
+      border-radius: 8px;
       background: transparent;
-      color: #8f8f8f;
+      color: var(--muted);
       border: 1px solid transparent;
       font-size: 0.78rem;
       font-weight: 700;
     }
     .product-view-btn:hover {
-      background: #1a1a1a;
-      color: #ddd;
+      background: var(--surface-contrast);
+      color: var(--text);
     }
     .product-view-btn.active {
-      background: #ffcc00;
-      color: #111;
-      border-color: #ffcc00;
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      color: var(--accent-contrast);
+      border-color: transparent;
     }
     .product-view-hint {
       width: 100%;
       margin: 2px 0 0;
-      color: #6f6f6f;
+      color: var(--muted);
       font-size: 0.77rem;
     }
     .product-sections {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
     .product-section {
-      border: 1px solid #262626;
-      border-radius: 16px;
-      background: #121212;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--surface-raised), var(--surface));
       overflow: hidden;
+      box-shadow: var(--soft-shadow);
     }
     .product-section.collapsed .product-section-content { display: none; }
     .product-section-toggle {
       width: 100%;
       margin: 0;
-      padding: 18px 20px;
+      padding: 14px 16px;
       border: none;
       background: transparent;
       color: inherit;
@@ -207,14 +259,16 @@
       justify-content: space-between;
       gap: 16px;
       cursor: pointer;
+      transition: background 0.15s ease;
     }
-    .product-section-toggle:hover { background: #171717; }
+    .product-section-toggle:hover { background: var(--surface-contrast); }
     .product-section-main {
       display: flex;
       flex-direction: column;
       gap: 6px;
       align-items: flex-start;
       text-align: left;
+      flex: 1;
     }
     .product-section-title-row {
       display: flex;
@@ -224,15 +278,16 @@
     }
     .product-section-title {
       margin: 0;
-      font-size: 1rem;
-      color: #fff;
+      font-size: 1.05rem;
+      color: var(--text);
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-family: 'Poppins', sans-serif;
     }
     .product-section-subtitle {
       margin: 0;
-      color: #666;
+      color: var(--muted);
       font-size: 0.8rem;
     }
     .product-section-summary {
@@ -246,72 +301,101 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 7px 10px;
-      border-radius: 999px;
+      padding: 5px 10px;
+      border-radius: 8px;
       font-size: 0.76rem;
       font-weight: 600;
       border: 1px solid transparent;
-      background: #1a1a1a;
-      color: #999;
+      background: var(--surface-contrast);
+      color: var(--muted);
     }
     .product-mini-pill.active {
-      background: #132417;
-      border-color: #21462b;
-      color: #6cd28c;
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success-text);
     }
     .product-mini-pill.inactive {
-      background: #261414;
-      border-color: #442323;
-      color: #ef8d8d;
+      background: var(--inactive-bg);
+      border-color: var(--inactive-border);
+      color: var(--inactive-text);
     }
     .product-section-chevron {
       font-size: 1.1rem;
-      color: #888;
+      color: var(--muted);
       transition: transform 0.18s ease;
       flex-shrink: 0;
     }
     .product-section.collapsed .product-section-chevron { transform: rotate(-90deg); }
+    .product-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .product-section-header .product-section-toggle {
+      flex: 1;
+    }
+    .product-section-header .btn-section-add {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 18px;
+      background: var(--surface-contrast);
+      border: 1px solid var(--border);
+      color: var(--accent-strong);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .product-section-header .btn-section-add:hover {
+      background: color-mix(in srgb, var(--surface-contrast) 82%, var(--accent) 18%);
+      transform: scale(1.05);
+    }
     .product-section-content {
-      padding: 0 18px 18px;
-      border-top: 1px solid #202020;
+      padding: 0 16px 16px;
+      border-top: 1px solid var(--border);
     }
     .product-section-content.compact {
-      padding-top: 16px;
+      padding-top: 14px;
     }
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 14px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
     .product-card {
       display: flex;
-      gap: 14px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #252525;
-      background: #191919;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-raised);
       min-width: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .product-card.is-inactive { opacity: 0.72; }
     .product-card-image {
-      width: 72px;
-      height: 72px;
-      border-radius: 12px;
+      width: 70px;
+      height: 70px;
+      border-radius: 8px;
       object-fit: cover;
       flex-shrink: 0;
-      background: #222;
+      background: var(--surface-contrast);
+      border: 1px solid var(--border);
     }
     .product-card-body {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       flex: 1;
       min-width: 0;
     }
     .product-card-top {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: space-between;
       align-items: flex-start;
     }
@@ -319,43 +403,45 @@
     .product-card-title-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .product-card-title {
       margin: 0;
-      font-size: 0.96rem;
-      color: #fff;
+      font-size: 0.95rem;
+      color: var(--text);
       word-break: break-word;
+      font-family: 'Poppins', sans-serif;
     }
     .product-card-details {
       margin: 0;
-      font-size: 0.8rem;
-      color: #8b8b8b;
-      line-height: 1.45;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
       word-break: break-word;
     }
     .product-card-price {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #ffcc00;
+      color: var(--accent-strong);
       white-space: nowrap;
       flex-shrink: 0;
+      font-family: 'Poppins', sans-serif;
     }
     .product-card-meta {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       align-items: center;
     }
     .product-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 0.74rem;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 0.7rem;
       font-weight: 700;
       border: 1px solid transparent;
     }
@@ -376,47 +462,34 @@
     }
     .product-card-actions {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
       gap: 1px;
-      margin-top: auto;
-      padding: 1px;
-      border-radius: 12px;
-      background: #2a2a2a;
+      margin-top: 4px;
+      border-radius: 10px;
+      background: var(--border);
       overflow: hidden;
     }
     .product-card-actions button {
       width: 100%;
       min-width: 0;
-      min-height: 58px;
+      min-height: 40px;
       margin: 0;
-      padding: 8px 6px;
+      padding: 4px;
       border: 0;
       border-radius: 0;
-      font-size: 0.72rem;
-      line-height: 1.15;
+      font-size: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 0;
       text-align: center;
       font-weight: 700;
       box-shadow: none;
-    }
-    .product-card-actions button:hover {
-      transform: none;
-      filter: brightness(1.05);
+      cursor: pointer;
     }
     .product-card-action-icon {
-      font-size: 1rem;
+      font-size: 1.2rem;
       line-height: 1;
-    }
-    .product-card-action-label {
-      display: block;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
     .product-list {
       display: flex;
@@ -427,20 +500,21 @@
     .product-list-row {
       display: grid;
       grid-template-columns: 56px minmax(0, 1.7fr) auto minmax(170px, 0.9fr) auto;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #252525;
-      background: #181818;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-raised);
     }
     .product-list-row.is-inactive { opacity: 0.72; }
     .product-list-thumb {
-      width: 56px;
-      height: 56px;
-      border-radius: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
       object-fit: cover;
-      background: #222;
+      background: var(--surface-contrast);
+      border: 1px solid var(--border);
     }
     .product-list-info {
       min-width: 0;
@@ -450,22 +524,24 @@
     }
     .product-list-title {
       margin: 0;
-      font-size: 0.9rem;
-      color: #fff;
+      font-size: 0.92rem;
+      color: var(--text);
       word-break: break-word;
+      font-family: 'Poppins', sans-serif;
     }
     .product-list-text {
       margin: 0;
       font-size: 0.78rem;
-      color: #838383;
+      color: var(--muted);
       line-height: 1.4;
       word-break: break-word;
     }
     .product-list-price {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      color: #ffcc00;
+      color: var(--accent-strong);
       white-space: nowrap;
+      font-family: 'Poppins', sans-serif;
     }
     .product-list-meta {
       display: flex;
@@ -487,14 +563,82 @@
       border-radius: 8px;
       font-size: 0.75rem;
     }
+    /* Tabela de produtos */
+    .product-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+    }
+    .product-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .product-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--surface-contrast);
+      border-bottom: 1px solid var(--border);
+    }
+    .product-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .product-table tbody tr {
+      background: var(--surface-raised);
+    }
+    .product-table tbody tr:hover {
+      background: color-mix(in srgb, var(--surface-raised) 90%, var(--accent) 10%);
+    }
+    .product-table .product-table-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: var(--surface-contrast);
+    }
+    .product-table .product-table-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'Poppins', sans-serif;
+    }
+    .product-table .product-table-details {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .product-table .product-table-price {
+      font-weight: 700;
+      color: var(--accent-strong);
+      font-family: 'Poppins', sans-serif;
+    }
+    .product-table .product-table-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .product-table .product-table-actions button {
+      width: auto;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+    }
     .product-empty {
       margin-top: 16px;
-      padding: 18px;
-      border-radius: 12px;
-      background: #161616;
-      color: #6f6f6f;
-      font-size: 0.88rem;
-      border: 1px dashed #2d2d2d;
+      padding: 24px;
+      border-radius: 10px;
+      background: var(--surface-contrast);
+      color: var(--muted);
+      font-size: 0.9rem;
+      border: 1px dashed var(--border);
       text-align: center;
     }
 
@@ -567,7 +711,7 @@
     }
     #edit-modal-overlay.active { display: flex; }
     #edit-modal {
-      background: #1a1a1a; border-radius: 16px; padding: 30px;
+      background: #1a1a1a; border-radius: 10px; padding: 30px;
       width: 100%; max-width: 480px; position: relative;
     }
     #edit-modal h3 { margin: 0 0 18px; font-size: 1.1rem; }
@@ -590,7 +734,7 @@
     #acc-modal-overlay.active { display: block; }
     #acc-modal {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #1a1a1a; border-radius: 16px;
+      background: #1a1a1a; border-radius: 10px;
       width: calc(100% - 32px); max-width: 560px;
       max-height: 90vh; display: flex; flex-direction: column;
     }
@@ -615,7 +759,7 @@
     .acc-item .extra { color: #ffcc00; font-size: 0.78rem; white-space: nowrap; }
     .acc-item .tag-default {
       font-size: 0.7rem; background: #1a3a2a; color: #4caf50;
-      padding: 2px 8px; border-radius: 50px; white-space: nowrap;
+      padding: 2px 8px; border-radius: 10px; white-space: nowrap;
     }
     .acc-modal-bottom {
       padding: 16px 24px; border-top: 1px solid #2a2a2a;
@@ -633,6 +777,40 @@
 
     /* Aparencia premium + temas */
     :root {
+      --bg: #050505;
+      --bg-glow: rgba(243, 207, 104, 0.08);
+      --text: #f5f5f5;
+      --muted: #a8a8a8;
+      --muted-strong: #777;
+      --surface: rgba(15, 15, 15, 0.94);
+      --surface-soft: rgba(22, 22, 22, 0.9);
+      --surface-raised: rgba(28, 28, 28, 0.96);
+      --surface-contrast: #0f0f0f;
+      --surface-elevated: rgba(10, 10, 10, 0.98);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --accent: #caa56a;
+      --accent-strong: #f3cf68;
+      --accent-contrast: #15110a;
+      --card-shadow: 0 24px 56px rgba(0, 0, 0, 0.48);
+      --soft-shadow: 0 16px 40px rgba(0, 0, 0, 0.34);
+      --segmented-bg: rgba(255, 255, 255, 0.03);
+      --segmented-border: rgba(255, 255, 255, 0.08);
+      --segmented-button-bg: rgba(255, 255, 255, 0.02);
+      --input-bg: rgba(255, 255, 255, 0.06);
+      --table-head: rgba(255, 255, 255, 0.05);
+      --overlay: rgba(0, 0, 0, 0.76);
+      --success-bg: #132219;
+      --success-border: #1f4a2d;
+      --success-text: #7fd8a3;
+      --inactive-bg: #261515;
+      --inactive-border: #5b2a2a;
+      --inactive-text: #f2a7a7;
+      --daily-bg: #2f260f;
+      --daily-border: #6f5a1e;
+      --daily-text: #f0d37b;
+    }
+    html[data-theme="sunset"] {
       --bg: #120f0d;
       --bg-glow: rgba(202, 165, 106, 0.12);
       --text: #f6efe5;
@@ -719,8 +897,13 @@
     }
     .admin-header {
       border-bottom: 1px solid var(--border-strong);
-      border-radius: 18px;
+      border-radius: 10px;
       backdrop-filter: blur(12px);
+    }
+    .admin-action-group {
+      background: var(--segmented-bg);
+      border-color: var(--segmented-border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
     .admin-brand-logo,
     .tool-panel-title {
@@ -740,10 +923,11 @@
       color: var(--muted);
     }
     #btn-kanban-link,
-    #btn-theme-toggle {
+    #btn-theme-toggle,
+    #btn-tool-panel {
       width: auto;
       margin: 0;
-      border-radius: 999px;
+      border-radius: 10px;
       padding: 10px 14px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -758,7 +942,8 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
     #btn-kanban-link:hover,
-    #btn-theme-toggle:hover {
+    #btn-theme-toggle:hover,
+    #btn-tool-panel:hover {
       background: color-mix(in srgb, var(--surface-contrast) 82%, var(--accent) 18%);
       color: var(--accent-strong);
     }
@@ -836,7 +1021,7 @@
     .product-section,
     .product-card,
     .product-list-row {
-      border-radius: 18px;
+      border-radius: 10px;
     }
     th {
       background: var(--table-head);
@@ -900,7 +1085,7 @@
     .product-card-image {
       width: 84px;
       height: 84px;
-      border-radius: 18px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       box-shadow: 0 14px 24px rgba(0, 0, 0, 0.16);
     }
@@ -1023,16 +1208,26 @@
     }
     @media (max-width: 720px) {
       .admin-panel { padding: 16px; }
+      .admin-header-shell { top: 8px; }
+      .admin-header { padding: 8px; }
+      .admin-brand { min-width: 0; width: 100%; align-items: center; justify-content: flex-start; }
+      .admin-header-actions { width: 100%; justify-content: stretch; margin-left: 0; }
+      .admin-action-group { width: 100%; }
+      .admin-action-group > * { flex: 1 1 calc(50% - 6px); }
+      .admin-utility-btn,
+      #status-btn,
+      #btn-novo-prato { justify-content: center; }
+      #btn-novo-prato { flex: 1 1 100%; }
       #tool-panel { padding: 12px; align-items: stretch; }
-      .tool-panel-dialog { width: 100%; max-height: 100vh; border-radius: 18px; }
+      .tool-panel-dialog { width: 100%; max-height: 100vh; border-radius: 10px; }
       .tool-panel-inner { padding: 20px 16px; }
       .tool-lock-panel { padding: 20px 16px; min-height: 0; }
-      .tool-lock-card { padding: 22px 18px; border-radius: 18px; }
+      .tool-lock-card { padding: 22px 18px; border-radius: 10px; }
       .tool-lock-actions { flex-direction: column; }
       .tool-lock-submit,
       .tool-panel-close { width: 100%; }
       .products-layout { padding: 18px; }
-      .product-view-switch { width: 100%; border-radius: 16px; }
+      .product-view-switch { width: 100%; border-radius: 10px; }
       .product-view-btn { flex: 1 1 calc(50% - 8px); text-align: center; }
       .product-section-toggle { padding: 16px; align-items: flex-start; }
       .product-section-summary { justify-content: flex-start; }
@@ -1066,19 +1261,52 @@
 </head>
 <body>
   <div class="admin-panel">
-    <div class="admin-header">
-      <div class="admin-brand">
-        <span class="admin-brand-logo">La Coccina</span>
-        <span class="admin-brand-tag">Painel Administrativo</span>
+    <div class="admin-header-shell">
+      <div class="admin-header">
+        <div class="admin-brand">
+          <span class="admin-brand-mark" aria-hidden="true">
+            <img src="../assets/imagens/favicon-192.png" alt="">
+          </span>
+          <span class="admin-brand-logo">La Coccina</span>
+        </div>
+        <div class="admin-header-actions">
+          <button type="button" id="btn-acompanhamentos" class="admin-utility-btn" onclick="toggleAcompanhamentos()">🥗 Acompanhamentos</button>
+          <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
+          <a id="btn-kanban-link" class="admin-utility-btn" href="kanban.html" style="display:none;">📋</a>
+          <button id="btn-tool-panel" class="admin-utility-btn" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
+          <button onclick="toggleRestaurantStatus()" id="status-btn">
+            🔄 Carregando...
+          </button>
+          <button id="btn-novo-prato" onclick="openDrawer()">＋ Novo Prato</button>
+        </div>
       </div>
-      <div class="admin-header-actions">
-        <button type="button" id="btn-theme-toggle" onclick="toggleAdminTheme()" aria-label="Alternar tema">Tema</button>
-        <a id="btn-kanban-link" href="kanban.html" style="display:none;">📋 Kanban</a>
-        <button id="btn-novo-prato" onclick="openDrawer()">＋ Novo Prato</button>
-        <button onclick="toggleRestaurantStatus()" id="status-btn" style="width:auto; padding:10px 20px;">
-          🔄 Carregando...
-        </button>
-        <button id="btn-tool-panel" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
+    </div>
+
+    <!-- Catálogo de Acompanhamentos -->
+    <div id="card-acompanhamentos" class="card-admin">
+      <div class="products-toolbar">
+        <div>
+          <h2>🥗 Catálogo de Acompanhamentos</h2>
+          <p>Registros globais reutilizáveis. Associe ao prato pelo botão de acompanhamentos na lista de produtos.</p>
+        </div>
+      </div>
+
+      <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
+        <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
+        <input type="number" id="acc-extra-price"  placeholder="Preço extra" step="0.01" min="0" value="0">
+        <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
+        <button type="submit" class="btn-tool-add">Adicionar</button>
+      </form>
+
+      <div class="table-scroll" style="margin-top:12px;">
+        <table class="acc-table">
+          <thead>
+            <tr><th style="width:32px"></th><th>Nome</th><th>Preço extra</th><th>Status</th><th style="width:40px"></th></tr>
+          </thead>
+          <tbody id="acc-catalog-body">
+            <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -1092,8 +1320,9 @@
           <div class="products-toolbar-meta">
             <span class="products-pill" id="products-total-badge">Carregando produtos...</span>
             <div class="product-view-switch" role="group" aria-label="Opções de visualização do catálogo">
-              <button type="button" class="product-view-btn" data-view-mode="sections" onclick="setProductViewMode('sections')">Sugestão 1: Visual</button>
-              <button type="button" class="product-view-btn" data-view-mode="compact" onclick="setProductViewMode('compact')">Sugestão 2: Compacta</button>
+              <button type="button" class="product-view-btn" data-view-mode="grid" onclick="setProductViewMode('grid')">📦 Cards</button>
+              <button type="button" class="product-view-btn" data-view-mode="list" onclick="setProductViewMode('list')">📋 Lista</button>
+              <button type="button" class="product-view-btn" data-view-mode="table" onclick="setProductViewMode('table')">📊 Tabela</button>
               <p class="product-view-hint" id="product-view-hint">Carregando opções de visualização...</p>
             </div>
           </div>
@@ -1140,30 +1369,6 @@
         </div>
 
         <div id="tool-panel-content" hidden>
-          <!-- Catálogo de Acompanhamentos -->
-          <div class="tool-section">
-            <h3>🥗 Catalogo de Acompanhamentos</h3>
-            <p class="tool-section-desc">Registros globais reutilizaveis. Associe ao prato pelo botao de acompanhamentos na tabela de produtos.</p>
-
-            <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
-              <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
-              <input type="number" id="acc-extra-price"  placeholder="Preco extra" step="0.01" min="0" value="0">
-              <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
-              <button type="submit" class="btn-tool-add">Adicionar</button>
-            </form>
-
-            <div class="table-scroll" style="margin-top:12px;">
-              <table class="acc-table">
-                <thead>
-                  <tr><th style="width:32px"></th><th>Nome</th><th>Preco extra</th><th>Status</th><th style="width:40px"></th></tr>
-                </thead>
-                <tbody id="acc-catalog-body">
-                  <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           <!-- Configurações de UX -->
           <div class="tool-section">
             <h3>Configuracoes de UX</h3>
@@ -1349,6 +1554,12 @@
     const PRODUCT_SECTION_STORAGE_KEY = 'lc_admin_product_sections';
     const PRODUCT_VIEW_MODE_KEY = 'lc_admin_product_view_mode';
     const ADMIN_THEME_STORAGE_KEY = 'lc_admin_theme';
+    const ADMIN_THEME_ORDER = ['light', 'night', 'sunset'];
+    const ADMIN_THEME_META = {
+      light: { label: 'Dia', icon: '☀️' },
+      night: { label: 'Noite', icon: '🌙' },
+      sunset: { label: 'Entardecer', icon: '🌆' },
+    };
     const PRODUCT_CATEGORY_META = {
       marmita: {
         label: 'Refeições',
@@ -1406,7 +1617,7 @@
 
     function getProductViewMode() {
       const mode = localStorage.getItem(PRODUCT_VIEW_MODE_KEY);
-      return mode === 'compact' ? 'compact' : 'sections';
+      return ['grid', 'list', 'table'].includes(mode) ? mode : 'grid';
     }
 
     function syncProductViewModeUi() {
@@ -1416,21 +1627,37 @@
       });
       const hint = document.getElementById('product-view-hint');
       if (!hint) return;
-      hint.textContent = mode === 'compact'
-        ? 'Sugestão 2: visão compacta para comparar mais itens e agir rápido.'
-        : 'Sugestão 1: visão visual por categoria para organizar melhor comida e bebida.';
+      const hints = {
+        grid: 'Visão visual em cards para ver fotos e detalhes.',
+        list: 'Visão compacta para agir rápido e comparar.',
+        table: 'Visão de tabela para ter overview completo.'
+      };
+      hint.textContent = hints[mode] || hints.grid;
     }
 
     function setProductViewMode(mode) {
-      const nextMode = mode === 'compact' ? 'compact' : 'sections';
+      const nextMode = ['grid', 'list', 'table'].includes(mode) ? mode : 'grid';
       localStorage.setItem(PRODUCT_VIEW_MODE_KEY, nextMode);
       syncProductViewModeUi();
       renderProductSections(productsCache);
     }
 
+    function openDrawerWithCategory(category) {
+      openDrawer();
+      const select = document.getElementById('category');
+      if (select) {
+        select.value = category;
+        toggleDetailFields('category', 'detail-fields');
+      }
+    }
+
+    function normalizeAdminTheme(theme) {
+      if (theme === 'dark') return 'sunset';
+      return ADMIN_THEME_ORDER.includes(theme) ? theme : 'night';
+    }
+
     function getAdminTheme() {
-      const theme = localStorage.getItem(ADMIN_THEME_STORAGE_KEY);
-      return theme === 'light' ? 'light' : 'dark';
+      return normalizeAdminTheme(localStorage.getItem(ADMIN_THEME_STORAGE_KEY));
     }
 
     function syncAdminThemeUi() {
@@ -1440,20 +1667,25 @@
       const button = document.getElementById('btn-theme-toggle');
       if (!button) return;
 
-      const isLight = theme === 'light';
-      button.innerHTML = isLight ? '☀️ Tema Claro' : '🌙 Tema Escuro';
-      button.title = isLight ? 'Alternar para o tema escuro premium' : 'Alternar para o tema claro premium';
+      const themeIndex = ADMIN_THEME_ORDER.indexOf(theme);
+      const currentTheme = ADMIN_THEME_META[theme] || ADMIN_THEME_META.night;
+      const nextThemeKey = ADMIN_THEME_ORDER[(themeIndex + 1) % ADMIN_THEME_ORDER.length];
+      const nextTheme = ADMIN_THEME_META[nextThemeKey];
+      button.innerHTML = `${currentTheme.icon} ${currentTheme.label}`;
+      button.title = `Alternar para ${nextTheme.label}`;
       button.setAttribute('aria-label', button.title);
     }
 
     function setAdminTheme(theme) {
-      const nextTheme = theme === 'light' ? 'light' : 'dark';
+      const nextTheme = normalizeAdminTheme(theme);
       localStorage.setItem(ADMIN_THEME_STORAGE_KEY, nextTheme);
       syncAdminThemeUi();
     }
 
     function toggleAdminTheme() {
-      setAdminTheme(getAdminTheme() === 'light' ? 'dark' : 'light');
+      const currentIndex = ADMIN_THEME_ORDER.indexOf(getAdminTheme());
+      const nextTheme = ADMIN_THEME_ORDER[(currentIndex + 1) % ADMIN_THEME_ORDER.length];
+      setAdminTheme(nextTheme);
     }
 
     function formatCurrency(value) {
@@ -1496,7 +1728,6 @@
       return `
         <button onclick="${onclick}" class="${className}" title="${esc(title || label)}" aria-label="${esc(title || label)}" ${attrs}>
           <span class="product-card-action-icon" aria-hidden="true">${icon}</span>
-          <span class="product-card-action-label">${label}</span>
         </button>
       `;
     }
@@ -1641,31 +1872,83 @@
       `;
     }
 
+    function buildProductTableRow(product) {
+      const detailText = getProductDetailText(product);
+      const isActive = Number(product.active) === 1;
+      const isDaily = Number(product.isDailySpecial) === 1;
+      const editAttrs = `
+        data-id="${product.id}"
+        data-name="${esc(product.name || '')}"
+        data-price="${product.price}"
+        data-desc="${esc(product.desc || '')}"
+        data-category="${esc(product.category || '')}"
+        data-details="${esc(JSON.stringify(product.details || {}))}"
+        data-image="${esc(product.image || '')}"
+      `;
+
+      return `
+        <tr class="${isActive ? '' : 'is-inactive'}">
+          <td style="width: 70px;">
+            <img
+              class="product-table-thumb"
+              src="${imgUrl(product.image)}"
+              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22%3E%3Crect width=%2248%22 height=%2248%22 fill=%22%23262626%22/%3E%3Ctext x=%2224%22 y=%2228%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%23888%22%3ESem foto%3C/text%3E%3C/svg%3E'"
+              alt=""
+            >
+          </td>
+          <td>
+            <div class="product-table-name">
+              ${esc(product.name || 'Sem nome')}
+              ${isDaily ? '<span class="product-badge daily" style="margin-left: 8px;">Prato do dia</span>' : ''}
+            </div>
+            ${detailText ? `<div class="product-table-details">${esc(detailText)}</div>` : ''}
+          </td>
+          <td class="product-table-price">${formatCurrency(product.price)}</td>
+          <td>
+            <span class="product-badge ${isActive ? 'active' : 'inactive'}">${isActive ? '● Ativo' : '○ Inativo'}</span>
+          </td>
+          <td>
+            <div class="product-table-actions">
+              <button onclick="toggleActive(${product.id})" class="${isActive ? 'btn-toggle-on' : 'btn-toggle-off'}" style="width: auto;">${isActive ? 'Desligar' : 'Ligar'}</button>
+              ${product.category === 'marmita' ? `<button onclick="toggleDailySpecial(${product.id}, ${isDaily})" class="${isDaily ? 'btn-daily-on' : 'btn-daily-off'}" style="width: auto;">${isDaily ? 'Tirar dia' : 'No dia'}</button>` : ''}
+              <button class="btn-edit" ${editAttrs} onclick="openDrawerForEdit(this)" style="width: auto;">Editar</button>
+              <button onclick="deleteProduct(${product.id})" class="btn-del" style="width: auto;">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
     function buildProductSection(category, items, contentHtml, contentClass = '') {
       const meta = getProductCategoryMeta(category);
       const activeItems = items.filter((item) => Number(item.active) === 1).length;
       const expanded = isProductSectionExpanded(category);
       return `
         <section class="product-section ${expanded ? '' : 'collapsed'}" data-category="${category}">
-          <button
-            type="button"
-            class="product-section-toggle"
-            aria-expanded="${expanded}"
-            onclick="toggleProductSection('${category}')"
-          >
-            <span class="product-section-main">
-              <span class="product-section-title-row">
-                <span class="product-section-title">${meta.icon} ${meta.label}</span>
-                <span class="product-mini-pill">${items.length} itens</span>
+          <div class="product-section-header">
+            <button
+              type="button"
+              class="product-section-toggle"
+              aria-expanded="${expanded}"
+              onclick="toggleProductSection('${category}')"
+            >
+              <span class="product-section-main">
+                <span class="product-section-title-row">
+                  <span class="product-section-title">${meta.icon} ${meta.label}</span>
+                  <span class="product-mini-pill">${items.length} itens</span>
+                </span>
+                <span class="product-section-subtitle">${meta.description}</span>
               </span>
-              <span class="product-section-subtitle">${meta.description}</span>
-            </span>
-            <span class="product-section-summary">
-              <span class="product-mini-pill active">${activeItems} ativos</span>
-              <span class="product-mini-pill inactive">${items.length - activeItems} inativos</span>
-              <span class="product-section-chevron">⌃</span>
-            </span>
-          </button>
+              <span class="product-section-summary">
+                <span class="product-mini-pill active">${activeItems} ativos</span>
+                <span class="product-mini-pill inactive">${items.length - activeItems} inativos</span>
+                <span class="product-section-chevron">⌃</span>
+              </span>
+            </button>
+            <button type="button" class="btn-section-add" onclick="openDrawerWithCategory('${category}')" title="Adicionar item">
+              ➕
+            </button>
+          </div>
           <div class="product-section-content ${contentClass}">
             ${contentHtml}
           </div>
@@ -1683,6 +1966,28 @@
       const activeCount = products.filter((product) => Number(product.active) === 1).length;
       totalBadge.textContent = `${products.length} itens · ${activeCount} ativos`;
 
+      if (mode === 'table') {
+        const allProducts = getSortedProducts(products);
+        const tableHtml = `
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th style="width: 70px;"></th>
+                <th>Prato</th>
+                <th>Preço</th>
+                <th>Status</th>
+                <th style="width: 420px; text-align: right;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allProducts.map(buildProductTableRow).join('')}
+            </tbody>
+          </table>
+        `;
+        container.innerHTML = tableHtml;
+        return;
+      }
+
       const sectionsHtml = ['marmita', 'bebida', 'outros']
         .filter((category) => grouped[category].length > 0)
         .map((category) => {
@@ -1690,7 +1995,7 @@
           if (!items.length) {
             return '';
           }
-          if (mode === 'compact') {
+          if (mode === 'list') {
             return buildProductSection(
               category,
               items,
@@ -2085,7 +2390,6 @@
 
     async function loadToolPanelData() {
       await Promise.all([
-        loadAccompanimentsCatalog(),
         loadDeliverySettings(),
       ]);
     }
@@ -2196,11 +2500,21 @@
 
     async function loadAccompanimentsCatalog() {
       try {
-        const res = await toolApiFetch(`${API_BASE}/api/accompaniments/admin`);
+        const res = await apiFetch(`${API_BASE}/api/accompaniments/admin`);
         if (!res.ok) return;
         catalogCache = await res.json();
         renderCatalog();
       } catch (e) { console.error('Erro ao carregar catálogo:', e); }
+    }
+
+    // Toggle acompanhamentos
+    let acompanhamentosVisible = true;
+    function toggleAcompanhamentos() {
+      const card = document.getElementById('card-acompanhamentos');
+      acompanhamentosVisible = !acompanhamentosVisible;
+      card.style.display = acompanhamentosVisible ? 'block' : 'none';
+      const btn = document.getElementById('btn-acompanhamentos');
+      btn.style.opacity = acompanhamentosVisible ? '1' : '0.6';
     }
 
     function renderCatalog() {
@@ -2298,7 +2612,7 @@
         else         a.name = raw;
 
         try {
-          await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, {
+          await apiFetch(`${API_BASE}/api/accompaniments/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: a.active }),
@@ -2319,7 +2633,7 @@
       // Salva a nova ordem persitindo sort_order de cada item
       try {
         await Promise.all(catalogCache.map(a =>
-          toolApiFetch(`${API_BASE}/api/accompaniments/${a.id}`, {
+          apiFetch(`${API_BASE}/api/accompaniments/${a.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: a.active }),
@@ -2334,7 +2648,7 @@
       const sort_order = document.getElementById('acc-sort').value || 0;
       if (!name) { alert('Informe o nome do acompanhamento.'); return; }
       try {
-        const res = await toolApiFetch(`${API_BASE}/api/accompaniments`, {
+        const res = await apiFetch(`${API_BASE}/api/accompaniments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, extra_price, sort_order })
@@ -2351,7 +2665,7 @@
       const a = catalogCache.find(x => x.id === id);
       if (!a) return;
       try {
-        await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, {
+        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: a.name, extra_price: a.extra_price, sort_order: a.sort_order, active: !current })
@@ -2363,7 +2677,7 @@
     async function deleteAccompaniment(id) {
       if (!confirm('Remover este acompanhamento do catálogo?')) return;
       try {
-        await toolApiFetch(`${API_BASE}/api/accompaniments/${id}`, { method: 'DELETE' });
+        await apiFetch(`${API_BASE}/api/accompaniments/${id}`, { method: 'DELETE' });
         await loadAccompanimentsCatalog();
       } catch (e) { alert('Erro de conexão.'); }
     }
@@ -2558,6 +2872,7 @@
       loadConfig();
       loadAccDisplayMode();
       loadKanbanEnabled();
+      loadAccompanimentsCatalog();
     };
   </script>
 </body>
