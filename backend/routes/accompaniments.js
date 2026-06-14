@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { requireAdmin, requireToolAccess } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/auth');
 const { notifyClients } = require('../menuEvents');
 const {
   parsePositiveId,
