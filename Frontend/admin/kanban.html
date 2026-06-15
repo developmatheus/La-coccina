@@ -13,31 +13,219 @@
     @font-face { font-family: 'SomeTimeLater'; src: url('../ASSETS/fonts/Some Time Later.otf') format('opentype'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     * { box-sizing: border-box; }
+    html {
+      --kb-bg: #0d0d0d;
+      --kb-surface: #111;
+      --kb-surface-alt: #1a1a1a;
+      --kb-surface-soft: #101010;
+      --kb-border: #1e1e1e;
+      --kb-border-soft: #2a2a2a;
+      --kb-text: #fff;
+      --kb-muted: #777;
+      --kb-subtle: #555;
+      --kb-brand: #ffcc00;
+      --kb-brand-contrast: #000;
+      --kb-accent-bg: #1a2a1a;
+      --kb-accent-border: #2a4a2a;
+      --kb-accent-text: #4caf50;
+      --kb-danger-bg: #1a0a0a;
+      --kb-danger-border: #3a1010;
+      --kb-danger-text: #e74c3c;
+      --kb-warn-bg: #1f1606;
+      --kb-warn-border: #57430d;
+      --kb-info-bg: #111827;
+      --kb-info-border: #21304f;
+      --kb-info-text: #9cc3ff;
+      --kb-purple-bg: #1a1020;
+      --kb-purple-border: #4a2f5a;
+      --kb-purple-text: #d2b4de;
+      --kb-green-bg: #102013;
+      --kb-green-border: #29563d;
+      --kb-green-text: #7dcea0;
+      --kb-gold-bg: #1e1a0a;
+      --kb-gold-border: #4d3d11;
+      --kb-gold-text: #ffcc00;
+      --kb-shadow: rgba(0, 0, 0, 0.4);
+      --kb-overlay: rgba(0, 0, 0, 0.7);
+    }
+    html[data-theme="light"] {
+      --kb-bg: #f4ede5;
+      --kb-surface: #fffaf4;
+      --kb-surface-alt: #f5ede3;
+      --kb-surface-soft: #ede2d4;
+      --kb-border: #d8cab8;
+      --kb-border-soft: #cbbfad;
+      --kb-text: #3b342c;
+      --kb-muted: #7c6c5f;
+      --kb-subtle: #9f8c7d;
+      --kb-brand: #9b6b2f;
+      --kb-brand-contrast: #fffaf4;
+      --kb-accent-bg: #ecf6ea;
+      --kb-accent-border: #bfd8b7;
+      --kb-accent-text: #2f7a44;
+      --kb-danger-bg: #fff1ef;
+      --kb-danger-border: #e8b4ab;
+      --kb-danger-text: #b33f32;
+      --kb-warn-bg: #fff5da;
+      --kb-warn-border: #dec788;
+      --kb-info-bg: #edf4ff;
+      --kb-info-border: #bfd1ee;
+      --kb-info-text: #315b95;
+      --kb-purple-bg: #f3ebfb;
+      --kb-purple-border: #d8c0ed;
+      --kb-purple-text: #7a4ea2;
+      --kb-green-bg: #e8f5eb;
+      --kb-green-border: #bbd8c1;
+      --kb-green-text: #2f7a44;
+      --kb-gold-bg: #fff3d7;
+      --kb-gold-border: #e1c98c;
+      --kb-gold-text: #8a6728;
+      --kb-shadow: rgba(59, 52, 44, 0.10);
+      --kb-overlay: rgba(59, 52, 44, 0.34);
+    }
+    html[data-theme="sunset"] {
+      --kb-bg: #1a120d;
+      --kb-surface: #231710;
+      --kb-surface-alt: #2d1d14;
+      --kb-surface-soft: #1b110d;
+      --kb-border: #4a3425;
+      --kb-border-soft: #644530;
+      --kb-text: #f7efe6;
+      --kb-muted: #c0a690;
+      --kb-subtle: #9e7e67;
+      --kb-brand: #ffcc00;
+      --kb-brand-contrast: #1a120d;
+      --kb-accent-bg: #1d2c19;
+      --kb-accent-border: #375030;
+      --kb-accent-text: #7fcf85;
+      --kb-danger-bg: #341817;
+      --kb-danger-border: #6a2725;
+      --kb-danger-text: #ff8f84;
+      --kb-warn-bg: #35270e;
+      --kb-warn-border: #7f6120;
+      --kb-info-bg: #182235;
+      --kb-info-border: #314663;
+      --kb-info-text: #a9caff;
+      --kb-purple-bg: #281933;
+      --kb-purple-border: #5a3f73;
+      --kb-purple-text: #d9b8ef;
+      --kb-green-bg: #17291a;
+      --kb-green-border: #2d5e3d;
+      --kb-green-text: #8fd7a5;
+      --kb-gold-bg: #35290f;
+      --kb-gold-border: #7f6223;
+      --kb-gold-text: #ffd86f;
+      --kb-shadow: rgba(0, 0, 0, 0.45);
+      --kb-overlay: rgba(0, 0, 0, 0.62);
+    }
     html, body { margin: 0; padding: 0; overflow-x: hidden; }
-    body { background: #0d0d0d; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-    .kb-header { background: #111; border-bottom: 1px solid #1e1e1e; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
-    .kb-brand { font-family: 'SomeTimeLater', cursive; font-size: 1.4rem; color: #ffcc00; }
-    .kb-title { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1px; }
-    .kb-header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .kb-btn, .kb-col-action, .batch-btn, .modal-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #ccc; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500; white-space: nowrap; }
-    .kb-btn:hover, .kb-col-action:hover, .batch-btn:hover, .modal-btn:hover { border-color: #444; color: #fff; }
-    .kb-btn.primary, .kb-col-action, .modal-btn.primary, .batch-btn.primary { background: #ffcc00; color: #000; border-color: #ffcc00; }
-    .kb-btn.primary:hover, .kb-col-action:hover, .modal-btn.primary:hover, .batch-btn.primary:hover { background: #ffd633; color: #000; }
-    .batch-btn.warn, .modal-btn.warn { background: #1f1606; border-color: #57430d; color: #ffcc00; }
-    .batch-btn.danger, .modal-btn.danger { background: #1a0a0a; border-color: #3a1010; color: #e74c3c; }
-    .kb-badge { background: #e74c3c; color: #fff; border-radius: 50px; padding: 1px 7px; font-size: 0.7rem; font-weight: 700; margin-left: 4px; vertical-align: middle; }
-    #kb-conn { font-size: 0.72rem; color: #555; display: flex; align-items: center; gap: 4px; }
-    #kb-conn-dot { width: 7px; height: 7px; border-radius: 50%; background: #555; }
-    #kb-conn-dot.connected { background: #27ae60; }
-    #protein-summary { background: #111; border-bottom: 1px solid #1a1a1a; padding: 10px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
-    .protein-chip { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 50px; padding: 4px 12px; font-size: 0.78rem; color: #bbb; display: flex; align-items: center; gap: 6px; }
-    .protein-chip strong { color: #ffcc00; font-size: 0.9rem; }
-    #protein-summary .ps-label { font-size: 0.72rem; color: #444; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
-    .kb-board { display: flex; gap: 10px; padding: 10px 16px; flex: 1; overflow-x: hidden; align-items: flex-start; }
-    .kb-col { flex: 1 1 0; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 10px; border: 1px solid #1e1e1e; overflow: hidden; min-height: 260px; }
-    .kb-col-header { padding: 10px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; flex-wrap: wrap; }
+    body { background: var(--kb-bg); color: var(--kb-text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+    .admin-panel { padding: 24px; width: 100%; }
+    .admin-header-shell { position: sticky; top: 16px; z-index: 90; margin-bottom: 18px; }
+    .admin-header { background: linear-gradient(180deg, var(--kb-surface-alt), var(--kb-surface)); padding: 10px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--kb-border); box-shadow: 0 12px 28px var(--kb-shadow); }
+    .admin-brand { display: flex; align-items: center; gap: 12px; }
+    .admin-brand-mark { width: 32px; height: 32px; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid var(--kb-border); background: var(--kb-surface-soft); }
+    .admin-brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .admin-brand-copy { display: flex; flex-direction: column; gap: 2px; }
+    .admin-brand-logo { font-family: 'SomeTimeLater', cursive; font-size: 1.15rem; color: var(--kb-brand); line-height: 1; letter-spacing: 0.02em; }
+    .admin-brand-tag { font-size: 0.72rem; color: var(--kb-subtle); text-transform: uppercase; letter-spacing: 0.1em; }
+    .admin-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .admin-utility-btn,
+    .admin-header-status {
+      width: auto;
+      margin: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--kb-surface-alt);
+      color: var(--kb-brand);
+      border: 1px solid var(--kb-border-soft);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .admin-utility-btn:hover {
+      background: var(--kb-surface-soft);
+      color: var(--kb-brand);
+      border-color: var(--kb-subtle);
+    }
+    .admin-utility-btn.current-page {
+      border-color: var(--kb-brand);
+      background: color-mix(in srgb, var(--kb-surface-alt) 82%, var(--kb-brand) 18%);
+      color: var(--kb-brand);
+    }
+    .admin-header-status {
+      color: var(--kb-muted);
+      cursor: default;
+    }
+    .admin-header-status-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--kb-subtle); flex-shrink: 0; }
+    .admin-header-status-dot.connected { background: #27ae60; }
+    .hint-icon {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--kb-border-soft);
+      background: var(--kb-surface-alt);
+      color: var(--kb-brand);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1;
+      cursor: help;
+    }
+    .hint-icon::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: min(280px, 70vw);
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--kb-surface-soft);
+      border: 1px solid var(--kb-border-soft);
+      color: var(--kb-text);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      text-align: left;
+      white-space: normal;
+      box-shadow: 0 18px 36px var(--kb-shadow);
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.14s ease, transform 0.14s ease;
+      z-index: 20;
+    }
+    .hint-icon:hover::after,
+    .hint-icon:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .kb-btn, .kb-col-action, .batch-btn, .modal-btn { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); color: var(--kb-text); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 500; white-space: nowrap; }
+    .kb-btn:hover, .kb-col-action:hover, .batch-btn:hover, .modal-btn:hover { border-color: var(--kb-subtle); color: var(--kb-text); }
+    .kb-btn.primary, .kb-col-action, .modal-btn.primary, .batch-btn.primary { background: var(--kb-brand); color: var(--kb-brand-contrast); border-color: var(--kb-brand); }
+    .kb-btn.primary:hover, .kb-col-action:hover, .modal-btn.primary:hover, .batch-btn.primary:hover { filter: brightness(1.05); color: var(--kb-brand-contrast); }
+    .kb-col-action.inactive { background: var(--kb-surface-soft); color: var(--kb-muted); border-color: var(--kb-border-soft); cursor: not-allowed; }
+    .batch-btn.warn, .modal-btn.warn { background: var(--kb-warn-bg); border-color: var(--kb-warn-border); color: var(--kb-brand); }
+    .batch-btn.danger, .modal-btn.danger { background: var(--kb-danger-bg); border-color: var(--kb-danger-border); color: var(--kb-danger-text); }
+    .kb-badge { background: var(--kb-danger-text); color: #fff; border-radius: 50px; padding: 1px 7px; font-size: 0.7rem; font-weight: 700; margin-left: 4px; vertical-align: middle; }
+    #protein-summary { background: var(--kb-surface); border: 1px solid var(--kb-border); border-radius: 10px; padding: 10px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+    .protein-chip { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 50px; padding: 4px 12px; font-size: 0.78rem; color: var(--kb-text); display: flex; align-items: center; gap: 6px; }
+    .protein-chip strong { color: var(--kb-brand); font-size: 0.9rem; }
+    #protein-summary .ps-label { font-size: 0.72rem; color: var(--kb-subtle); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+    .kb-board { display: flex; gap: 10px; flex: 1; overflow-x: hidden; align-items: flex-start; }
+    .kb-col { flex: 1 1 0; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 0; background: var(--kb-surface); border-radius: 10px; border: 1px solid var(--kb-border); overflow: hidden; min-height: 260px; }
+    .kb-col-header { padding: 10px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--kb-border); flex-shrink: 0; flex-wrap: wrap; }
     .kb-col-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; flex: 1; }
-    .kb-col-count { background: #2a2a2a; color: #888; border-radius: 10px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
+    .kb-col-count { background: var(--kb-surface-soft); color: var(--kb-muted); border-radius: 10px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
     .kb-col-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .col-novo .kb-col-indicator { background: #3498db; }
     .col-novo .kb-col-title { color: #5dade2; }
@@ -50,148 +238,183 @@
     .col-a_caminho .kb-col-indicator { background: #9b59b6; }
     .col-a_caminho .kb-col-title { color: #bb8fce; }
     .kb-col-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 100px; }
-    .kb-col-body.drag-over { background: #1a1a1a; border-radius: 8px; }
+    .kb-col-body.drag-over { background: var(--kb-surface-alt); border-radius: 8px; }
     .kb-col-header .kb-col-action { width: 100%; justify-content: center; padding: 8px; font-size: 0.75rem; }
-    .kb-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
+    .kb-card { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 8px; padding: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
     .kb-card.static-card { cursor: default; }
     .kb-card:active { cursor: grabbing; }
     .kb-card.dragging { opacity: 0.4; transform: scale(0.97); }
-    .kb-card:hover { border-color: #3a3a3a; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+    .kb-card:hover { border-color: var(--kb-subtle); box-shadow: 0 4px 16px var(--kb-shadow); }
     .kb-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 6px; }
-    .kb-card-id { font-size: 0.65rem; color: #444; font-weight: 600; }
-    .kb-card-time { font-size: 0.62rem; color: #444; white-space: nowrap; }
-    .kb-card-name { font-size: 0.85rem; font-weight: 600; color: #eee; margin-bottom: 3px; }
-    .kb-card-address { font-size: 0.7rem; color: #666; margin-bottom: 6px; line-height: 1.2; }
+    .kb-card-id { font-size: 0.65rem; color: var(--kb-subtle); font-weight: 600; }
+    .kb-card-time { font-size: 0.62rem; color: var(--kb-subtle); white-space: nowrap; }
+    .kb-card-name { font-size: 0.85rem; font-weight: 600; color: var(--kb-text); margin-bottom: 3px; }
+    .kb-card-address { font-size: 0.7rem; color: var(--kb-muted); margin-bottom: 6px; line-height: 1.2; }
     .kb-card-items { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
-    .kb-card-item { font-size: 0.75rem; color: #aaa; display: flex; gap: 5px; align-items: flex-start; }
-    .kb-card-item-qty { color: #ffcc00; font-weight: 700; flex-shrink: 0; }
-    .kb-card-acc { font-size: 0.65rem; color: #555; margin-left: 16px; margin-top: 1px; }
-    .kb-card-total { font-size: 0.78rem; color: #ffcc00; font-weight: 600; margin-bottom: 8px; }
-    .kb-card-payment { font-size: 0.68rem; color: #555; margin-top: -6px; margin-bottom: 8px; }
+    .kb-card-item { font-size: 0.75rem; color: var(--kb-text); display: flex; gap: 5px; align-items: flex-start; }
+    .kb-card-item-qty { color: var(--kb-brand); font-weight: 700; flex-shrink: 0; }
+    .kb-card-acc { font-size: 0.65rem; color: var(--kb-muted); margin-left: 16px; margin-top: 1px; }
+    .kb-card-total { font-size: 0.78rem; color: var(--kb-brand); font-weight: 600; margin-bottom: 8px; }
+    .kb-card-payment { font-size: 0.68rem; color: var(--kb-muted); margin-top: -6px; margin-bottom: 8px; }
     .kb-card-actions { display: flex; gap: 5px; flex-wrap: wrap; }
     .kb-card-actions button { border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
-    .btn-move-next { background: #ffcc00; color: #000; }
-    .btn-cancel { background: #1a0a0a; color: #e74c3c; border: 1px solid #2a1010 !important; }
-    .kb-card-obs { font-size: 0.7rem; color: #666; background: #141414; border-radius: 6px; padding: 5px 7px; margin-bottom: 6px; border-left: 2px solid #2a2a2a; }
+    .btn-move-next { background: var(--kb-brand); color: var(--kb-brand-contrast); }
+    .btn-cancel { background: var(--kb-danger-bg); color: var(--kb-danger-text); border: 1px solid var(--kb-danger-border) !important; }
+    .kb-card-obs { font-size: 0.7rem; color: var(--kb-muted); background: var(--kb-surface-soft); border-radius: 6px; padding: 5px 7px; margin-bottom: 6px; border-left: 2px solid var(--kb-border-soft); }
     .kb-card.wa-pending { border-color: #e67e22; border-left: 3px solid #e67e22; }
-    .kb-card.wa-confirmed { border-color: #2a2a2a; }
-    .wa-check-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; margin-bottom: 8px; background: #0f0f0f; border: 1px solid #2a2a2a; cursor: pointer; transition: background 0.15s; }
-    .wa-check-row:hover { background: #1a1a1a; }
-    .wa-check-row.confirmed { background: #0d1f10; border-color: #1e3a22; }
-    .wa-check-box { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1.5px solid #3a3a3a; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; transition: all 0.15s; }
+    .kb-card.wa-confirmed { border-color: var(--kb-border-soft); }
+    .wa-check-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; margin-bottom: 8px; background: var(--kb-surface-soft); border: 1px solid var(--kb-border-soft); cursor: pointer; transition: background 0.15s; }
+    .wa-check-row:hover { background: var(--kb-surface-alt); }
+    .wa-check-row.confirmed { background: var(--kb-accent-bg); border-color: var(--kb-accent-border); }
+    .wa-check-box { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1.5px solid var(--kb-subtle); background: var(--kb-surface-alt); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; transition: all 0.15s; }
     .wa-check-row.confirmed .wa-check-box { background: #25d366; border-color: #25d366; }
-    .wa-check-label { font-size: 0.7rem; color: #555; line-height: 1.2; flex: 1; }
-    .wa-check-row.confirmed .wa-check-label { color: #4caf50; }
-    .wa-pending-badge { background: #e67e22; color: #fff; border-radius: 10px; padding: 2px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
-    .kb-empty { color: #333; font-size: 0.75rem; text-align: center; padding: 16px 10px; font-style: italic; }
-    .kb-whatsapp-notice { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; color: #4caf50; display: flex; align-items: center; gap: 6px; }
+    .wa-check-label { font-size: 0.7rem; color: var(--kb-muted); line-height: 1.2; flex: 1; }
+    .wa-check-row.confirmed .wa-check-label { color: var(--kb-accent-text); }
+    .wa-pending-badge { background: var(--kb-warn-bg); color: var(--kb-brand); border: 1px solid var(--kb-warn-border); border-radius: 10px; padding: 2px 6px; font-size: 0.62rem; font-weight: 700; vertical-align: middle; margin-left: 4px; }
+    .kb-empty { color: var(--kb-subtle); font-size: 0.75rem; text-align: center; padding: 16px 10px; font-style: italic; }
+    .kb-whatsapp-notice { background: var(--kb-accent-bg); border: 1px solid var(--kb-accent-border); border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; color: var(--kb-accent-text); display: flex; align-items: center; gap: 6px; }
     .kb-card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
     .kb-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.02em; }
-    .kb-tag.batch { background: #1e1a0a; color: #ffcc00; border: 1px solid #4d3d11; }
-    .kb-tag.status { background: #111827; color: #9cc3ff; border: 1px solid #21304f; }
-    .kb-tag.plate { background: #1a1020; color: #d2b4de; border: 1px solid #4a2f5a; }
-    .kb-tag.stop { background: #102013; color: #7dcea0; border: 1px solid #29563d; }
-    .kb-batch-panel { background: #101010; border: 1px solid #242424; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .kb-tag.batch { background: var(--kb-gold-bg); color: var(--kb-gold-text); border: 1px solid var(--kb-gold-border); }
+    .kb-tag.status { background: var(--kb-info-bg); color: var(--kb-info-text); border: 1px solid var(--kb-info-border); }
+    .kb-tag.plate { background: var(--kb-purple-bg); color: var(--kb-purple-text); border: 1px solid var(--kb-purple-border); }
+    .kb-tag.stop { background: var(--kb-green-bg); color: var(--kb-green-text); border: 1px solid var(--kb-green-border); }
+    .kb-batch-panel { background: var(--kb-surface-soft); border: 1px solid var(--kb-border-soft); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
     .kb-batch-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .kb-batch-panel-title { font-size: 0.8rem; color: #ffcc00; font-weight: 700; }
+    .kb-batch-panel-title { font-size: 0.8rem; color: var(--kb-brand); font-weight: 700; }
     .kb-batch-panel-meta { display: flex; flex-wrap: wrap; gap: 6px; }
-    .kb-batch-panel p { font-size: 0.75rem; color: #777; line-height: 1.4; }
+    .kb-batch-panel p { font-size: 0.75rem; color: var(--kb-muted); line-height: 1.4; }
     .kb-batch-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .batch-btn { padding: 7px 10px; font-size: 0.75rem; width: auto; }
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 700; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: var(--kb-overlay); z-index: 700; }
     .modal-overlay.open { display: block; }
-    .route-modal, .batch-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%, -50%) scale(0.98); width: min(1040px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow: hidden; background: #111; border: 1px solid #1f1f1f; border-radius: 18px; z-index: 701; display: none; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55); }
+    .route-modal, .batch-modal { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%, -50%) scale(0.98); width: min(1040px, calc(100vw - 24px)); max-height: calc(100vh - 40px); overflow: hidden; background: var(--kb-surface); border: 1px solid var(--kb-border); border-radius: 18px; z-index: 701; display: none; box-shadow: 0 20px 60px var(--kb-overlay); }
     .route-modal.open, .batch-modal.open { display: flex; flex-direction: column; }
-    .route-modal-header, .batch-modal-header { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .route-modal-title, .batch-modal-title { font-size: 1rem; font-weight: 700; color: #fff; }
-    .route-modal-desc, .batch-modal-desc { font-size: 0.78rem; color: #666; margin-top: 4px; }
+    .route-modal-header, .batch-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--kb-border); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .route-modal-title, .batch-modal-title { font-size: 1rem; font-weight: 700; color: var(--kb-text); }
+    .route-modal-desc, .batch-modal-desc { font-size: 0.78rem; color: var(--kb-muted); margin-top: 4px; }
     .route-modal-body { display: grid; grid-template-columns: minmax(320px, 1fr) 340px; gap: 0; min-height: 520px; }
-    .route-map-wrap { background: #0d0d0d; min-height: 520px; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; }
+    .route-map-wrap { background: var(--kb-surface-soft); min-height: 520px; border-right: 1px solid var(--kb-border); display: flex; flex-direction: column; }
     #route-map { flex: 1; min-height: 360px; }
-    .route-map-status { padding: 12px 16px; font-size: 0.78rem; color: #777; border-top: 1px solid #1a1a1a; }
+    .route-map-status { padding: 12px 16px; font-size: 0.78rem; color: var(--kb-muted); border-top: 1px solid var(--kb-border); }
     .route-side { padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-    .route-summary { background: #151515; border: 1px solid #1f1f1f; border-radius: 12px; padding: 12px; }
+    .route-summary { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 12px; padding: 12px; }
     .route-list-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
     .route-list { display: flex; flex-direction: column; gap: 8px; }
-    .route-stop { background: #151515; border: 1px solid #1f1f1f; border-radius: 10px; padding: 10px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease; }
+    .route-stop { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 10px; padding: 10px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease; }
     .route-stop.dragging { opacity: 0.55; border-color: #5ca8e0; }
-    .route-stop.drop-target { border-color: #ffcc00; background: #191611; }
-    .route-stop-handle { width: 34px; min-height: 34px; border-radius: 8px; border: 1px dashed #303030; display: flex; align-items: center; justify-content: center; color: #888; font-size: 0.95rem; cursor: grab; user-select: none; }
+    .route-stop.drop-target { border-color: var(--kb-brand); background: var(--kb-surface-soft); }
+    .route-stop-handle { width: 34px; min-height: 34px; border-radius: 8px; border: 1px dashed var(--kb-border-soft); display: flex; align-items: center; justify-content: center; color: var(--kb-muted); font-size: 0.95rem; cursor: grab; user-select: none; }
     .route-stop-handle:active { cursor: grabbing; }
     .route-stop-body { min-width: 0; }
-    .route-stop strong { color: #fff; font-size: 0.84rem; display: block; }
-    .route-stop span { display: block; color: #666; font-size: 0.74rem; margin-top: 4px; line-height: 1.3; }
+    .route-stop strong { color: var(--kb-text); font-size: 0.84rem; display: block; }
+    .route-stop span { display: block; color: var(--kb-muted); font-size: 0.74rem; margin-top: 4px; line-height: 1.3; }
     .route-stop-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-    .route-stop-badge { background: #101010; border: 1px solid #242424; color: #9a9a9a; border-radius: 999px; padding: 4px 8px; font-size: 0.68rem; white-space: nowrap; }
-    .route-modal-footer, .batch-modal-footer { padding: 14px 20px; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .route-stop-badge { background: var(--kb-surface-soft); border: 1px solid var(--kb-border-soft); color: var(--kb-muted); border-radius: 999px; padding: 4px 8px; font-size: 0.68rem; white-space: nowrap; }
+    .route-modal-footer, .batch-modal-footer { padding: 14px 20px; border-top: 1px solid var(--kb-border); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .modal-btn { width: auto; }
     .batch-modal-body { padding: 18px 20px; display: grid; grid-template-columns: 220px 1fr; gap: 18px; overflow-y: auto; }
     .batch-qr-box { background: #fff; border-radius: 16px; padding: 16px; min-height: 220px; display: flex; align-items: center; justify-content: center; }
     .batch-info-grid { display: flex; flex-direction: column; gap: 14px; }
-    .batch-section { background: #151515; border: 1px solid #1f1f1f; border-radius: 12px; padding: 14px; }
-    .batch-section h4 { font-size: 0.78rem; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-    .batch-section p { font-size: 0.82rem; color: #d1d1d1; line-height: 1.45; margin-bottom: 6px; }
+    .batch-section { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 12px; padding: 14px; }
+    .batch-section h4 { font-size: 0.78rem; color: var(--kb-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .batch-section p { font-size: 0.82rem; color: var(--kb-text); line-height: 1.45; margin-bottom: 6px; }
     .batch-section p:last-child { margin-bottom: 0; }
     .batch-link { color: #5ca8e0; word-break: break-all; font-size: 0.78rem; }
-    #kb-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; }
+    #kb-detail-overlay { display: none; position: fixed; inset: 0; background: var(--kb-overlay); z-index: 500; }
     #kb-detail-overlay.open { display: block; }
-    #kb-detail-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw; background: #131313; z-index: 501; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); border-left: 1px solid #1e1e1e; box-shadow: -8px 0 40px rgba(0,0,0,0.6); }
+    #kb-detail-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100vw; background: var(--kb-surface); z-index: 501; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); border-left: 1px solid var(--kb-border); box-shadow: -8px 0 40px var(--kb-overlay); }
     #kb-detail-drawer.open { transform: translateX(0); }
-    .kd-header { padding: 16px 20px 12px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .kd-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--kb-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .kd-header-left { display: flex; flex-direction: column; gap: 2px; }
-    .kd-order-id { font-size: 0.7rem; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-    .kd-customer-name { font-size: 1.05rem; font-weight: 700; color: #fff; }
-    .kd-close { background: none; border: 1px solid #2a2a2a; color: #666; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem; width: auto; margin: 0; }
-    .kd-close:hover { color: #fff; border-color: #444; }
+    .kd-order-id { font-size: 0.7rem; color: var(--kb-subtle); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .kd-customer-name { font-size: 1.05rem; font-weight: 700; color: var(--kb-text); }
+    .kd-close { background: none; border: 1px solid var(--kb-border-soft); color: var(--kb-muted); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem; width: auto; margin: 0; }
+    .kd-close:hover { color: var(--kb-text); border-color: var(--kb-subtle); }
     .kd-body { overflow-y: auto; flex: 1; padding: 0; }
-    .kd-section { padding: 16px 20px; border-bottom: 1px solid #1a1a1a; }
+    .kd-section { padding: 16px 20px; border-bottom: 1px solid var(--kb-border); }
     .kd-section:last-child { border-bottom: none; }
-    .kd-section-title { font-size: 0.65rem; color: #444; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; font-weight: 700; }
+    .kd-section-title { font-size: 0.65rem; color: var(--kb-subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; font-weight: 700; }
     .kd-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; }
     .kd-row:last-child { margin-bottom: 0; }
-    .kd-label { color: #555; white-space: nowrap; flex-shrink: 0; }
-    .kd-value { color: #ccc; text-align: right; word-break: break-word; }
-    .kd-value.gold { color: #ffcc00; font-weight: 700; }
+    .kd-label { color: var(--kb-muted); white-space: nowrap; flex-shrink: 0; }
+    .kd-value { color: var(--kb-text); text-align: right; word-break: break-word; }
+    .kd-value.gold { color: var(--kb-brand); font-weight: 700; }
     .kd-value.green { color: #4caf50; }
-    .kd-item-row { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid #1a1a1a; align-items: flex-start; }
+    .kd-item-row { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--kb-border); align-items: flex-start; }
     .kd-item-row:last-child { border-bottom: none; }
-    .kd-item-qty { color: #ffcc00; font-weight: 700; font-size: 0.88rem; flex-shrink: 0; width: 24px; }
+    .kd-item-qty { color: var(--kb-brand); font-weight: 700; font-size: 0.88rem; flex-shrink: 0; width: 24px; }
     .kd-item-info { flex: 1; }
-    .kd-item-name { font-size: 0.88rem; color: #ddd; }
-    .kd-item-acc { font-size: 0.75rem; color: #555; margin-top: 2px; }
-    .kd-item-price { font-size: 0.82rem; color: #888; white-space: nowrap; }
-    .kd-track-code { background: #0f0f0f; border: 1px solid #1e1e1e; border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.82rem; color: #5ca8e0; word-break: break-all; margin-top: 6px; cursor: pointer; }
+    .kd-item-name { font-size: 0.88rem; color: var(--kb-text); }
+    .kd-item-acc { font-size: 0.75rem; color: var(--kb-muted); margin-top: 2px; }
+    .kd-item-price { font-size: 0.82rem; color: var(--kb-muted); white-space: nowrap; }
+    .kd-track-code { background: var(--kb-surface-soft); border: 1px solid var(--kb-border); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.82rem; color: #5ca8e0; word-break: break-all; margin-top: 6px; cursor: pointer; }
     .kd-track-code:hover { border-color: #2a4a7a; }
-    .kd-prev-order { padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+    .kd-prev-order { padding: 8px 0; border-bottom: 1px solid var(--kb-border); }
     .kd-prev-order:last-child { border-bottom: none; }
-    .kd-prev-date { font-size: 0.72rem; color: #444; }
-    .kd-prev-total { font-size: 0.78rem; color: #888; }
+    .kd-prev-date { font-size: 0.72rem; color: var(--kb-subtle); }
+    .kd-prev-total { font-size: 0.78rem; color: var(--kb-muted); }
     .kd-status-badge { display: inline-block; border-radius: 50px; padding: 3px 10px; font-size: 0.72rem; font-weight: 700; }
     #kd-batch-qr { margin-top: 12px; min-height: 160px; display: flex; align-items: center; justify-content: center; }
+    .protein-chips-placeholder { color: var(--kb-subtle); font-size: 0.78rem; }
+    .route-summary-title { display: block; color: var(--kb-text); margin-bottom: 6px; }
+    .route-muted { color: var(--kb-muted); font-size: 0.8rem; line-height: 1.4; }
+    .route-subtle { color: var(--kb-subtle); font-size: 0.74rem; margin-top: 6px; }
+    .route-result { font-size: 0.78rem; color: var(--kb-muted); flex: 1; }
+    .batch-stops { display: flex; flex-direction: column; gap: 8px; }
+    .kb-inline-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .kd-action-row { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .kd-action-btn { border-radius: 6px; padding: 7px 12px; font-size: 0.8rem; cursor: pointer; }
+    .kd-action-btn.primary { background: var(--kb-brand); color: var(--kb-brand-contrast); border: none; font-weight: 700; padding-inline: 14px; }
+    .kd-action-btn.danger { background: var(--kb-danger-bg); color: var(--kb-danger-text); border: 1px solid var(--kb-danger-border); }
+    .kd-value.italic { color: var(--kb-muted); font-style: italic; }
+    .kd-total-row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--kb-border); }
+    .batch-link-wrap { margin-top: 8px; }
+    .kd-batch-loading { text-align: left; color: var(--kb-muted); }
+    .kd-prev-order.clickable { cursor: pointer; }
     @media (max-width: 980px) {
+      .admin-panel { padding: 12px; }
+      .admin-header-shell { top: 8px; }
+      .admin-header { padding: 8px; }
+      .admin-brand { width: 100%; }
+      .admin-header-actions { width: 100%; }
+      .admin-utility-btn,
+      .admin-header-status { justify-content: center; }
       .route-modal-body { grid-template-columns: 1fr; }
-      .route-map-wrap { min-height: 320px; border-right: none; border-bottom: 1px solid #1a1a1a; }
+      .route-map-wrap { min-height: 320px; border-right: none; border-bottom: 1px solid var(--kb-border); }
       .batch-modal-body { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-<header class="kb-header">
-  <div>
-    <div class="kb-brand">La Coccina</div>
-    <div class="kb-title">Kanban de Pedidos</div>
+<div class="admin-panel">
+  <div class="admin-header-shell">
+    <div class="admin-header">
+      <div class="admin-brand">
+        <span class="admin-brand-mark" aria-hidden="true">
+          <img src="../assets/imagens/favicon-192.png" alt="">
+        </span>
+        <div class="admin-brand-copy">
+          <span class="admin-brand-logo">La Coccina</span>
+          <span class="admin-brand-tag">Kanban de Pedidos</span>
+        </div>
+      </div>
+      <div class="admin-header-actions">
+        <a id="btn-kanban-link" class="admin-utility-btn current-page" href="kanban.html" aria-current="page">📋 Kanban</a>
+        <a class="admin-utility-btn" href="dashboard.html">📊 Dashboard</a>
+        <a class="admin-utility-btn" href="cadastros.html">🧾 Cadastros</a>
+        <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
+        <button type="button" class="hint-icon" id="kb-whatsapp-help" aria-label="Ajuda do modo WhatsApp" data-tooltip="Modo WhatsApp ativo: pedidos chegam pelo WhatsApp e sao movidos manualmente no Kanban.">i</button>
+        <div class="admin-header-status" id="kb-conn"><div id="kb-conn-dot" class="admin-header-status-dot"></div><span id="kb-conn-label">Conectando...</span></div>
+      </div>
+    </div>
   </div>
-  <div class="kb-header-right">
-    <div class="kb-whatsapp-notice">📱 Modo WhatsApp ativo — pedidos chegam pelo WhatsApp e são movidos manualmente</div>
-    <div id="kb-conn"><div id="kb-conn-dot"></div><span id="kb-conn-label">Conectando...</span></div>
-    <a href="dashboard.html" class="kb-btn">← Painel</a>
+  <div id="protein-summary">
+    <span class="ps-label">Proteínas em produção:</span>
+    <span id="protein-chips" class="protein-chips-placeholder">Carregando...</span>
   </div>
-</header>
-<div id="protein-summary">
-  <span class="ps-label">Proteínas em produção:</span>
-  <span id="protein-chips" style="color:#444; font-size:0.78rem">Carregando...</span>
+  <main class="kb-board" id="kb-board"></main>
 </div>
-<main class="kb-board" id="kb-board"></main>
 
 <div class="modal-overlay" id="route-modal-overlay" onclick="closeRouteModal()"></div>
 <section class="route-modal" id="route-modal" role="dialog" aria-modal="true">
@@ -209,13 +432,13 @@
     </div>
     <div class="route-side">
       <div class="route-summary">
-        <strong style="display:block; color:#fff; margin-bottom:6px;">Origem</strong>
-        <div id="route-origin-label" style="color:#888; font-size:0.8rem; line-height:1.4;">-</div>
+        <strong class="route-summary-title">Origem</strong>
+        <div id="route-origin-label" class="route-muted">-</div>
       </div>
       <div class="route-summary">
-        <strong style="display:block; color:#fff; margin-bottom:6px;">Resumo do lote</strong>
-        <div id="route-summary-count" style="color:#888; font-size:0.8rem;">0 pedidos</div>
-        <div id="route-summary-note" style="color:#666; font-size:0.74rem; margin-top:6px;">Somente pedidos em `Preparando Rota` e sem lote ativo entram nesta preparação.</div>
+        <strong class="route-summary-title">Resumo do lote</strong>
+        <div id="route-summary-count" class="route-muted">0 pedidos</div>
+        <div id="route-summary-note" class="route-subtle">Somente pedidos em `Preparando Rota` e sem lote ativo entram nesta preparação.</div>
       </div>
       <div class="route-list-toolbar">
         <button class="modal-btn" id="route-reverse-btn" onclick="reverseRouteOrder()" disabled>Inverter ordem</button>
@@ -224,8 +447,8 @@
     </div>
   </div>
   <div class="route-modal-footer">
-    <div id="route-result" style="font-size:0.78rem; color:#666; flex:1;">Nenhum lote criado ainda.</div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div id="route-result" class="route-result">Nenhum lote criado ainda.</div>
+    <div class="kb-inline-actions">
       <button class="modal-btn" onclick="closeRouteModal()">Fechar</button>
       <button class="modal-btn primary" id="route-confirm-btn" onclick="confirmRouteBatch()">Criar lote</button>
     </div>
@@ -259,12 +482,12 @@
       </div>
       <div class="batch-section">
         <h4>Paradas</h4>
-        <div id="batch-modal-stops" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div id="batch-modal-stops" class="batch-stops"></div>
       </div>
     </div>
   </div>
   <div class="batch-modal-footer">
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div class="kb-inline-actions">
       <button class="modal-btn" onclick="copyBatchLink()">Copiar link</button>
       <button class="modal-btn" id="batch-open-public-btn" onclick="openBatchPublicPage()">Abrir página do lote</button>
     </div>
@@ -290,6 +513,13 @@
 <script>
   const API = LaCoccinaSecurity.API_BASE;
   const WA_KEY = 'lc_wa_confirmed';
+  const ADMIN_THEME_STORAGE_KEY = 'lc_admin_theme';
+  const ADMIN_THEME_ORDER = ['light', 'night', 'sunset'];
+  const ADMIN_THEME_META = {
+    light: { label: 'Dia', icon: '☀️' },
+    night: { label: 'Noite', icon: '🌙' },
+    sunset: { label: 'Entardecer', icon: '🌆' },
+  };
   const PAYMENT_LABELS = { pix: 'PIX', dinheiro: 'Dinheiro', cartao: 'Cartão' };
   const STATUS_LABELS = {
     novo: 'Novo Pedido',
@@ -333,7 +563,7 @@
   };
 
   let orders = [];
-  let deliverySettings = { restaurantOriginAddress: '', googleMapsApiKeyConfigured: false, googleMapsApiKey: '' };
+  let deliverySettings = { deliveryManagementEnabled: false, restaurantOriginAddress: '', googleMapsApiKeyConfigured: false, googleMapsApiKey: '' };
   let dragSrcId = null;
   let dragSrcCol = null;
   let sseConn = null;
@@ -360,6 +590,40 @@
       return Promise.reject(new Error('Sem token'));
     }
     return fetch(url, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}` } });
+  }
+
+  function normalizeAdminTheme(theme) {
+    if (theme === 'dark') return 'sunset';
+    return ADMIN_THEME_ORDER.includes(theme) ? theme : 'night';
+  }
+
+  function getAdminTheme() {
+    return normalizeAdminTheme(localStorage.getItem(ADMIN_THEME_STORAGE_KEY));
+  }
+
+  function syncKanbanTheme() {
+    const theme = getAdminTheme();
+    document.documentElement.setAttribute('data-theme', theme);
+    const button = document.getElementById('btn-theme-toggle');
+    if (!button) return;
+    const themeIndex = ADMIN_THEME_ORDER.indexOf(theme);
+    const currentTheme = ADMIN_THEME_META[theme] || ADMIN_THEME_META.night;
+    const nextThemeKey = ADMIN_THEME_ORDER[(themeIndex + 1) % ADMIN_THEME_ORDER.length];
+    const nextTheme = ADMIN_THEME_META[nextThemeKey];
+    button.innerHTML = `${currentTheme.icon} ${currentTheme.label}`;
+    button.title = `Alternar para ${nextTheme.label}`;
+    button.setAttribute('aria-label', button.title);
+  }
+
+  function setAdminTheme(theme) {
+    localStorage.setItem(ADMIN_THEME_STORAGE_KEY, normalizeAdminTheme(theme));
+    syncKanbanTheme();
+  }
+
+  function toggleAdminTheme() {
+    const currentIndex = ADMIN_THEME_ORDER.indexOf(getAdminTheme());
+    const nextTheme = ADMIN_THEME_ORDER[(currentIndex + 1) % ADMIN_THEME_ORDER.length];
+    setAdminTheme(nextTheme);
   }
 
   function isWaConfirmed(id) {
@@ -395,6 +659,10 @@
     return COLUMN_ORDER.indexOf(normalizeStatusKey(status));
   }
 
+  function isDeliveryManagementEnabled() {
+    return deliverySettings?.deliveryManagementEnabled === true;
+  }
+
   function compareOrders(a, b) {
     const idxDiff = columnIndex(a.status) - columnIndex(b.status);
     if (idxDiff) return idxDiff;
@@ -419,7 +687,7 @@
     if (!current || !target) return false;
     if (current === target) return true;
     if (['cancelado', 'entregue'].includes(target)) return true;
-    if (current === 'preparando_rota') return false;
+    if (current === 'preparando_rota') return !isDeliveryManagementEnabled() && target === 'a_caminho';
     const currentIndex = columnIndex(current);
     return currentIndex !== -1 && COLUMN_ORDER[currentIndex + 1] === target;
   }
@@ -428,6 +696,9 @@
     const current = normalizeStatusKey(order?.status);
     const target = normalizeStatusKey(targetStatus);
     if (current === 'preparando_rota' && target === 'a_caminho') {
+      if (!isDeliveryManagementEnabled()) {
+        return 'A gestao de entrega esta inativa. O Kanban segue manual e permite avancar para "A Caminho" sem lote.';
+      }
       return 'Pedidos em "Preparando Rota" so podem ir para "A Caminho" ao confirmar a saida do lote.';
     }
     return 'Arraste ou avance apenas para a proxima etapa do fluxo: Novo Pedido -> Em Producao -> Aguardando Envio -> Preparando Rota -> A Caminho.';
@@ -515,15 +786,18 @@
   }
 
   function renderBatchPanel(batchGroup, colKey) {
+    const deliveryEnabled = isDeliveryManagementEnabled();
     const first = batchGroup.orders[0];
     const publicUrl = first.delivery_batch_public_token ? publicBatchUrl(first.delivery_batch_public_token) : '';
     const actions = [];
-    actions.push(`<button class="batch-btn" onclick="openBatchModal(${batchGroup.batchId})">Ver QR</button>`);
-    if (publicUrl) {
-      actions.push(`<button class="batch-btn" onclick="window.open('${publicUrl}', '_blank', 'noopener')">Abrir página</button>`);
-    }
-    if (colKey === 'preparando_rota' && first.delivery_batch_status === 'aceito_motoboy') {
-      actions.push(`<button class="batch-btn warn" onclick="confirmKitchenRelease(${batchGroup.batchId})">Confirmar saída</button>`);
+    if (deliveryEnabled) {
+      actions.push(`<button class="batch-btn" onclick="openBatchModal(${batchGroup.batchId})">Ver QR</button>`);
+      if (publicUrl) {
+        actions.push(`<button class="batch-btn" onclick="window.open('${publicUrl}', '_blank', 'noopener')">Abrir página</button>`);
+      }
+      if (colKey === 'preparando_rota' && first.delivery_batch_status === 'aceito_motoboy') {
+        actions.push(`<button class="batch-btn warn" onclick="confirmKitchenRelease(${batchGroup.batchId})">Confirmar saída</button>`);
+      }
     }
     return `
       <div class="kb-batch-panel">
@@ -535,8 +809,14 @@
           ${first.delivery_vehicle_plate ? `<span class="kb-tag plate">Placa ${esc(first.delivery_vehicle_plate)}</span>` : ''}
           <span class="kb-tag batch">${batchGroup.orders.length} pedidos</span>
         </div>
-        <p>${first.delivery_batch_status === 'preparado' ? 'Aguardando o aceite do motoboy pelo QR Code.' : first.delivery_batch_status === 'aceito_motoboy' ? 'Motoboy aceitou o lote. A cozinha precisa confirmar a saída.' : 'Lote já liberado e em rota.'}</p>
-        <div class="kb-batch-actions">${actions.join('')}</div>
+        <p>${deliveryEnabled
+          ? (first.delivery_batch_status === 'preparado'
+            ? 'Aguardando o aceite do motoboy pelo QR Code.'
+            : first.delivery_batch_status === 'aceito_motoboy'
+              ? 'Motoboy aceitou o lote. A cozinha precisa confirmar a saída.'
+              : 'Lote já liberado e em rota.')
+          : 'Gestao de entrega inativa. O Kanban permanece em modo manual.'}</p>
+        ${actions.length ? `<div class="kb-batch-actions">${actions.join('')}</div>` : ''}
       </div>
     `;
   }
@@ -553,8 +833,9 @@
     const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
     const normalizedStatus = normalizeStatusKey(order.status);
     const canDrag = !(normalizedStatus === 'preparando_rota' && order.delivery_batch_id) && normalizedStatus !== 'a_caminho';
-    const nextKey = col.key === 'preparando_rota' ? '' : col.nextKey;
-    const nextLabel = col.key === 'preparando_rota' ? '' : col.nextLabel;
+    const deliveryEnabled = isDeliveryManagementEnabled();
+    const nextKey = col.key === 'preparando_rota' && deliveryEnabled ? '' : col.nextKey;
+    const nextLabel = col.key === 'preparando_rota' && deliveryEnabled ? '' : col.nextLabel;
     const tags = [];
     if (order.delivery_batch_code) tags.push(`<span class="kb-tag batch">Lote ${esc(order.delivery_batch_code)}</span>`);
     if (order.delivery_batch_status) tags.push(`<span class="kb-tag status">${esc(batchStatusLabel(order.delivery_batch_status))}</span>`);
@@ -602,7 +883,9 @@
       const batchPanels = buildBatchGroups(colOrders).map((group) => renderBatchPanel(group, col.key)).join('');
       const cards = colOrders.map((order) => renderCard(order, col)).join('');
       const headerAction = col.key === 'preparando_rota'
-        ? `<button class="kb-col-action" onclick="openRouteModal()">Preparar rota</button>`
+        ? (isDeliveryManagementEnabled()
+          ? `<button class="kb-col-action" onclick="openRouteModal()">Preparar rota</button>`
+          : `<div class="kb-col-action inactive">Gestao de entrega inativa</div>`)
         : '';
 
       const colEl = document.createElement('div');
@@ -728,7 +1011,7 @@
     if (sseConn) sseConn.close();
     sseConn = new EventSource(`${API}/api/products/stream`);
     sseConn.onopen = () => {
-      document.getElementById('kb-conn-dot').className = 'connected';
+      document.getElementById('kb-conn-dot').className = 'admin-header-status-dot connected';
       document.getElementById('kb-conn-label').textContent = 'Ao vivo';
     };
     sseConn.onmessage = (event) => {
@@ -740,7 +1023,7 @@
       } catch {}
     };
     sseConn.onerror = () => {
-      document.getElementById('kb-conn-dot').className = '';
+      document.getElementById('kb-conn-dot').className = 'admin-header-status-dot';
       document.getElementById('kb-conn-label').textContent = 'Reconectando...';
       sseConn.close();
       setTimeout(connectSSE, 5000);
@@ -969,6 +1252,10 @@
   }
 
   async function openRouteModal() {
+    if (!isDeliveryManagementEnabled()) {
+      alert('A gestao de entrega esta inativa. O Kanban permanece em modo manual.');
+      return;
+    }
     const eligibleOrders = orders.filter((order) => order.status === 'preparando_rota' && !order.delivery_batch_id);
     if (!eligibleOrders.length) {
       alert('Nao ha pedidos sem lote na coluna Preparando Rota.');
@@ -1146,9 +1433,9 @@
       <div class="kd-section">
         <div class="kd-section-title">Status atual</div>
         <span class="kd-status-badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44">${STATUS_LABELS[order.status] || order.status}</span>
-        <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-          ${col?.nextKey && order.status !== 'preparando_rota' ? `<button onclick="moveOrder(${order.id}, '${col.nextKey}'); closeOrderDetail()" style="background:#ffcc00;color:#000;border:none;border-radius:6px;padding:7px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;">${col.nextLabel}</button>` : ''}
-          <button onclick="moveOrder(${order.id}, 'cancelado'); closeOrderDetail()" style="background:#1a0a0a;color:#e74c3c;border:1px solid #2a1010;border-radius:6px;padding:7px 12px;font-size:0.8rem;cursor:pointer;">Cancelar</button>
+        <div class="kd-action-row">
+          ${col?.nextKey && (order.status !== 'preparando_rota' || !isDeliveryManagementEnabled()) ? `<button onclick="moveOrder(${order.id}, '${col.nextKey}'); closeOrderDetail()" class="kd-action-btn primary">${col.nextLabel}</button>` : ''}
+          <button onclick="moveOrder(${order.id}, 'cancelado'); closeOrderDetail()" class="kd-action-btn danger">Cancelar</button>
         </div>
       </div>
       <div class="kd-section">
@@ -1157,7 +1444,7 @@
         <div class="kd-row"><span class="kd-label">Telefone</span><span class="kd-value green">${esc(order.phone)}</span></div>
         <div class="kd-row"><span class="kd-label">Endereco</span><span class="kd-value">${esc(order.address || '—')}</span></div>
         <div class="kd-row"><span class="kd-label">Pagamento</span><span class="kd-value">${PAYMENT_LABELS[order.payment] || esc(order.payment || '—')}</span></div>
-        ${order.obs ? `<div class="kd-row"><span class="kd-label">Obs.</span><span class="kd-value" style="color:#888;font-style:italic">${esc(order.obs)}</span></div>` : ''}
+        ${order.obs ? `<div class="kd-row"><span class="kd-label">Obs.</span><span class="kd-value italic">${esc(order.obs)}</span></div>` : ''}
       </div>
       <div class="kd-section">
         <div class="kd-section-title">Itens do pedido</div>
@@ -1165,11 +1452,11 @@
           const acc = (item.accompaniments || []).map((accItem) => accItem.name).join(', ');
           return `<div class="kd-item-row"><div class="kd-item-qty">${item.qty}×</div><div class="kd-item-info"><div class="kd-item-name">${esc(item.name)}</div>${acc ? `<div class="kd-item-acc">↳ ${esc(acc)}</div>` : ''}</div><div class="kd-item-price">R$ ${(parseFloat(item.price) * item.qty).toFixed(2)}</div></div>`;
         }).join('')}
-        <div class="kd-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #1e1e1e;"><span class="kd-label">Total</span><span class="kd-value gold">R$ ${parseFloat(order.total).toFixed(2)}</span></div>
+        <div class="kd-row kd-total-row"><span class="kd-label">Total</span><span class="kd-value gold">R$ ${parseFloat(order.total).toFixed(2)}</span></div>
       </div>
-      ${trackUrl ? `<div class="kd-section"><div class="kd-section-title">Codigo de rastreio</div><div class="kd-track-code" onclick="navigator.clipboard.writeText('${order.order_token}').then(()=>this.textContent='Copiado!').catch(()=>{})">${esc(order.order_token)}</div><div style="margin-top:8px;"><a href="${trackUrl}" target="_blank" rel="noopener" style="color:#5ca8e0; font-size:0.78rem; text-decoration:none;">Abrir pagina de rastreio do cliente →</a></div></div>` : ''}
-      <div class="kd-section" id="kd-batch-section">${order.delivery_batch_id ? '<div class="kd-section-title">Lote de entrega</div><div id="kd-batch-loading" class="kd-value" style="text-align:left;color:#777;">Carregando dados do lote...</div>' : '<div class="kd-section-title">Lote de entrega</div><div class="kd-value" style="text-align:left;color:#777;">Pedido sem lote associado.</div>'}</div>
-      ${prevOrders.length ? `<div class="kd-section"><div class="kd-section-title">Pedidos anteriores (${esc(order.phone)})</div>${prevOrders.slice(0, 5).map((prev) => `<div class="kd-prev-order" onclick="openOrderDetail(${prev.id})" style="cursor:pointer;"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="kd-prev-date">#${prev.id} — ${new Date(prev.created_at + 'Z').toLocaleDateString('pt-BR')}</span><span class="kd-prev-total">R$ ${parseFloat(prev.total).toFixed(2)}</span></div><span class="kd-status-badge" style="background:${(STATUS_COLORS[prev.status] || '#888')}22;color:${STATUS_COLORS[prev.status] || '#888'};border:1px solid ${(STATUS_COLORS[prev.status] || '#888')}44;margin-top:4px;font-size:0.65rem;">${STATUS_LABELS[prev.status] || prev.status}</span></div>`).join('')}</div>` : ''}
+      ${trackUrl ? `<div class="kd-section"><div class="kd-section-title">Codigo de rastreio</div><div class="kd-track-code" onclick="navigator.clipboard.writeText('${order.order_token}').then(()=>this.textContent='Copiado!').catch(()=>{})">${esc(order.order_token)}</div><div class="batch-link-wrap"><a href="${trackUrl}" target="_blank" rel="noopener" class="batch-link">Abrir pagina de rastreio do cliente →</a></div></div>` : ''}
+      <div class="kd-section" id="kd-batch-section">${order.delivery_batch_id ? '<div class="kd-section-title">Lote de entrega</div><div id="kd-batch-loading" class="kd-value kd-batch-loading">Carregando dados do lote...</div>' : '<div class="kd-section-title">Lote de entrega</div><div class="kd-value kd-batch-loading">Pedido sem lote associado.</div>'}</div>
+      ${prevOrders.length ? `<div class="kd-section"><div class="kd-section-title">Pedidos anteriores (${esc(order.phone)})</div>${prevOrders.slice(0, 5).map((prev) => `<div class="kd-prev-order clickable" onclick="openOrderDetail(${prev.id})"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="kd-prev-date">#${prev.id} — ${new Date(prev.created_at + 'Z').toLocaleDateString('pt-BR')}</span><span class="kd-prev-total">R$ ${parseFloat(prev.total).toFixed(2)}</span></div><span class="kd-status-badge" style="background:${(STATUS_COLORS[prev.status] || '#888')}22;color:${STATUS_COLORS[prev.status] || '#888'};border:1px solid ${(STATUS_COLORS[prev.status] || '#888')}44;margin-top:4px;font-size:0.65rem;">${STATUS_LABELS[prev.status] || prev.status}</span></div>`).join('')}</div>` : ''}
       <div class="kd-section">
         <div class="kd-section-title">Confirmacao WhatsApp</div>
         <div class="${isWaConfirmed(order.id) ? 'wa-check-row confirmed' : 'wa-check-row'}" onclick="toggleWaConfirmed(${order.id});">
@@ -1222,6 +1509,11 @@
     alert('O Kanban está desabilitado. Ative-o em Configurações no painel administrativo.');
     window.location.href = 'dashboard.html';
   } else {
+    syncKanbanTheme();
+    window.addEventListener('focus', syncKanbanTheme);
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'lc_admin_theme') syncKanbanTheme();
+    });
     Promise.all([loadDeliverySettings(), loadOrders()]).finally(() => {
       connectSSE();
       setInterval(() => render(), 60000);
