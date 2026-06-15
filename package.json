@@ -6,9 +6,16 @@
     "start": "npm --prefix backend start",
     "dev": "npm --prefix backend run dev",
     "migrate": "npm --prefix backend run migrate",
-    "hash-password": "npm --prefix backend run hash-password --"
+    "hash-password": "npm --prefix backend run hash-password --",
+    "demo:prepare-orders": "npm --prefix backend run prepare:presentation-orders",
+    "playwright:personas": "node scripts/playwright-personas.mjs",
+    "playwright:order-kanban": "node scripts/playwright-order-kanban.mjs",
+    "playwright:kanban-video": "node scripts/playwright-kanban-video.mjs"
   },
   "dependencies": {
     "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }

@@ -11,6 +11,7 @@ const router = express.Router();
 const VALID_BATCH_STATUSES = ['preparado', 'aceito_motoboy', 'liberado_cozinha'];
 const DRIVER_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 const DRIVER_FAILURE_REASONS = new Set(['cliente_ausente', 'endereco_incorreto', 'pedido_cancelado', 'outro']);
+const FOLLOWUP_STATES = new Set(['delayed', 'cancelled']);
 
 async function getTableColumns(conn, tableName) {
   try {
@@ -61,15 +62,41 @@ async function ensureDeliveryBatchSchema() {
   await ensureColumn(conn, 'orders', 'delivered_at', 'TEXT');
   await ensureColumn(conn, 'orders', 'delivery_attempted_at', 'TEXT');
   await ensureColumn(conn, 'orders', 'delivery_actor_name', "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn(conn, 'orders', 'delivery_followup_state', "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn(conn, 'orders', 'delivery_followup_updated_at', 'TEXT');
   await ensureColumn(conn, 'delivery_batches', 'current_order_id', 'INTEGER');
   await ensureColumn(conn, 'delivery_batches', 'driver_session_token', "TEXT NOT NULL DEFAULT ''");
   await ensureColumn(conn, 'delivery_batches', 'driver_session_expires_at', 'TEXT');
 
   await conn.exec(`
+    CREATE TABLE IF NOT EXISTS delivery_attempt_logs (
+      id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id              INTEGER NOT NULL,
+      delivery_batch_id     INTEGER,
+      attempt_action        TEXT NOT NULL DEFAULT '',
+      order_status_before   TEXT NOT NULL DEFAULT '',
+      order_status_after    TEXT NOT NULL DEFAULT '',
+      followup_state_before TEXT NOT NULL DEFAULT '',
+      followup_state_after  TEXT NOT NULL DEFAULT '',
+      actor_name            TEXT NOT NULL DEFAULT '',
+      reason                TEXT NOT NULL DEFAULT '',
+      note                  TEXT NOT NULL DEFAULT '',
+      customer_name         TEXT NOT NULL DEFAULT '',
+      address               TEXT NOT NULL DEFAULT '',
+      phone                 TEXT NOT NULL DEFAULT '',
+      payment_method        TEXT NOT NULL DEFAULT '',
+      order_total           REAL NOT NULL DEFAULT 0,
+      delivery_sequence     INTEGER,
+      attempted_at          TEXT NOT NULL DEFAULT (datetime('now'))
+    );
     CREATE INDEX IF NOT EXISTS idx_delivery_batches_public_token ON delivery_batches(public_token);
     CREATE INDEX IF NOT EXISTS idx_delivery_batches_status ON delivery_batches(batch_status);
     CREATE INDEX IF NOT EXISTS idx_orders_delivery_batch_id ON orders(delivery_batch_id);
     CREATE INDEX IF NOT EXISTS idx_orders_delivery_sequence ON orders(delivery_sequence);
+    CREATE INDEX IF NOT EXISTS idx_orders_delivery_followup_state ON orders(delivery_followup_state);
+    CREATE INDEX IF NOT EXISTS idx_delivery_attempt_logs_order ON delivery_attempt_logs(order_id);
+    CREATE INDEX IF NOT EXISTS idx_delivery_attempt_logs_batch ON delivery_attempt_logs(delivery_batch_id);
+    CREATE INDEX IF NOT EXISTS idx_delivery_attempt_logs_attempted_at ON delivery_attempt_logs(attempted_at);
   `);
 }
 
@@ -107,6 +134,10 @@ function normalizeResolvedStops(value) {
 function normalizeFailureReason(value) {
   const reason = String(value || '').trim().toLowerCase();
   return DRIVER_FAILURE_REASONS.has(reason) ? reason : '';
+}
+
+function normalizeFailureMode(value) {
+  return value === 'cancelled' ? 'cancelled' : 'delayed';
 }
 
 function parseSessionExpiry(value) {
@@ -148,6 +179,16 @@ async function getConfigValue(key) {
   return rows[0]?.value || '';
 }
 
+async function getDriverCancellationMode() {
+  const value = await getConfigValue('driverCancellationMode');
+  return value === 'admin_confirmation' ? 'admin_confirmation' : 'auto';
+}
+
+async function getDeliveryManagementEnabled() {
+  const value = String(await getConfigValue('deliveryManagementEnabled') || '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(value);
+}
+
 async function loadBatchByToken(token) {
   await ensureDeliveryBatchSchema();
   const [rows] = await db.execute(
@@ -169,7 +210,8 @@ async function loadBatchOrders(batchId) {
             delivery_sequence, created_at, updated_at,
             address_lat, address_lng, address_geocoded_at,
             delivery_failed_reason, delivery_failed_note,
-            delivered_at, delivery_attempted_at, delivery_actor_name
+            delivered_at, delivery_attempted_at, delivery_actor_name,
+            delivery_followup_state, delivery_followup_updated_at
        FROM orders
       WHERE delivery_batch_id = ?
       ORDER BY COALESCE(delivery_sequence, 999999) ASC, created_at ASC`,
@@ -186,8 +228,55 @@ async function loadBatchOrders(batchId) {
     deliveredAt: row.delivered_at,
     deliveryAttemptedAt: row.delivery_attempted_at,
     deliveryActorName: row.delivery_actor_name,
+    deliveryFollowupState: row.delivery_followup_state,
+    deliveryFollowupUpdatedAt: row.delivery_followup_updated_at,
     deliveryFailed: Boolean(row.delivery_failed_reason || row.delivery_failed_note || row.delivery_attempted_at),
   }));
+}
+
+async function loadAttemptLogsForBatch(batchId) {
+  const [rows] = await db.execute(
+    `SELECT id, order_id, delivery_batch_id, attempt_action,
+            order_status_before, order_status_after,
+            followup_state_before, followup_state_after,
+            actor_name, reason, note, customer_name, address,
+            phone, payment_method, order_total, delivery_sequence,
+            attempted_at
+       FROM delivery_attempt_logs
+      WHERE delivery_batch_id = ?
+      ORDER BY datetime(attempted_at) DESC, id DESC`,
+    [batchId]
+  );
+  return rows;
+}
+
+function groupAttemptLogsByOrder(rows) {
+  const map = new Map();
+  for (const row of rows || []) {
+    const orderId = Number(row.order_id);
+    if (!map.has(orderId)) {
+      map.set(orderId, []);
+    }
+    map.get(orderId).push({
+      id: Number(row.id),
+      action: row.attempt_action,
+      orderStatusBefore: row.order_status_before,
+      orderStatusAfter: row.order_status_after,
+      followupStateBefore: row.followup_state_before,
+      followupStateAfter: row.followup_state_after,
+      actorName: row.actor_name,
+      reason: row.reason,
+      note: row.note,
+      customerName: row.customer_name,
+      address: row.address,
+      phone: row.phone,
+      paymentMethod: row.payment_method,
+      orderTotal: Number(row.order_total || 0),
+      deliverySequence: row.delivery_sequence,
+      attemptedAt: row.attempted_at,
+    });
+  }
+  return map;
 }
 
 function sortBatchOrders(orders) {
@@ -198,27 +287,45 @@ function sortBatchOrders(orders) {
   });
 }
 
-function isOperationalFailure(order) {
-  return Boolean(
+function getFollowupState(order) {
+  const explicitState = String(order?.deliveryFollowupState ?? order?.delivery_followup_state ?? '').trim().toLowerCase();
+  if (FOLLOWUP_STATES.has(explicitState)) return explicitState;
+  if ((order?.status || '') === 'cancelado') return 'cancelled';
+  if (
     order?.deliveryFailed ||
     order?.delivery_failed_reason ||
     order?.delivery_failed_note ||
     order?.delivery_attempted_at ||
     order?.deliveryAttemptedAt
-  );
+  ) {
+    return 'delayed';
+  }
+  return '';
+}
+
+function isDeferredOrder(order) {
+  return FOLLOWUP_STATES.has(getFollowupState(order));
 }
 
 function isRouteEligible(order) {
   if (!order) return false;
   if (order.status === 'entregue' || order.status === 'cancelado') return false;
-  if (isOperationalFailure(order)) return false;
+  if (isDeferredOrder(order)) return false;
   return true;
 }
 
-function serializeRouteStop(order) {
+function isSelectableCurrentStop(order) {
+  if (!order) return false;
+  if (order.status === 'entregue') return false;
+  return true;
+}
+
+function serializeRouteStop(order, attemptHistory = []) {
   if (!order) return null;
   const lat = Number(order.addressLat ?? order.address_lat);
   const lng = Number(order.addressLng ?? order.address_lng);
+  const attempts = Array.isArray(attemptHistory) ? attemptHistory : [];
+  const lastAttempt = attempts[0] || null;
   return {
     orderId: Number(order.id),
     sequence: order.delivery_sequence ?? null,
@@ -231,6 +338,13 @@ function serializeRouteStop(order) {
     paymentMethod: order.payment || '',
     status: order.status || '',
     obs: order.obs || '',
+    followupState: getFollowupState(order),
+    attemptCount: attempts.length,
+    lastAttemptAt: lastAttempt?.attemptedAt || order.deliveryAttemptedAt || order.delivery_attempted_at || null,
+    lastAttemptAction: lastAttempt?.action || '',
+    lastAttemptReason: lastAttempt?.reason || order.deliveryFailedReason || order.delivery_failed_reason || '',
+    lastAttemptNote: lastAttempt?.note || order.deliveryFailedNote || order.delivery_failed_note || '',
+    attemptHistoryPreview: attempts.slice(0, 3),
   };
 }
 
@@ -292,26 +406,35 @@ function buildWazeCurrentUrl(stop) {
   return `https://waze.com/ul?q=${encodeURIComponent(stop.address)}&navigate=yes`;
 }
 
-function getRouteWindow(batchOrders, currentOrderId, limit = 3) {
+function getRouteWindow(batchOrders, currentOrderId, attemptMap = new Map(), limit = 3) {
   const ordered = sortBatchOrders(batchOrders);
   const eligible = ordered.filter(isRouteEligible);
+  const deferredOrders = ordered.filter(isDeferredOrder);
+  const availableOrders = ordered.filter((order) => isSelectableCurrentStop(order));
   if (!eligible.length) {
+    const selectedDeferred = (Number(currentOrderId) || null)
+      ? availableOrders.find((order) => Number(order.id) === Number(currentOrderId))
+      : null;
+    const deferredStops = deferredOrders
+      .map((order) => serializeRouteStop(order, attemptMap.get(Number(order.id)) || []))
+      .filter(Boolean);
     return {
-      currentOrderId: null,
-      currentStop: null,
+      currentOrderId: selectedDeferred ? Number(selectedDeferred.id) : null,
+      currentStop: selectedDeferred ? serializeRouteStop(selectedDeferred, attemptMap.get(Number(selectedDeferred.id)) || []) : null,
       nextStops: [],
       routeWindow: [],
+      deferredStops,
       links: {
-        googleMapsCurrent: '',
-        googleMapsWindow: '',
-        wazeCurrent: '',
+        googleMapsCurrent: selectedDeferred ? buildGoogleMapsCurrentUrl(selectedDeferred) : '',
+        googleMapsWindow: selectedDeferred ? buildGoogleMapsCurrentUrl(selectedDeferred) : '',
+        wazeCurrent: selectedDeferred ? buildWazeCurrentUrl(selectedDeferred) : '',
       },
     };
   }
 
   const normalizedCurrentId = Number(currentOrderId) || null;
   let currentOrder = normalizedCurrentId
-    ? eligible.find((order) => Number(order.id) === normalizedCurrentId)
+    ? availableOrders.find((order) => Number(order.id) === normalizedCurrentId)
     : null;
 
   if (!currentOrder && normalizedCurrentId) {
@@ -326,15 +449,23 @@ function getRouteWindow(batchOrders, currentOrderId, limit = 3) {
   }
 
   const currentIndex = eligible.findIndex((order) => Number(order.id) === Number(currentOrder.id));
-  const nextOrders = eligible.slice(currentIndex + 1, currentIndex + 1 + Math.max(0, Number(limit) || 3));
-  const routeWindow = [currentOrder, ...nextOrders].map(serializeRouteStop).filter(Boolean);
+  const nextOrders = currentIndex >= 0
+    ? eligible.slice(currentIndex + 1, currentIndex + 1 + Math.max(0, Number(limit) || 3))
+    : eligible.slice(0, Math.max(0, Number(limit) || 3));
+  const routeWindow = [currentOrder, ...nextOrders]
+    .map((order) => serializeRouteStop(order, attemptMap.get(Number(order.id)) || []))
+    .filter(Boolean);
   const currentStop = routeWindow[0] || null;
+  const deferredStops = deferredOrders
+    .map((order) => serializeRouteStop(order, attemptMap.get(Number(order.id)) || []))
+    .filter(Boolean);
 
   return {
     currentOrderId: currentStop?.orderId || null,
     currentStop,
     nextStops: routeWindow.slice(1),
     routeWindow,
+    deferredStops,
     links: {
       googleMapsCurrent: buildGoogleMapsCurrentUrl(currentStop),
       googleMapsWindow: buildGoogleMapsWindowUrl(routeWindow),
@@ -345,7 +476,10 @@ function getRouteWindow(batchOrders, currentOrderId, limit = 3) {
 
 async function serializeBatch(batch) {
   const orders = await loadBatchOrders(batch.id);
-  const routeWindow = getRouteWindow(orders, batch.current_order_id, 3);
+  const attemptMap = groupAttemptLogsByOrder(await loadAttemptLogsForBatch(batch.id));
+  const routeWindow = getRouteWindow(orders, batch.current_order_id, attemptMap, 3);
+  const driverCancellationMode = await getDriverCancellationMode();
+  const deliveryManagementEnabled = await getDeliveryManagementEnabled();
   return {
     id: batch.id,
     batchCode: batch.batch_code,
@@ -368,7 +502,9 @@ async function serializeBatch(batch) {
     currentStop: routeWindow.currentStop,
     nextStops: routeWindow.nextStops,
     routeWindow: routeWindow.routeWindow,
+    deferredStops: routeWindow.deferredStops,
     links: routeWindow.links,
+    operationConfig: { driverCancellationMode, deliveryManagementEnabled },
     orders,
   };
 }
@@ -411,8 +547,10 @@ async function requireDriverSession(req, token) {
 
 async function loadBatchOrderById(batchId, orderId) {
   const [rows] = await db.execute(
-    `SELECT id, status, delivery_sequence, delivery_failed_reason, delivery_failed_note,
-            delivered_at, delivery_attempted_at
+    `SELECT id, customer, address, phone, payment, total, obs, status, delivery_sequence,
+            created_at, updated_at, delivery_failed_reason, delivery_failed_note,
+            delivered_at, delivery_attempted_at, delivery_actor_name,
+            delivery_followup_state, delivery_followup_updated_at
        FROM orders
       WHERE delivery_batch_id = ? AND id = ?`,
     [batchId, orderId]
@@ -423,14 +561,48 @@ async function loadBatchOrderById(batchId, orderId) {
 async function nextOpenOrderId(conn, batchId, currentOrderId) {
   const rows = await conn.all(
     `SELECT id, status, delivery_sequence, created_at,
-            delivery_failed_reason, delivery_failed_note, delivery_attempted_at
+            delivery_failed_reason, delivery_failed_note, delivery_attempted_at,
+            delivery_followup_state
        FROM orders
       WHERE delivery_batch_id = ?
       ORDER BY COALESCE(delivery_sequence, 999999) ASC, created_at ASC`,
     [batchId]
   );
 
-  return getRouteWindow(rows, currentOrderId, 3).currentOrderId || null;
+  return getRouteWindow(rows, currentOrderId, new Map(), 3).currentOrderId || null;
+}
+
+async function insertAttemptLog(conn, { order, batchId, action, actorName, reason, note, nextStatus, nextFollowupState }) {
+  const beforeStatus = String(order.status || '');
+  const beforeFollowupState = getFollowupState(order);
+  await conn.run(
+    `INSERT INTO delivery_attempt_logs (
+        order_id, delivery_batch_id, attempt_action,
+        order_status_before, order_status_after,
+        followup_state_before, followup_state_after,
+        actor_name, reason, note, customer_name,
+        address, phone, payment_method, order_total,
+        delivery_sequence, attempted_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    [
+      Number(order.id),
+      batchId ? Number(batchId) : null,
+      action,
+      beforeStatus,
+      nextStatus,
+      beforeFollowupState,
+      nextFollowupState,
+      actorName || '',
+      reason || '',
+      note || '',
+      order.customer || '',
+      order.address || '',
+      order.phone || '',
+      order.payment || '',
+      Number(order.total || 0),
+      order.delivery_sequence ?? null,
+    ]
+  );
 }
 
 async function nextBatchCode(conn) {
@@ -465,6 +637,10 @@ router.post('/prepare', requireAdmin, async (req, res) => {
 
   try {
     await ensureDeliveryBatchSchema();
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     const configuredOrigin = await getConfigValue('restaurantOriginAddress');
     const googleMapsApiKey = String(process.env.GOOGLE_MAPS_API_KEY || '').trim();
 
@@ -577,6 +753,10 @@ router.post('/public/:token/accept', async (req, res) => {
   }
 
   try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     const batch = await loadBatchByToken(token);
     if (!batch) return res.status(404).json({ error: 'Lote não encontrado.' });
     if (!VALID_BATCH_STATUSES.includes(batch.batch_status)) {
@@ -637,6 +817,10 @@ router.post('/public/:token/session', async (req, res) => {
   }
 
   try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     const batch = await loadBatchByToken(token);
     if (!batch) return res.status(404).json({ error: 'Lote não encontrado.' });
     if (!batch.driver_name || !batch.driver_whatsapp || !batch.vehicle_plate) {
@@ -667,6 +851,10 @@ router.post('/:id/confirm-kitchen', requireAdmin, async (req, res) => {
   if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });
 
   try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     await ensureDeliveryBatchSchema();
     const [rows] = await db.execute(
       `SELECT id, batch_code, public_token, batch_status
@@ -734,6 +922,10 @@ router.get('/public/:token', async (req, res) => {
   }
 
   try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     const batch = await loadBatchByToken(token);
     if (!batch) return res.status(404).json({ error: 'Lote não encontrado.' });
     res.json(await serializeBatch(batch));
@@ -755,6 +947,10 @@ router.patch('/public/:token/current-stop', async (req, res) => {
   }
 
   try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
     const session = await requireDriverSession(req, token);
     if (session.error) {
       return res.status(session.error.status).json(session.error.body);
@@ -765,17 +961,54 @@ router.patch('/public/:token/current-stop', async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Pedido não pertence a este lote.' });
     }
-    if (!isRouteEligible(order)) {
-      return res.status(400).json({ error: 'A parada informada não está disponível como próxima entrega do motoboy.' });
+    if (!isSelectableCurrentStop(order)) {
+      return res.status(400).json({ error: 'A parada informada não está disponível para seleção.' });
     }
 
-    await db.execute(
-      `UPDATE delivery_batches
-          SET current_order_id = ?,
-              updated_at = datetime('now')
-        WHERE id = ?`,
-      [orderId, batch.id]
-    );
+    const conn = await db.raw();
+    await conn.exec('BEGIN');
+    try {
+      const followupState = getFollowupState(order);
+      if (followupState) {
+        const nextStatus = order.status === 'cancelado' ? 'a_caminho' : order.status;
+        await conn.run(
+          `UPDATE orders
+              SET status = ?,
+                  delivery_followup_state = '',
+                  delivery_followup_updated_at = datetime('now'),
+                  delivery_failed_reason = '',
+                  delivery_failed_note = '',
+                  delivery_attempted_at = NULL,
+                  delivered_at = NULL,
+                  updated_at = datetime('now')
+            WHERE id = ?`,
+          [nextStatus, orderId]
+        );
+        await insertAttemptLog(conn, {
+          order,
+          batchId: batch.id,
+          action: 'reopened',
+          actorName: batch.driver_name || '',
+          reason: '',
+          note: '',
+          nextStatus,
+          nextFollowupState: '',
+        });
+      }
+
+      await conn.run(
+        `UPDATE delivery_batches
+            SET current_order_id = ?,
+                updated_at = datetime('now')
+          WHERE id = ?`,
+        [orderId, batch.id]
+      );
+
+      await conn.exec('COMMIT');
+    } catch (innerErr) {
+      await conn.exec('ROLLBACK');
+      throw innerErr;
+    }
 
     const updated = await loadBatchByToken(token);
     const serialized = await serializeBatch(updated);
@@ -791,6 +1024,7 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
   const orderId = parsePositiveId(req.params.orderId);
   const action = String(req.body.action || '').trim().toLowerCase();
   const reason = normalizeFailureReason(req.body.reason);
+  const failureMode = normalizeFailureMode(req.body.failureMode);
   const note = String(req.body.note || '').trim().slice(0, 280);
   const shouldAdvance = req.body.advance !== false;
 
@@ -822,11 +1056,8 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Pedido não pertence a este lote.' });
     }
-    if (order.status === 'cancelado') {
-      return res.status(400).json({ error: 'Pedido cancelado não pode ser atualizado pelo motoboy.' });
-    }
-
     const actorName = batch.driver_name || '';
+    const driverCancellationMode = await getDriverCancellationMode();
     const conn = await db.raw();
     await conn.exec('BEGIN');
     try {
@@ -839,32 +1070,66 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
                     delivery_failed_reason = '',
                     delivery_failed_note = '',
                     delivery_attempted_at = NULL,
+                    delivery_followup_state = '',
+                    delivery_followup_updated_at = datetime('now'),
                     delivery_actor_name = ?,
                     updated_at = datetime('now')
               WHERE id = ?`,
             [actorName, orderId]
           );
+          await insertAttemptLog(conn, {
+            order,
+            batchId: batch.id,
+            action: 'delivered',
+            actorName,
+            reason: '',
+            note,
+            nextStatus: 'entregue',
+            nextFollowupState: '',
+          });
         }
       } else {
+        const effectiveNote =
+          failureMode === 'cancelled' && driverCancellationMode === 'admin_confirmation'
+            ? ['Cancelamento pendente de confirmação do admin.', note].filter(Boolean).join(' ')
+            : note;
         const alreadySameFailure =
           order.status === 'a_caminho' &&
           order.delivery_failed_reason === reason &&
-          order.delivery_failed_note === note &&
+          order.delivery_failed_note === effectiveNote &&
           Boolean(order.delivery_attempted_at);
 
         if (!alreadySameFailure) {
+          const nextStatus = failureMode === 'cancelled' && driverCancellationMode === 'auto'
+            ? 'cancelado'
+            : 'a_caminho';
+          const nextFollowupState = failureMode === 'cancelled' && driverCancellationMode === 'auto'
+            ? 'cancelled'
+            : 'delayed';
           await conn.run(
             `UPDATE orders
-                SET status = 'a_caminho',
+                SET status = ?,
                     delivery_failed_reason = ?,
                     delivery_failed_note = ?,
                     delivery_attempted_at = datetime('now'),
                     delivered_at = NULL,
+                    delivery_followup_state = ?,
+                    delivery_followup_updated_at = datetime('now'),
                     delivery_actor_name = ?,
                     updated_at = datetime('now')
               WHERE id = ?`,
-            [reason, note, actorName, orderId]
+            [nextStatus, reason, effectiveNote, nextFollowupState, actorName, orderId]
           );
+          await insertAttemptLog(conn, {
+            order,
+            batchId: batch.id,
+            action: nextFollowupState === 'cancelled' ? 'cancelled' : 'delayed',
+            actorName,
+            reason,
+            note: effectiveNote,
+            nextStatus,
+            nextFollowupState,
+          });
         }
       }
 

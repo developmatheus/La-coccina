@@ -132,6 +132,7 @@ async function buildKanbanOrdersQuery() {
     orderCol('delivery_attempted_at', 'NULL'),
     orderCol('delivered_at', 'NULL'),
     orderCol('delivery_actor_name', "''"),
+    orderCol('delivery_followup_state', "''"),
     hasDeliveryJoin ? 'b.batch_code AS delivery_batch_code' : "'' AS delivery_batch_code",
     hasDeliveryJoin ? 'b.public_token AS delivery_batch_public_token' : "'' AS delivery_batch_public_token",
     hasDeliveryJoin ? 'b.batch_status AS delivery_batch_status' : "'' AS delivery_batch_status",
@@ -167,6 +168,108 @@ function compareOrdersForKanban(a, b) {
 
 function generateToken(id) {
   return `${id}-${crypto.randomBytes(5).toString('hex')}`;
+}
+
+function normalizeFollowupState(value) {
+  const state = String(value || '').trim().toLowerCase();
+  return ['delayed', 'cancelled'].includes(state) ? state : '';
+}
+
+function parseDateBoundary(value, endOfDay = false) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return `${raw} ${endOfDay ? '23:59:59' : '00:00:00'}`;
+  }
+  return raw;
+}
+
+function escapeLike(value) {
+  return String(value || '').replace(/[%_]/g, '\\$&');
+}
+
+function buildOrderTimeSeries(rows, field, format = 'day') {
+  const map = new Map();
+  for (const row of rows) {
+    const raw = String(row[field] || '');
+    if (!raw) continue;
+    const key = format === 'hour' ? raw.slice(0, 13) : raw.slice(0, 10);
+    map.set(key, (map.get(key) || 0) + Number(row.total || 0));
+  }
+  return Array.from(map.entries())
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+    .map(([label, value]) => ({ label, value: Number(value.toFixed(2)) }));
+}
+
+function buildCountSeries(rows, field, format = 'day') {
+  const map = new Map();
+  for (const row of rows) {
+    const raw = String(row[field] || '');
+    if (!raw) continue;
+    const key = format === 'hour' ? raw.slice(0, 13) : raw.slice(0, 10);
+    map.set(key, (map.get(key) || 0) + 1);
+  }
+  return Array.from(map.entries())
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+    .map(([label, count]) => ({ label, count }));
+}
+
+function aggregateByKey(rows, keySelector, valueSelector = (row) => Number(row.total || 0)) {
+  const map = new Map();
+  for (const row of rows) {
+    const key = keySelector(row);
+    map.set(key, (map.get(key) || 0) + valueSelector(row));
+  }
+  return Array.from(map.entries())
+    .map(([label, value]) => ({ label, value: Number(value.toFixed(2)) }))
+    .sort((a, b) => b.value - a.value);
+}
+
+function summarizeTopProducts(rows) {
+  const productMap = new Map();
+  for (const row of rows) {
+    const items = parseOrderItems(row.items);
+    for (const item of items) {
+      const name = String(item?.name || item?.productName || 'Produto sem nome').trim() || 'Produto sem nome';
+      const qty = Math.max(1, Number(item?.qty || item?.quantity || 1) || 1);
+      const revenue = Number(item?.price || item?.unitPrice || 0) * qty;
+      const current = productMap.get(name) || { label: name, quantity: 0, revenue: 0 };
+      current.quantity += qty;
+      current.revenue += revenue;
+      productMap.set(name, current);
+    }
+  }
+  return Array.from(productMap.values())
+    .map((item) => ({ ...item, revenue: Number(item.revenue.toFixed(2)) }))
+    .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
+    .slice(0, 10);
+}
+
+function buildAttemptMap(rows) {
+  const map = new Map();
+  for (const row of rows || []) {
+    const orderId = Number(row.order_id);
+    if (!map.has(orderId)) {
+      map.set(orderId, []);
+    }
+    map.get(orderId).push({
+      id: Number(row.id),
+      action: row.attempt_action,
+      reason: row.reason,
+      note: row.note,
+      attemptedAt: row.attempted_at,
+      actorName: row.actor_name,
+      orderStatusBefore: row.order_status_before,
+      orderStatusAfter: row.order_status_after,
+      followupStateBefore: row.followup_state_before,
+      followupStateAfter: row.followup_state_after,
+    });
+  }
+  return map;
+}
+
+function getLatestAttempt(attempts) {
+  return Array.isArray(attempts) && attempts.length ? attempts[0] : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -266,17 +369,298 @@ router.get('/', requireAdmin, async (_req, res) => {
   }
 });
 
-// Admin — histórico (entregues + cancelados)
-router.get('/history', requireAdmin, async (_req, res) => {
+router.get('/followup', requireAdmin, async (req, res) => {
+  try {
+    const bucket = String(req.query.bucket || 'delivered').trim().toLowerCase() === 'not_delivered'
+      ? 'not_delivered'
+      : 'delivered';
+    const search = String(req.query.search || '').trim();
+    const followupState = normalizeFollowupState(req.query.followupState);
+    const status = normalizeStatusInput(req.query.status);
+    const from = parseDateBoundary(req.query.from, false);
+    const to = parseDateBoundary(req.query.to, true);
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 30));
+    const offset = (page - 1) * limit;
+    const where = [];
+    const params = [];
+
+    if (bucket === 'delivered') {
+      where.push(`o.status = 'entregue'`);
+    } else {
+      where.push(`(
+        o.delivery_followup_state IN ('delayed', 'cancelled')
+        OR o.status = 'cancelado'
+        OR o.delivery_failed_reason <> ''
+        OR o.delivery_failed_note <> ''
+        OR o.delivery_attempted_at IS NOT NULL
+      )`);
+    }
+    if (followupState) {
+      where.push('o.delivery_followup_state = ?');
+      params.push(followupState);
+    }
+    if (status && VALID_STATUSES.includes(status)) {
+      where.push('o.status = ?');
+      params.push(status);
+    }
+    if (from) {
+      where.push('o.created_at >= ?');
+      params.push(from);
+    }
+    if (to) {
+      where.push('o.created_at <= ?');
+      params.push(to);
+    }
+    if (search) {
+      const like = `%${escapeLike(search)}%`;
+      where.push(`(
+        o.customer LIKE ? ESCAPE '\\'
+        OR o.address LIKE ? ESCAPE '\\'
+        OR o.phone LIKE ? ESCAPE '\\'
+        OR CAST(o.id AS TEXT) LIKE ? ESCAPE '\\'
+      )`);
+      params.push(like, like, like, like);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const [countRows] = await db.execute(
+      `SELECT COUNT(*) AS total
+         FROM orders o
+         ${whereSql}`,
+      params
+    );
+    const total = Number(countRows[0]?.total || 0);
+    const [rows] = await db.execute(
+      `SELECT o.id, o.customer, o.address, o.phone, o.payment, o.total, o.status,
+              o.created_at, o.updated_at, o.delivery_failed_reason, o.delivery_failed_note,
+              o.delivery_attempted_at, o.delivered_at, o.delivery_actor_name,
+              o.delivery_followup_state, b.batch_code, b.driver_name
+         FROM orders o
+         LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
+         ${whereSql}
+        ORDER BY COALESCE(o.delivered_at, o.delivery_attempted_at, o.updated_at, o.created_at) DESC
+        LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+    const orderIds = rows.map((row) => Number(row.id)).filter(Boolean);
+    let attemptsMap = new Map();
+    if (orderIds.length) {
+      const placeholders = orderIds.map(() => '?').join(', ');
+      const [attemptRows] = await db.execute(
+        `SELECT id, order_id, attempt_action, reason, note, attempted_at, actor_name,
+                order_status_before, order_status_after, followup_state_before, followup_state_after
+           FROM delivery_attempt_logs
+          WHERE order_id IN (${placeholders})
+          ORDER BY datetime(attempted_at) DESC, id DESC`,
+        orderIds
+      );
+      attemptsMap = buildAttemptMap(attemptRows);
+    }
+    res.json({
+      total,
+      page,
+      limit,
+      items: rows.map((row) => {
+        const attempts = attemptsMap.get(Number(row.id)) || [];
+        const latestAttempt = getLatestAttempt(attempts);
+        return {
+          id: Number(row.id),
+          customer: row.customer,
+          address: row.address,
+          phone: row.phone,
+          payment: row.payment,
+          total: Number(row.total || 0),
+          status: row.status,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+          deliveredAt: row.delivered_at,
+          deliveryAttemptedAt: row.delivery_attempted_at,
+          deliveryFailedReason: row.delivery_failed_reason,
+          deliveryFailedNote: row.delivery_failed_note,
+          deliveryActorName: row.delivery_actor_name,
+          deliveryFollowupState: normalizeFollowupState(row.delivery_followup_state),
+          batchCode: row.batch_code || '',
+          driverName: row.driver_name || '',
+          attemptsCount: attempts.length,
+          latestAttempt,
+        };
+      }),
+    });
+  } catch (err) {
+    console.error('Erro ao buscar follow-up:', err.message);
+    res.status(500).json({ error: 'Erro ao buscar follow-up' });
+  }
+});
+
+router.get('/:id/delivery-attempts', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido' });
+
   try {
     const [rows] = await db.execute(
-      `SELECT id, customer, total, status, created_at, updated_at
-       FROM orders WHERE status IN ('entregue', 'cancelado')
-       ORDER BY updated_at DESC LIMIT 100`
+      `SELECT id, order_id, delivery_batch_id, attempt_action, reason, note, actor_name,
+              order_status_before, order_status_after,
+              followup_state_before, followup_state_after,
+              customer_name, address, phone, payment_method, order_total,
+              delivery_sequence, attempted_at
+         FROM delivery_attempt_logs
+        WHERE order_id = ?
+        ORDER BY datetime(attempted_at) DESC, id DESC`,
+      [id]
     );
-    res.json(rows);
+    res.json(rows.map((row) => ({
+      id: Number(row.id),
+      orderId: Number(row.order_id),
+      batchId: row.delivery_batch_id ? Number(row.delivery_batch_id) : null,
+      action: row.attempt_action,
+      reason: row.reason,
+      note: row.note,
+      actorName: row.actor_name,
+      orderStatusBefore: row.order_status_before,
+      orderStatusAfter: row.order_status_after,
+      followupStateBefore: row.followup_state_before,
+      followupStateAfter: row.followup_state_after,
+      customerName: row.customer_name,
+      address: row.address,
+      phone: row.phone,
+      paymentMethod: row.payment_method,
+      orderTotal: Number(row.order_total || 0),
+      deliverySequence: row.delivery_sequence,
+      attemptedAt: row.attempted_at,
+    })));
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar histórico' });
+    console.error('Erro ao buscar tentativas da entrega:', err.message);
+    res.status(500).json({ error: 'Erro ao buscar tentativas da entrega' });
+  }
+});
+
+router.get('/finance/summary', requireAdmin, async (req, res) => {
+  try {
+    const from = parseDateBoundary(req.query.from, false);
+    const to = parseDateBoundary(req.query.to, true);
+    const params = [];
+    const where = [];
+    if (from) {
+      where.push('o.created_at >= ?');
+      params.push(from);
+    }
+    if (to) {
+      where.push('o.created_at <= ?');
+      params.push(to);
+    }
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const [rows] = await db.execute(
+      `SELECT o.id, o.customer, o.payment, o.total, o.status, o.items,
+              o.created_at, o.updated_at, o.delivered_at, o.delivery_followup_state
+         FROM orders o
+         ${whereSql}
+        ORDER BY o.created_at DESC`,
+      params
+    );
+
+    const normalizedRows = rows.map((row) => ({ ...row, total: Number(row.total || 0) }));
+    const grossSales = normalizedRows.reduce((sum, row) => sum + row.total, 0);
+    const deliveredRows = normalizedRows.filter((row) => row.status === 'entregue');
+    const cancelledRows = normalizedRows.filter((row) => row.status === 'cancelado');
+    const operationalRows = normalizedRows.filter((row) => !['entregue', 'cancelado'].includes(row.status));
+    const deliveredRevenue = deliveredRows.reduce((sum, row) => sum + row.total, 0);
+    const cancelledValue = cancelledRows.reduce((sum, row) => sum + row.total, 0);
+    const openOperationalValue = operationalRows.reduce((sum, row) => sum + row.total, 0);
+    const averageTicket = normalizedRows.length ? grossSales / normalizedRows.length : 0;
+
+    res.json({
+      grossSales: Number(grossSales.toFixed(2)),
+      deliveredRevenue: Number(deliveredRevenue.toFixed(2)),
+      cancelledValue: Number(cancelledValue.toFixed(2)),
+      openOperationalValue: Number(openOperationalValue.toFixed(2)),
+      ordersCount: normalizedRows.length,
+      deliveredCount: deliveredRows.length,
+      cancelledCount: cancelledRows.length,
+      averageTicket: Number(averageTicket.toFixed(2)),
+      paymentBreakdown: aggregateByKey(normalizedRows, (row) => row.payment || 'Nao informado'),
+      statusBreakdown: aggregateByKey(normalizedRows, (row) => STATUS_LABEL[row.status] || row.status, () => 1)
+        .map((item) => ({ ...item, count: item.value, value: undefined })),
+      dailySeries: buildOrderTimeSeries(normalizedRows, 'created_at', 'day'),
+      hourlySeries: buildCountSeries(normalizedRows, 'created_at', 'hour'),
+      topCustomers: aggregateByKey(normalizedRows, (row) => row.customer || 'Cliente nao informado')
+        .slice(0, 10),
+      topProducts: summarizeTopProducts(normalizedRows),
+    });
+  } catch (err) {
+    console.error('Erro ao montar resumo financeiro:', err.message);
+    res.status(500).json({ error: 'Erro ao montar resumo financeiro' });
+  }
+});
+
+router.get('/finance/details', requireAdmin, async (req, res) => {
+  try {
+    const from = parseDateBoundary(req.query.from, false);
+    const to = parseDateBoundary(req.query.to, true);
+    const search = String(req.query.search || '').trim();
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+    const offset = (page - 1) * limit;
+    const params = [];
+    const where = [];
+    if (from) {
+      where.push('o.created_at >= ?');
+      params.push(from);
+    }
+    if (to) {
+      where.push('o.created_at <= ?');
+      params.push(to);
+    }
+    if (search) {
+      const like = `%${escapeLike(search)}%`;
+      where.push(`(
+        o.customer LIKE ? ESCAPE '\\'
+        OR o.address LIKE ? ESCAPE '\\'
+        OR o.payment LIKE ? ESCAPE '\\'
+        OR CAST(o.id AS TEXT) LIKE ? ESCAPE '\\'
+      )`);
+      params.push(like, like, like, like);
+    }
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const [countRows] = await db.execute(
+      `SELECT COUNT(*) AS total
+         FROM orders o
+         ${whereSql}`,
+      params
+    );
+    const total = Number(countRows[0]?.total || 0);
+    const [rows] = await db.execute(
+      `SELECT o.id, o.customer, o.payment, o.total, o.status, o.created_at,
+              o.updated_at, o.delivered_at, o.delivery_followup_state,
+              b.batch_code, b.driver_name
+         FROM orders o
+         LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
+         ${whereSql}
+        ORDER BY o.created_at DESC
+        LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+    res.json({
+      total,
+      page,
+      limit,
+      items: rows.map((row) => ({
+        id: Number(row.id),
+        customer: row.customer,
+        payment: row.payment,
+        total: Number(row.total || 0),
+        status: row.status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        deliveredAt: row.delivered_at,
+        deliveryFollowupState: normalizeFollowupState(row.delivery_followup_state),
+        batchCode: row.batch_code || '',
+        driverName: row.driver_name || '',
+      })),
+    });
+  } catch (err) {
+    console.error('Erro ao listar detalhes financeiros:', err.message);
+    res.status(500).json({ error: 'Erro ao listar detalhes financeiros' });
   }
 });
 

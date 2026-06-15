@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Coccina — Dashboard Admin</title>
+  <title>La Coccina — Cadastros Admin</title>
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/imagens/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="../assets/imagens/favicon-192.png">
   <link rel="apple-touch-icon" href="../assets/imagens/apple-touch-icon.png">
@@ -1527,8 +1527,8 @@
         </div>
         <div class="admin-header-actions">
           <a id="btn-kanban-link" class="admin-utility-btn" href="kanban.html" style="display:none;">📋 Kanban</a>
-          <a class="admin-utility-btn current-page" href="dashboard.html" aria-current="page">📊 Dashboard</a>
-          <a class="admin-utility-btn" href="cadastros.html">🧾 Cadastros</a>
+          <a class="admin-utility-btn" href="dashboard.html">📊 Dashboard</a>
+          <a class="admin-utility-btn current-page" href="cadastros.html" aria-current="page">🧾 Cadastros</a>
           <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
           <button id="btn-tool-panel" class="admin-utility-btn" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
           <button onclick="toggleRestaurantStatus()" id="status-btn">
@@ -1541,139 +1541,59 @@
     <div class="card-admin">
       <div class="products-toolbar">
         <div>
-          <h2>📊 Dashboard Operacional</h2>
-          <p>Esta página concentra follow-up de atendimentos e visão financeiro/contábil. A manutenção de produtos e acompanhamentos agora fica em <strong>Cadastros</strong>.</p>
+          <h2>🧾 Manutenção de Cadastros</h2>
+          <p>Esta página concentra o cardápio administrativo e o catálogo global de acompanhamentos. Indicadores operacionais e financeiros ficam em <strong>Dashboard</strong>.</p>
         </div>
       </div>
     </div>
 
-    <div class="card-admin products-card">
-      <div class="ops-card-body">
-        <div class="ops-toolbar">
-          <div>
-            <h2>Follow-up de Atendimentos</h2>
-            <p>Visão operacional das entregas concluídas e das exceções de entrega com histórico de tentativas.</p>
-          </div>
-          <div class="ops-filters">
-            <div class="ops-toggle-group" role="group" aria-label="Buckets do follow-up">
-              <button type="button" id="followup-bucket-delivered" class="active" onclick="setFollowupBucket('delivered')">Entregues</button>
-              <button type="button" id="followup-bucket-not-delivered" onclick="setFollowupBucket('not_delivered')">Nao entregues</button>
-            </div>
-            <input type="date" id="followup-from" onchange="applyFollowupFilters()">
-            <input type="date" id="followup-to" onchange="applyFollowupFilters()">
-            <input type="search" id="followup-search" placeholder="Buscar pedido, cliente ou endereco" oninput="applyFollowupFilters(true)">
-            <select id="followup-state-filter" onchange="applyFollowupFilters()">
-              <option value="">Todos os subtipos</option>
-              <option value="delayed">Adiados</option>
-              <option value="cancelled">Cancelados</option>
-            </select>
-          </div>
+    <!-- Catálogo de Acompanhamentos -->
+    <div id="card-acompanhamentos" class="card-admin">
+      <div class="products-toolbar">
+        <div>
+          <h2>🥗 Catálogo de Acompanhamentos</h2>
+          <p>Registros globais reutilizáveis. Associe ao prato pelo botão de acompanhamentos na lista de produtos.</p>
         </div>
+      </div>
 
-        <div class="ops-grid-metrics">
-          <div class="ops-metric-card"><span>Total no bucket</span><strong id="followup-total">-</strong></div>
-          <div class="ops-metric-card"><span>Valor acumulado</span><strong id="followup-total-value">-</strong></div>
-          <div class="ops-metric-card"><span>Tentativas registradas</span><strong id="followup-attempts-total">-</strong></div>
-          <div class="ops-metric-card"><span>Cancelamentos</span><strong id="followup-cancelled-total">-</strong></div>
-        </div>
+      <form class="acc-add-form" onsubmit="event.preventDefault(); addAccompaniment()">
+        <input type="text"   id="acc-name"        placeholder="Nome (ex: Arroz branco)" required>
+        <input type="number" id="acc-extra-price"  placeholder="Preço extra" step="0.01" min="0" value="0">
+        <input type="number" id="acc-sort"         placeholder="Ordem" min="0" value="0">
+        <button type="submit" class="btn-tool-add">Adicionar</button>
+      </form>
 
-        <div class="table-scroll">
-          <table class="ops-table">
-            <thead>
-              <tr>
-                <th>Pedido</th>
-                <th>Cliente</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Lote</th>
-                <th>Ultima tentativa</th>
-                <th>Tentativas</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="followup-body">
-              <tr><td colspan="8" class="ops-empty">Carregando follow-up...</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="table-scroll" style="margin-top:12px;">
+        <table class="acc-table">
+          <thead>
+            <tr><th style="width:32px"></th><th>Nome</th><th>Preço extra</th><th>Status</th><th style="width:40px"></th></tr>
+          </thead>
+          <tbody id="acc-catalog-body">
+            <tr><td colspan="5" class="acc-empty">Nenhum acompanhamento cadastrado ainda.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <div class="card-admin products-card">
-      <div class="ops-card-body">
-        <div class="ops-toolbar">
+      <div class="products-layout">
+        <div class="products-toolbar">
           <div>
-            <h2>Financeiro / Contabil</h2>
-            <p>KPIs, breakdowns e detalhe de vendas por periodo com base nos pedidos salvos no sistema.</p>
+            <h2>Cardápio do Admin</h2>
+            <p>Escolha a forma de visualizar o catálogo conforme a operação: mais visual ou mais compacta.</p>
           </div>
-          <div class="ops-filters">
-            <input type="date" id="finance-from" onchange="applyFinanceFilters()">
-            <input type="date" id="finance-to" onchange="applyFinanceFilters()">
-            <input type="search" id="finance-search" placeholder="Buscar cliente, pagamento ou pedido" oninput="applyFinanceFilters(true)">
+          <div class="products-toolbar-meta">
+            <span class="products-pill" id="products-total-badge">Carregando produtos...</span>
+            <div class="product-view-switch" role="group" aria-label="Opções de visualização do catálogo">
+              <button type="button" class="product-view-btn" data-view-mode="grid" onclick="setProductViewMode('grid')">📦 Cards</button>
+              <button type="button" class="product-view-btn" data-view-mode="list" onclick="setProductViewMode('list')">📋 Lista</button>
+              <button type="button" class="product-view-btn" data-view-mode="table" onclick="setProductViewMode('table')">📊 Tabela</button>
+              <p class="product-view-hint" id="product-view-hint">Carregando opções de visualização...</p>
+            </div>
           </div>
         </div>
-
-        <div class="ops-grid-metrics">
-          <div class="ops-metric-card"><span>Venda bruta</span><strong id="finance-gross">-</strong></div>
-          <div class="ops-metric-card"><span>Receita entregue</span><strong id="finance-delivered">-</strong></div>
-          <div class="ops-metric-card"><span>Valor cancelado</span><strong id="finance-cancelled">-</strong></div>
-          <div class="ops-metric-card"><span>Operacional aberto</span><strong id="finance-open">-</strong></div>
-          <div class="ops-metric-card"><span>Pedidos</span><strong id="finance-orders-count">-</strong></div>
-          <div class="ops-metric-card"><span>Ticket medio</span><strong id="finance-ticket">-</strong></div>
-        </div>
-
-        <div class="ops-finance-grid">
-          <section class="ops-panel">
-            <h3>Formas de pagamento</h3>
-            <div class="ops-list" id="finance-payment-breakdown">
-              <div class="ops-empty">Carregando...</div>
-            </div>
-          </section>
-          <section class="ops-panel">
-            <h3>Status dos pedidos</h3>
-            <div class="ops-list" id="finance-status-breakdown">
-              <div class="ops-empty">Carregando...</div>
-            </div>
-          </section>
-          <section class="ops-panel">
-            <h3>Top clientes</h3>
-            <div class="ops-list" id="finance-top-customers">
-              <div class="ops-empty">Carregando...</div>
-            </div>
-          </section>
-          <section class="ops-panel">
-            <h3>Top produtos</h3>
-            <div class="ops-list" id="finance-top-products">
-              <div class="ops-empty">Carregando...</div>
-            </div>
-          </section>
-        </div>
-
-        <section class="ops-panel">
-          <h3>Serie diaria de vendas</h3>
-          <div class="ops-list" id="finance-daily-series">
-            <div class="ops-empty">Carregando...</div>
-          </div>
-        </section>
-
-        <div class="table-scroll">
-          <table class="ops-table">
-            <thead>
-              <tr>
-                <th>Pedido</th>
-                <th>Cliente</th>
-                <th>Data</th>
-                <th>Status</th>
-                <th>Pagamento</th>
-                <th>Valor</th>
-                <th>Lote</th>
-                <th>Motoboy</th>
-              </tr>
-            </thead>
-            <tbody id="finance-details-body">
-              <tr><td colspan="8" class="ops-empty">Carregando dados financeiros...</td></tr>
-            </tbody>
-          </table>
+        <div id="product-sections" class="product-sections">
+          <div class="product-empty">Carregando produtos...</div>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "stop": "powershell -ExecutionPolicy Bypass -File parar-servidor.ps1",
     "hash-password": "node scripts/hash-password.js",
+    "prepare:presentation-orders": "node scripts/prepare-presentation-orders.js",
     "migrate": "node scripts/migrate.js",
     "migrate:rollback": "node scripts/migrate-rollback.js",
     "migrate:status": "node scripts/migrate.js --status"
