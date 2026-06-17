@@ -1672,7 +1672,7 @@
           <a class="admin-utility-btn" href="dashboard.html">📊 Dashboard</a>
           <a class="admin-utility-btn current-page" href="cadastros.html" aria-current="page">🧾 Cadastros</a>
           <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
-          <button id="btn-tool-panel" class="admin-utility-btn" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
+          <button id="btn-tool-panel" class="admin-utility-btn" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️ Configurações</button>
           <button onclick="toggleRestaurantStatus()" id="status-btn">
             🔄 Carregando...
           </button>
@@ -1753,9 +1753,14 @@
         <div class="tool-panel-header">
           <div>
             <h2 class="tool-panel-title" id="tool-panel-title">Configuracoes</h2>
-            <p class="tool-panel-desc" id="tool-panel-desc">Tudo agora abre em um modal grande, sem empurrar a tela para baixo.</p>
+            <p class="tool-panel-desc" id="tool-panel-desc">Tudo agora abre em um modal grande, sem empurrar a tela para baixo. Mesas e garçons do atendimento local ficam mais abaixo nesta janela.</p>
           </div>
           <button class="tool-panel-close" type="button" onclick="closeToolPanel()" aria-label="Fechar configurações">Fechar</button>
+        </div>
+
+        <div class="tool-choice-row" style="justify-content:space-between; align-items:center; margin:-10px 0 18px;">
+          <span class="tool-panel-status" style="margin-top:0;">Role dentro desta janela para ver a seção Atendimento Local.</span>
+          <button class="btn-tool-save" type="button" onclick="scrollToolPanelTo('tool-section-local-service')">Ir para Atendimento Local</button>
         </div>
 
         <div id="tool-panel-content">
@@ -1929,7 +1934,7 @@
             </div>
           </div>
 
-          <div class="tool-section">
+          <div class="tool-section" id="tool-section-local-service">
             <h3>Atendimento Local</h3>
             <p class="tool-section-desc">Configure a operacao de salao/mesa, destacando o canal local no kanban e no PWA de tablet.</p>
 
@@ -3050,6 +3055,12 @@
       const panel = document.getElementById('tool-panel');
       if (panel.hidden) openToolPanel();
       else closeToolPanel();
+    }
+
+    function scrollToolPanelTo(targetId) {
+      const el = document.getElementById(targetId);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function handleToolPanelBackdrop(event) {
