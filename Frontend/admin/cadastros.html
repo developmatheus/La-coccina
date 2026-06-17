@@ -3542,8 +3542,7 @@
           <td>
             <div class="delivery-areas-actions">
               <button type="button" class="delivery-area-btn" onclick="editServiceTable(${Number(table.id)})">Editar</button>
-              <button type="button" class="delivery-area-btn" onclick="toggleServiceTableActive(${Number(table.id)})">${table.active ? 'Desativar' : 'Ativar'}</button>
-              <button type="button" class="delivery-area-btn danger" onclick="removeServiceTable(${Number(table.id)})">Desativar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleServiceTableActive(${Number(table.id)})" title="${table.active ? 'Deixa a mesa inativa para não aparecer no atendimento, sem apagar histórico.' : 'Reativa a mesa para voltar a aparecer no atendimento.'}">${table.active ? 'Desativar' : 'Ativar'}</button>
             </div>
           </td>
         </tr>
@@ -3703,8 +3702,7 @@
           <td>
             <div class="delivery-areas-actions">
               <button type="button" class="delivery-area-btn" onclick="editServiceWaiter(${Number(waiter.id)})">Editar</button>
-              <button type="button" class="delivery-area-btn" onclick="toggleServiceWaiterActive(${Number(waiter.id)})">${waiter.active ? 'Desativar' : 'Ativar'}</button>
-              <button type="button" class="delivery-area-btn danger" onclick="removeServiceWaiter(${Number(waiter.id)})">Desativar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleServiceWaiterActive(${Number(waiter.id)})" title="${waiter.active ? 'Deixa o garçom inativo para não aparecer no atendimento, sem apagar histórico.' : 'Reativa o garçom para voltar a aparecer no atendimento.'}">${waiter.active ? 'Desativar' : 'Ativar'}</button>
             </div>
           </td>
         </tr>
