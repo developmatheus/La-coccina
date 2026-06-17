@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Atendimento Local - La Coccina</title>
+  <meta name="theme-color" content="#d97706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Atendimento Local">
+  <link rel="manifest" href="ASSETS/imagens/local-service.webmanifest">
+  <link rel="apple-touch-icon" href="ASSETS/imagens/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="ASSETS/imagens/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="ASSETS/js/config.js"></script>
+  <script src="ASSETS/js/security.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0b0d;
+      --surface: rgba(18, 18, 24, 0.96);
+      --surface-soft: rgba(29, 29, 36, 0.92);
+      --surface-alt: rgba(41, 41, 51, 0.9);
+      --text: #f7f7f8;
+      --muted: #c2c2cb;
+      --border: rgba(255, 255, 255, 0.09);
+      --accent: #d97706;
+      --accent-soft: rgba(217, 119, 6, 0.2);
+      --success: #22c55e;
+      --danger: #ef4444;
+      --shadow: 0 22px 44px rgba(0, 0, 0, 0.34);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top, rgba(217, 119, 6, 0.18), transparent 28%),
+        linear-gradient(180deg, #17110b 0%, #0b0b0d 40%, #09090b 100%);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 14px calc(env(safe-area-inset-bottom, 0px) + 112px);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      width: min(100%, 1320px);
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .hidden { display: none !important; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: calc(env(safe-area-inset-top, 0px) + 8px);
+      z-index: 40;
+      backdrop-filter: blur(18px);
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 1.08rem;
+      font-weight: 800;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .actions, .inline-row, .toolbar, .summary-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .btn, .chip, .status-pill {
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .btn:hover, .chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #140f0a;
+      border-color: rgba(217, 119, 6, 0.6);
+    }
+
+    .btn.success {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.28);
+      color: #dcfce7;
+    }
+
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.28);
+      color: #fecaca;
+    }
+
+    .btn.ghost { background: transparent; }
+    .btn.small, .chip { min-height: 38px; padding: 8px 12px; font-size: 0.84rem; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 14px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.12);
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { margin-top: 10px; font-size: clamp(1.5rem, 2.4vw, 2.05rem); line-height: 1.08; }
+
+    .hero p, .muted {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .stat-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px;
+      min-height: 100px;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .stack { display: grid; gap: 12px; }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(217, 119, 6, 0.65);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.18);
+    }
+
+    .notice {
+      display: none;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      line-height: 1.45;
+      font-size: 0.9rem;
+    }
+
+    .notice.show { display: block; }
+    .notice.info { background: rgba(30, 64, 175, 0.18); border-color: rgba(96, 165, 250, 0.28); color: #dbeafe; }
+    .notice.success { background: rgba(20, 83, 45, 0.34); border-color: rgba(34, 197, 94, 0.28); color: #dcfce7; }
+    .notice.error { background: rgba(127, 29, 29, 0.32); border-color: rgba(239, 68, 68, 0.28); color: #fecaca; }
+
+    .commands-list, .draft-list, .product-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .command-card, .draft-item, .product-card {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--surface-soft);
+      padding: 14px;
+    }
+
+    .command-card {
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .command-card:hover, .command-card.active {
+      transform: translateY(-1px);
+      border-color: rgba(217, 119, 6, 0.55);
+      background: rgba(217, 119, 6, 0.12);
+    }
+
+    .command-card strong, .product-card strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .status-pill {
+      min-height: auto;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    .status-pill.accent {
+      background: var(--accent-soft);
+      border-color: rgba(217, 119, 6, 0.3);
+      color: #fed7aa;
+    }
+
+    .status-pill.success {
+      background: rgba(34, 197, 94, 0.14);
+      border-color: rgba(34, 197, 94, 0.24);
+      color: #dcfce7;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .product-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .product-card {
+      display: grid;
+      gap: 12px;
+      align-content: space-between;
+      min-height: 170px;
+    }
+
+    .product-card p {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .product-price {
+      color: #fed7aa;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .qty-value {
+      min-width: 24px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .empty {
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      color: var(--muted);
+      padding: 18px;
+      text-align: center;
+    }
+
+    .sticky-actions {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+      background: linear-gradient(180deg, rgba(9, 9, 11, 0), rgba(9, 9, 11, 0.95) 20%, rgba(9, 9, 11, 0.98) 100%);
+      backdrop-filter: blur(16px);
+    }
+
+    .sticky-shell {
+      width: min(100%, 1320px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(21, 21, 27, 0.96);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .sticky-title strong {
+      display: block;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .sticky-title span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 1080px) {
+      .hero, .grid, .sticky-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      body { padding-inline: 10px; }
+      .field-grid, .product-toolbar, .summary-grid { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .actions { width: 100%; }
+      .actions .btn { flex: 1 1 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="card topbar">
+      <div class="brand">
+        <strong id="brand-title">Atendimento Local</strong>
+        <span id="brand-subtitle">PWA tablet-first para mesa, garçom e comanda.</span>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" type="button" onclick="refreshAll()">Atualizar</button>
+        <a class="btn ghost" href="admin/dashboard.html">Dashboard</a>
+        <button class="btn ghost" type="button" onclick="logout()">Sair</button>
+      </div>
+    </header>
+
+    <div id="auth-card" class="card hidden">
+      <div class="section-head">
+        <div>
+          <h2>Acesso necessário</h2>
+          <p class="muted">Faça login no admin ou abra este atalho a partir do painel para reutilizar sua sessão.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="admin/login.html">Abrir login admin</a>
+      </div>
+    </div>
+
+    <section id="app-shell" class="hidden">
+      <section class="hero">
+        <article class="card">
+          <span class="eyebrow">Atendimento de salão</span>
+          <h1>Abra, retome e feche comandas sem sair da operação.</h1>
+          <p id="hero-copy">O fluxo local compartilha a mesma cozinha e o mesmo catálogo do delivery.</p>
+          <div class="toolbar" style="margin-top:14px;">
+            <span id="module-status" class="status-pill accent">Sincronizando...</span>
+            <span id="sync-status" class="pill">Carregando dados iniciais</span>
+          </div>
+        </article>
+
+        <article class="card summary-grid">
+          <div class="stat-card">
+            <span class="mini">Comandas abertas</span>
+            <strong id="metric-open-orders">0</strong>
+            <span class="mini">Em atendimento no momento</span>
+          </div>
+          <div class="stat-card">
+            <span class="mini">Mesa atual</span>
+            <strong id="metric-current-table">-</strong>
+            <span class="mini">Selecionada para a próxima ação</span>
+          </div>
+          <div class="stat-card">
+            <span class="mini">Garçom atual</span>
+            <strong id="metric-current-waiter">-</strong>
+            <span class="mini">Responsável pela comanda</span>
+          </div>
+          <div class="stat-card">
+            <span class="mini">Rascunho</span>
+            <strong id="metric-draft-total">R$ 0,00</strong>
+            <span class="mini">Itens prontos para enviar</span>
+          </div>
+        </article>
+      </section>
+
+      <div id="notice" class="notice info"></div>
+
+      <section class="grid">
+        <aside class="stack">
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Comanda</h2>
+                <p class="muted">Escolha mesa e garçom, depois abra uma comanda nova ou continue uma já aberta.</p>
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="customer-name">Cliente</label>
+                <input id="customer-name" type="text" placeholder="Nome do cliente">
+              </div>
+              <div class="field">
+                <label for="command-code">Comanda</label>
+                <input id="command-code" type="text" placeholder="Prefixo ou codigo" maxlength="40">
+              </div>
+              <div class="field">
+                <label for="table-select">Mesa</label>
+                <select id="table-select"></select>
+              </div>
+              <div class="field">
+                <label for="waiter-select">Garçom</label>
+                <select id="waiter-select"></select>
+              </div>
+              <div class="field">
+                <label for="payment-select">Pagamento final</label>
+                <select id="payment-select">
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="pix">PIX</option>
+                  <option value="cartao">Cartão</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="phone-input">Telefone opcional</label>
+                <input id="phone-input" type="text" placeholder="Contato do cliente">
+              </div>
+              <div class="field full">
+                <label for="obs-input">Observações</label>
+                <textarea id="obs-input" placeholder="Observacoes da comanda"></textarea>
+              </div>
+            </div>
+            <div class="toolbar" style="margin-top:12px;">
+              <button class="btn" type="button" onclick="clearCommandSelection()">Nova comanda</button>
+              <button id="transfer-table-btn" class="btn ghost hidden" type="button" onclick="transferSelectedTable()">Transferir mesa</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Comandas abertas</h2>
+                <p class="muted">Toque em uma comanda para continuar lançando itens ou para fechar a conta.</p>
+              </div>
+            </div>
+            <div id="open-orders" class="commands-list"></div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Itens prontos</h2>
+                <p class="muted">Os itens abaixo serão enviados para a cozinha na comanda selecionada.</p>
+              </div>
+            </div>
+            <div id="draft-items" class="draft-list"></div>
+          </article>
+        </aside>
+
+        <section class="stack">
+          <article class="card">
+            <div class="section-head">
+              <div>
+                <h2>Catálogo</h2>
+                <p class="muted">Use busca rápida, filtre por categoria e toque para adicionar ao rascunho.</p>
+              </div>
+            </div>
+            <div class="product-toolbar">
+              <input id="product-search" type="search" placeholder="Buscar item do cardapio" oninput="renderProducts()">
+              <select id="category-filter" onchange="renderProducts()">
+                <option value="all">Todas as categorias</option>
+              </select>
+            </div>
+            <div id="products" class="product-grid"></div>
+          </article>
+        </section>
+      </section>
+    </section>
+  </div>
+
+  <div class="sticky-actions">
+    <div class="sticky-shell">
+      <div class="sticky-title">
+        <strong id="sticky-title">Nenhuma comanda selecionada</strong>
+        <span id="sticky-subtitle">Monte um rascunho e envie para a cozinha quando estiver pronto.</span>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" onclick="clearDraft()">Limpar itens</button>
+        <button class="btn primary" type="button" onclick="submitDraft()">Enviar para cozinha</button>
+        <button class="btn success" type="button" onclick="closeCommand()">Fechar conta</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = LaCoccinaSecurity.API_BASE;
+    const LOCAL_TOKEN_KEY = 'lc_local_service_token';
+    const DEFAULT_SETTINGS = {
+      enabled: false,
+      label: 'Atendimento Local',
+      color: '#d97706',
+      commandPrefix: 'CMD',
+      autoGenerateCommandCode: true,
+      requireTable: false,
+      requireWaiter: false,
+      allowTableTransfer: false,
+      allowSplitPayment: false,
+      pwaDisplayMode: 'confortavel',
+      primaryAccent: '#d97706',
+    };
+    const state = {
+      settings: { ...DEFAULT_SETTINGS },
+      tables: [],
+      waiters: [],
+      products: [],
+      openOrders: [],
+      selectedOrderId: null,
+      draftItems: [],
+    };
+
+    function esc(value) {
+      return LaCoccinaSecurity.escapeHtml(String(value ?? ''));
+    }
+
+    function getQueryToken() {
+      return new URLSearchParams(window.location.search).get('token') || '';
+    }
+
+    function bootstrapToken() {
+      const queryToken = getQueryToken();
+      if (queryToken) {
+        sessionStorage.setItem('adminToken', queryToken);
+        localStorage.setItem(LOCAL_TOKEN_KEY, queryToken);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, '', url.toString());
+        return queryToken;
+      }
+      const sessionToken = sessionStorage.getItem('adminToken') || '';
+      if (sessionToken) {
+        localStorage.setItem(LOCAL_TOKEN_KEY, sessionToken);
+        return sessionToken;
+      }
+      const cachedToken = localStorage.getItem(LOCAL_TOKEN_KEY) || '';
+      if (cachedToken) {
+        sessionStorage.setItem('adminToken', cachedToken);
+      }
+      return cachedToken;
+    }
+
+    function getToken() {
+      return sessionStorage.getItem('adminToken') || localStorage.getItem(LOCAL_TOKEN_KEY) || '';
+    }
+
+    function logout() {
+      sessionStorage.removeItem('adminToken');
+      localStorage.removeItem(LOCAL_TOKEN_KEY);
+      localStorage.removeItem('adminLogged');
+      window.location.href = 'admin/login.html';
+    }
+
+    function apiFetch(url, options = {}) {
+      const token = getToken();
+      if (!token) throw new Error('Sessão administrativa não encontrada.');
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+
+    function setNotice(message, type = 'info') {
+      const el = document.getElementById('notice');
+      if (!message) {
+        el.className = 'notice';
+        el.textContent = '';
+        return;
+      }
+      el.className = `notice show ${type}`;
+      el.textContent = message;
+    }
+
+    function setSyncStatus(message) {
+      document.getElementById('sync-status').textContent = message;
+    }
+
+    function formatCurrency(value) {
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function normalizeSettings(raw = {}) {
+      return {
+        ...DEFAULT_SETTINGS,
+        ...(raw || {}),
+        label: String(raw.label || DEFAULT_SETTINGS.label).trim() || DEFAULT_SETTINGS.label,
+        color: /^#[0-9a-f]{6}$/i.test(String(raw.color || '').trim()) ? raw.color : DEFAULT_SETTINGS.color,
+        primaryAccent: /^#[0-9a-f]{6}$/i.test(String(raw.primaryAccent || '').trim()) ? raw.primaryAccent : DEFAULT_SETTINGS.primaryAccent,
+      };
+    }
+
+    function normalizeProduct(product) {
+      return {
+        id: Number(product.id),
+        name: String(product.name || '').trim(),
+        category: String(product.category || '').trim() || 'outros',
+        desc: String(product.desc || '').trim(),
+        price: Number(product.price || 0),
+        active: product.active !== false,
+      };
+    }
+
+    function normalizeOpenOrder(order) {
+      return {
+        ...order,
+        id: Number(order.id),
+        total: Number(order.total || 0),
+        closedTotal: Number(order.closedTotal || 0),
+        tableId: order.tableId ? Number(order.tableId) : null,
+        waiterId: order.waiterId ? Number(order.waiterId) : null,
+      };
+    }
+
+    function getSelectedOrder() {
+      return state.openOrders.find((order) => order.id === state.selectedOrderId) || null;
+    }
+
+    function getDraftTotal() {
+      return state.draftItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0);
+    }
+
+    function getWorkingTotal() {
+      const selected = getSelectedOrder();
+      return Number(selected?.total || 0) + getDraftTotal();
+    }
+
+    function isLocalEnabled() {
+      return state.settings.enabled === true;
+    }
+
+    function updateTheme() {
+      document.documentElement.style.setProperty('--accent', state.settings.primaryAccent || state.settings.color || '#d97706');
+      document.documentElement.style.setProperty('--accent-soft', `${state.settings.primaryAccent || state.settings.color || '#d97706'}22`);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', state.settings.primaryAccent || state.settings.color || '#d97706');
+      document.title = `${state.settings.label || 'Atendimento Local'} - La Coccina`;
+      document.getElementById('brand-title').textContent = state.settings.label || 'Atendimento Local';
+      document.getElementById('brand-subtitle').textContent = 'PWA tablet-first para mesa, garçom e comanda.';
+      document.getElementById('hero-copy').textContent = state.settings.enabled
+        ? 'Escolha mesa, garçom e cliente para lançar pedidos no mesmo fluxo da cozinha.'
+        : 'O módulo está desabilitado para este cliente no painel administrativo.';
+      document.getElementById('module-status').textContent = state.settings.enabled
+        ? `${state.settings.label} ativo`
+        : `${state.settings.label} desabilitado`;
+      document.getElementById('module-status').className = `status-pill ${state.settings.enabled ? 'accent' : ''}`;
+      document.getElementById('transfer-table-btn').classList.toggle('hidden', !state.settings.allowTableTransfer);
+    }
+
+    function renderSelectOptions() {
+      const tableSelect = document.getElementById('table-select');
+      const waiterSelect = document.getElementById('waiter-select');
+      const selectedOrder = getSelectedOrder();
+      const activeTables = state.tables.filter((table) => table.active !== false);
+      const activeWaiters = state.waiters.filter((waiter) => waiter.active !== false);
+      tableSelect.innerHTML = `<option value="">${state.settings.requireTable ? 'Selecione a mesa' : 'Sem mesa'}</option>${activeTables.map((table) => `<option value="${table.id}">${esc(table.name)}${table.sector ? ` • ${esc(table.sector)}` : ''}</option>`).join('')}`;
+      waiterSelect.innerHTML = `<option value="">${state.settings.requireWaiter ? 'Selecione o garçom' : 'Sem garçom'}</option>${activeWaiters.map((waiter) => `<option value="${waiter.id}">${esc(waiter.name)}${waiter.code ? ` • ${esc(waiter.code)}` : ''}</option>`).join('')}`;
+      if (selectedOrder?.tableId) tableSelect.value = String(selectedOrder.tableId);
+      if (selectedOrder?.waiterId) waiterSelect.value = String(selectedOrder.waiterId);
+      updateMetrics();
+    }
+
+    function renderOpenOrders() {
+      const wrap = document.getElementById('open-orders');
+      if (!state.openOrders.length) {
+        wrap.innerHTML = '<div class="empty">Nenhuma comanda aberta no momento.</div>';
+        document.getElementById('metric-open-orders').textContent = '0';
+        return;
+      }
+      document.getElementById('metric-open-orders').textContent = String(state.openOrders.length);
+      wrap.innerHTML = state.openOrders.map((order) => `
+        <article class="command-card ${order.id === state.selectedOrderId ? 'active' : ''}" onclick="selectOpenOrder(${order.id})">
+          <strong>${esc(order.customer || 'Cliente local')}</strong>
+          <div class="mini">${esc(order.tableName ? `Mesa ${order.tableName}` : 'Mesa não definida')}</div>
+          <div class="mini">${esc(order.waiterName ? `Garçom ${order.waiterName}` : 'Garçom não definido')}</div>
+          <div class="badge-row">
+            ${order.commandCode ? `<span class="status-pill accent">${esc(order.commandCode)}</span>` : ''}
+            <span class="status-pill success">${esc(order.localServiceStatusLabel || 'Aberta')}</span>
+            <span class="status-pill">${formatCurrency(order.total)}</span>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderDraft() {
+      const wrap = document.getElementById('draft-items');
+      if (!state.draftItems.length) {
+        wrap.innerHTML = '<div class="empty">Nenhum item adicionado ainda.</div>';
+      } else {
+        wrap.innerHTML = state.draftItems.map((item) => `
+          <article class="draft-item">
+            <div class="section-head">
+              <div>
+                <strong>${esc(item.name)}</strong>
+                <p class="mini">${formatCurrency(item.price)} por unidade</p>
+              </div>
+              <span class="status-pill accent">${formatCurrency(Number(item.price || 0) * Number(item.qty || 0))}</span>
+            </div>
+            <div class="qty-row">
+              <button class="qty-btn" type="button" onclick="changeDraftQty(${item.id}, -1)">−</button>
+              <span class="qty-value">${item.qty}</span>
+              <button class="qty-btn" type="button" onclick="changeDraftQty(${item.id}, 1)">+</button>
+            </div>
+          </article>
+        `).join('');
+      }
+      updateMetrics();
+    }
+
+    function renderProducts() {
+      const wrap = document.getElementById('products');
+      const search = document.getElementById('product-search').value.trim().toLowerCase();
+      const category = document.getElementById('category-filter').value;
+      const items = state.products
+        .filter((product) => product.active !== false)
+        .filter((product) => category === 'all' || product.category === category)
+        .filter((product) => !search || product.name.toLowerCase().includes(search) || product.desc.toLowerCase().includes(search));
+      if (!items.length) {
+        wrap.innerHTML = '<div class="empty">Nenhum item encontrado para o filtro atual.</div>';
+        return;
+      }
+      wrap.innerHTML = items.map((product) => `
+        <article class="product-card">
+          <div>
+            <div class="badge-row" style="margin-top:0; margin-bottom:10px;">
+              <span class="pill">${esc(product.category)}</span>
+            </div>
+            <strong>${esc(product.name)}</strong>
+            <p>${esc(product.desc || 'Item disponível para lançamento rápido na comanda.')}</p>
+          </div>
+          <div class="section-head" style="margin-bottom:0;">
+            <span class="product-price">${formatCurrency(product.price)}</span>
+            <button class="btn small primary" type="button" onclick="addProduct(${product.id})">Adicionar</button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function updateCategoryOptions() {
+      const filter = document.getElementById('category-filter');
+      const categories = Array.from(new Set(state.products.filter((product) => product.active !== false).map((product) => product.category))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      filter.innerHTML = `<option value="all">Todas as categorias</option>${categories.map((category) => `<option value="${esc(category)}">${esc(category)}</option>`).join('')}`;
+    }
+
+    function updateMetrics() {
+      const tableId = document.getElementById('table-select').value;
+      const waiterId = document.getElementById('waiter-select').value;
+      const table = state.tables.find((item) => String(item.id) === String(tableId));
+      const waiter = state.waiters.find((item) => String(item.id) === String(waiterId));
+      document.getElementById('metric-current-table').textContent = table?.name || '-';
+      document.getElementById('metric-current-waiter').textContent = waiter?.name || '-';
+      document.getElementById('metric-draft-total').textContent = formatCurrency(getWorkingTotal());
+      const selected = getSelectedOrder();
+      document.getElementById('sticky-title').textContent = selected
+        ? `${selected.customer} • ${selected.commandCode || 'Comanda aberta'}`
+        : 'Nova comanda local';
+      document.getElementById('sticky-subtitle').textContent = selected
+        ? `${selected.tableName || 'Sem mesa'} • ${selected.waiterName || 'Sem garçom'} • ${formatCurrency(getWorkingTotal())}`
+        : `Rascunho atual: ${formatCurrency(getDraftTotal())}`;
+    }
+
+    function readFormValues() {
+      return {
+        customer: document.getElementById('customer-name').value.trim(),
+        commandCode: document.getElementById('command-code').value.trim(),
+        tableId: document.getElementById('table-select').value ? Number(document.getElementById('table-select').value) : null,
+        waiterId: document.getElementById('waiter-select').value ? Number(document.getElementById('waiter-select').value) : null,
+        payment: document.getElementById('payment-select').value,
+        phone: document.getElementById('phone-input').value.trim(),
+        obs: document.getElementById('obs-input').value.trim(),
+      };
+    }
+
+    function fillForm(order = null) {
+      document.getElementById('customer-name').value = order?.customer || '';
+      document.getElementById('command-code').value = order?.commandCode || '';
+      document.getElementById('payment-select').value = order?.payment || 'dinheiro';
+      document.getElementById('phone-input').value = order?.phone || '';
+      document.getElementById('obs-input').value = order?.obs || '';
+      renderSelectOptions();
+      if (order?.tableId) document.getElementById('table-select').value = String(order.tableId);
+      if (order?.waiterId) document.getElementById('waiter-select').value = String(order.waiterId);
+      updateMetrics();
+    }
+
+    function clearCommandSelection() {
+      state.selectedOrderId = null;
+      fillForm();
+      state.draftItems = [];
+      renderOpenOrders();
+      renderDraft();
+      setNotice('');
+    }
+
+    function clearDraft() {
+      state.draftItems = [];
+      renderDraft();
+    }
+
+    function selectOpenOrder(orderId) {
+      state.selectedOrderId = Number(orderId);
+      const order = getSelectedOrder();
+      fillForm(order);
+      renderOpenOrders();
+      setNotice(order ? `Comanda ${order.commandCode || `#${order.id}`} carregada para novos lançamentos.` : '', 'info');
+    }
+
+    function addProduct(productId) {
+      const product = state.products.find((item) => item.id === Number(productId));
+      if (!product) return;
+      const existing = state.draftItems.find((item) => item.id === product.id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        state.draftItems.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+      }
+      renderDraft();
+    }
+
+    function changeDraftQty(productId, delta) {
+      const item = state.draftItems.find((entry) => entry.id === Number(productId));
+      if (!item) return;
+      item.qty = Math.max(0, Number(item.qty || 0) + Number(delta || 0));
+      state.draftItems = state.draftItems.filter((entry) => entry.qty > 0);
+      renderDraft();
+    }
+
+    function validateForm(values, allowEmptyDraft = false) {
+      if (!isLocalEnabled()) return 'O módulo local está desabilitado nas configurações deste cliente.';
+      if (!values.customer) return 'Informe o nome do cliente para a comanda.';
+      if (state.settings.requireTable && !values.tableId) return 'Selecione uma mesa antes de continuar.';
+      if (state.settings.requireWaiter && !values.waiterId) return 'Selecione um garçom antes de continuar.';
+      if (!allowEmptyDraft && !state.draftItems.length) return 'Adicione pelo menos um item antes de enviar.';
+      return '';
+    }
+
+    async function fetchJsonOrError(res, fallback) {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || fallback);
+      }
+      return data;
+    }
+
+    async function submitDraft() {
+      const values = readFormValues();
+      const validationError = validateForm(values);
+      if (validationError) {
+        setNotice(validationError, 'error');
+        return;
+      }
+
+      const payload = {
+        customer: values.customer,
+        phone: values.phone,
+        payment: values.payment,
+        obs: values.obs,
+        tableId: values.tableId,
+        waiterId: values.waiterId,
+        commandCode: values.commandCode,
+        total: getWorkingTotal(),
+        items: state.draftItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+        })),
+      };
+
+      try {
+        setSyncStatus('Enviando itens para a cozinha...');
+        const selected = getSelectedOrder();
+        const url = selected ? `${API}/api/orders/local/${selected.id}/items` : `${API}/api/orders/local`;
+        const res = await apiFetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await fetchJsonOrError(res, 'Não foi possível salvar a comanda.');
+        state.draftItems = [];
+        await loadOpenOrders();
+        const nextId = Number(data?.order?.id || selected?.id || 0);
+        if (nextId) {
+          state.selectedOrderId = nextId;
+          fillForm(getSelectedOrder());
+        }
+        renderOpenOrders();
+        renderDraft();
+        setNotice(selected ? 'Itens adicionados e enviados para a cozinha.' : 'Comanda aberta e enviada para a cozinha.', 'success');
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || 'Erro ao enviar a comanda.', 'error');
+      } finally {
+        setSyncStatus('Dados sincronizados com o backend');
+      }
+    }
+
+    async function closeCommand() {
+      const selected = getSelectedOrder();
+      if (!selected) {
+        setNotice('Selecione uma comanda aberta para fechar a conta.', 'error');
+        return;
+      }
+      if (state.draftItems.length) {
+        setNotice('Envie ou limpe os itens pendentes antes de fechar a conta.', 'error');
+        return;
+      }
+      const values = readFormValues();
+      const validationError = validateForm(values, true);
+      if (validationError) {
+        setNotice(validationError, 'error');
+        return;
+      }
+      if (!confirm(`Fechar a comanda ${selected.commandCode || `#${selected.id}`} em ${formatCurrency(selected.total)}?`)) {
+        return;
+      }
+      try {
+        setSyncStatus('Fechando comanda...');
+        const res = await apiFetch(`${API}/api/orders/local/${selected.id}/close`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payment: values.payment,
+            closedTotal: selected.total,
+          }),
+        });
+        await fetchJsonOrError(res, 'Não foi possível fechar a conta.');
+        await loadOpenOrders();
+        clearCommandSelection();
+        setNotice('Conta fechada com sucesso.', 'success');
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || 'Erro ao fechar a conta.', 'error');
+      } finally {
+        setSyncStatus('Dados sincronizados com o backend');
+      }
+    }
+
+    async function transferSelectedTable() {
+      const selected = getSelectedOrder();
+      const tableId = document.getElementById('table-select').value ? Number(document.getElementById('table-select').value) : null;
+      if (!selected) {
+        setNotice('Selecione uma comanda aberta para transferir a mesa.', 'error');
+        return;
+      }
+      if (!tableId || tableId === selected.tableId) {
+        setNotice('Selecione uma nova mesa para transferir a comanda.', 'error');
+        return;
+      }
+      try {
+        const res = await apiFetch(`${API}/api/orders/local/${selected.id}/transfer-table`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tableId }),
+        });
+        await fetchJsonOrError(res, 'Não foi possível transferir a mesa.');
+        await loadOpenOrders();
+        fillForm(getSelectedOrder());
+        renderOpenOrders();
+        setNotice('Mesa transferida com sucesso.', 'success');
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || 'Erro ao transferir mesa.', 'error');
+      }
+    }
+
+    async function loadSettings() {
+      const res = await apiFetch(`${API}/api/settings/admin`);
+      const data = await fetchJsonOrError(res, 'Não foi possível carregar as configurações.');
+      state.settings = normalizeSettings(data.localServiceSettings || {});
+      updateTheme();
+    }
+
+    async function loadServiceTables() {
+      const res = await apiFetch(`${API}/api/service-tables`);
+      const data = await fetchJsonOrError(res, 'Não foi possível carregar as mesas.');
+      state.tables = Array.isArray(data) ? data : [];
+    }
+
+    async function loadServiceWaiters() {
+      const res = await apiFetch(`${API}/api/service-waiters`);
+      const data = await fetchJsonOrError(res, 'Não foi possível carregar os garçons.');
+      state.waiters = Array.isArray(data) ? data : [];
+    }
+
+    async function loadProducts() {
+      const res = await apiFetch(`${API}/api/products/all`);
+      const data = await fetchJsonOrError(res, 'Não foi possível carregar o catálogo.');
+      state.products = Array.isArray(data) ? data.map(normalizeProduct) : [];
+      updateCategoryOptions();
+      renderProducts();
+    }
+
+    async function loadOpenOrders() {
+      const res = await apiFetch(`${API}/api/orders/local/open`);
+      const data = await fetchJsonOrError(res, 'Não foi possível carregar as comandas abertas.');
+      state.openOrders = Array.isArray(data.items) ? data.items.map(normalizeOpenOrder) : [];
+      if (state.selectedOrderId && !state.openOrders.some((order) => order.id === state.selectedOrderId)) {
+        state.selectedOrderId = null;
+      }
+      renderOpenOrders();
+      updateMetrics();
+    }
+
+    async function refreshAll() {
+      try {
+        setSyncStatus('Atualizando configurações do atendimento local...');
+        await loadSettings();
+        if (!isLocalEnabled()) {
+          state.tables = [];
+          state.waiters = [];
+          state.products = [];
+          state.openOrders = [];
+          state.selectedOrderId = null;
+          state.draftItems = [];
+          renderSelectOptions();
+          updateCategoryOptions();
+          renderProducts();
+          renderOpenOrders();
+          renderDraft();
+          fillForm();
+          setNotice('O atendimento local está desligado neste cliente. Ative no painel administrativo para liberar o PWA.', 'info');
+          return;
+        }
+        setSyncStatus('Atualizando mesas, garçons, catálogo e comandas...');
+        await Promise.all([
+          loadServiceTables(),
+          loadServiceWaiters(),
+          loadProducts(),
+          loadOpenOrders(),
+        ]);
+        renderSelectOptions();
+        renderDraft();
+        if (state.selectedOrderId) {
+          fillForm(getSelectedOrder());
+        }
+        setNotice('');
+      } catch (error) {
+        console.error(error);
+        setNotice(error.message || 'Erro ao carregar o atendimento local.', 'error');
+      } finally {
+        setSyncStatus('Dados sincronizados com o backend');
+      }
+    }
+
+    async function init() {
+      const token = bootstrapToken();
+      if (!token) {
+        document.getElementById('auth-card').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('app-shell').classList.remove('hidden');
+      document.getElementById('auth-card').classList.add('hidden');
+      document.getElementById('table-select').addEventListener('change', updateMetrics);
+      document.getElementById('waiter-select').addEventListener('change', updateMetrics);
+      await refreshAll();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./local-service-sw.js').catch((error) => {
+          console.error('Falha ao registrar service worker:', error);
+        });
+      }
+    }
+
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>

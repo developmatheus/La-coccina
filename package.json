@@ -9,8 +9,10 @@
     "hash-password": "npm --prefix backend run hash-password --",
     "demo:prepare-orders": "npm --prefix backend run prepare:presentation-orders",
     "playwright:personas": "node scripts/playwright-personas.mjs",
+    "playwright:personas-video": "node scripts/playwright-personas-video.mjs",
     "playwright:order-kanban": "node scripts/playwright-order-kanban.mjs",
-    "playwright:kanban-video": "node scripts/playwright-kanban-video.mjs"
+    "playwright:kanban-video": "node scripts/playwright-kanban-video.mjs",
+    "playwright:local-video": "node scripts/playwright-local-service-video.mjs"
   },
   "dependencies": {
     "multer": "^2.1.1"

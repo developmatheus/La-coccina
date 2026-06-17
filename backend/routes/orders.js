@@ -11,7 +11,7 @@ const { notifyClients }      = require('../menuEvents');
 const { sanitizeOrderInput } = require('../utils/sanitize');
 const { parsePositiveId }    = require('../utils/sanitize');
 
-const VALID_STATUSES = ['novo', 'em_producao', 'aguardando_envio', 'preparando_rota', 'a_caminho', 'entregue', 'cancelado'];
+const VALID_STATUSES = ['novo', 'em_producao', 'pronto_para_servir', 'aguardando_envio', 'preparando_rota', 'a_caminho', 'entregue', 'cancelado'];
 const STATUS_ALIASES = {
   aguardando_entrega: 'aguardando_envio',
   separando_rota: 'preparando_rota',
@@ -20,20 +20,24 @@ const STATUS_ALIASES = {
   em_rota: 'a_caminho',
   em_entrega: 'a_caminho',
   saiu_para_entrega: 'a_caminho',
+  pronto_para_servico: 'pronto_para_servir',
+  pronto_servir: 'pronto_para_servir',
 };
 const STATUS_ORDER = {
   novo: 1,
   em_producao: 2,
-  aguardando_envio: 3,
-  preparando_rota: 4,
-  a_caminho: 5,
-  entregue: 6,
-  cancelado: 7,
+  pronto_para_servir: 3,
+  aguardando_envio: 4,
+  preparando_rota: 5,
+  a_caminho: 6,
+  entregue: 7,
+  cancelado: 8,
 };
 
 const STATUS_LABEL = {
   novo:             'Novo Pedido',
   em_producao:      'Em Produção',
+  pronto_para_servir: 'Pronto para Servir',
   aguardando_envio: 'Aguardando Envio',
   preparando_rota:  'Preparando Rota',
   a_caminho:        'A Caminho',
@@ -41,9 +45,66 @@ const STATUS_LABEL = {
   cancelado:        'Cancelado',
 };
 
+const LOCAL_SERVICE_STATUS_LABEL = {
+  '': 'Sem etapa local',
+  aberta: 'Comanda aberta',
+  aguardando_preparo: 'Aguardando preparo',
+  pronto_para_servir: 'Pronto para servir',
+  em_atendimento: 'Em atendimento',
+  fechado: 'Fechado',
+};
+
 function normalizeStatusInput(status) {
   const key = String(status || '').trim();
   return STATUS_ALIASES[key] || key;
+}
+
+function normalizeServiceChannel(value) {
+  return String(value || '').trim().toLowerCase() === 'local' ? 'local' : 'delivery';
+}
+
+function normalizeLocalServiceStatus(value) {
+  const status = String(value || '').trim().toLowerCase();
+  return ['aberta', 'aguardando_preparo', 'pronto_para_servir', 'em_atendimento', 'fechado'].includes(status)
+    ? status
+    : '';
+}
+
+async function getConfigValue(key) {
+  const [rows] = await db.execute('SELECT value FROM config WHERE key = ?', [key]);
+  return rows[0]?.value || '';
+}
+
+function normalizeConfigBoolean(value, fallback = false) {
+  if (value === '') return fallback;
+  return ['1', 'true', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
+}
+
+async function getLocalServiceSettings() {
+  return {
+    enabled: normalizeConfigBoolean(await getConfigValue('localServiceEnabled')),
+    label: String(await getConfigValue('localServiceLabel') || 'Atendimento Local').trim() || 'Atendimento Local',
+    color: String(await getConfigValue('localServiceColor') || '#d97706').trim() || '#d97706',
+    requireWaiter: normalizeConfigBoolean(await getConfigValue('localRequireWaiter')),
+    requireTable: normalizeConfigBoolean(await getConfigValue('localRequireTable')),
+    autoGenerateCommandCode: normalizeConfigBoolean(await getConfigValue('localAutoGenerateCommandCode')),
+    commandPrefix: String(await getConfigValue('localCommandPrefix') || 'CMD').trim().slice(0, 10) || 'CMD',
+    allowTableTransfer: normalizeConfigBoolean(await getConfigValue('localAllowTableTransfer')),
+    allowSplitPayment: normalizeConfigBoolean(await getConfigValue('localAllowSplitPayment')),
+  };
+}
+
+async function assertLocalServiceEnabled(res) {
+  const localSettings = await getLocalServiceSettings();
+  if (!localSettings.enabled) {
+    res.status(409).json({ error: 'O módulo de atendimento local está desabilitado.' });
+    return null;
+  }
+  return localSettings;
+}
+
+function generateCommandCode(prefix = 'CMD') {
+  return `${prefix}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
 function parseOrderItems(rawItems) {
@@ -93,12 +154,16 @@ async function buildKanbanOrdersQuery() {
   const orderColumns = await getTableColumns('orders');
   const deliveryTableExists = await hasTable('delivery_batches');
   const deliveryColumns = deliveryTableExists ? await getTableColumns('delivery_batches') : new Set();
+  const tablesTableExists = await hasTable('service_tables');
+  const waitersTableExists = await hasTable('service_waiters');
   const orderCol = (columnName, fallbackSql) => (orderColumns.has(columnName) ? `o.${columnName}` : `${fallbackSql} AS ${columnName}`);
 
   const hasBatchId = orderColumns.has('delivery_batch_id');
   const hasSequence = orderColumns.has('delivery_sequence');
   const hasStatus = orderColumns.has('status');
   const hasCreatedAt = orderColumns.has('created_at');
+  const hasTableJoin = tablesTableExists && orderColumns.has('table_id');
+  const hasWaiterJoin = waitersTableExists && orderColumns.has('waiter_id');
   const hasDeliveryJoin =
     deliveryTableExists &&
     hasBatchId &&
@@ -133,6 +198,19 @@ async function buildKanbanOrdersQuery() {
     orderCol('delivered_at', 'NULL'),
     orderCol('delivery_actor_name', "''"),
     orderCol('delivery_followup_state', "''"),
+    orderCol('service_channel', "'delivery'"),
+    orderCol('table_id', 'NULL'),
+    orderCol('waiter_id', 'NULL'),
+    orderCol('command_code', "''"),
+    orderCol('local_service_status', "''"),
+    orderCol('closed_at', 'NULL'),
+    orderCol('served_at', 'NULL'),
+    orderCol('closed_payment_method', "''"),
+    orderCol('closed_total', '0'),
+    orderCol('service_tag_color', "''"),
+    hasTableJoin ? "t.name AS table_name" : "'' AS table_name",
+    hasWaiterJoin ? "w.name AS waiter_name" : "'' AS waiter_name",
+    hasWaiterJoin ? "w.code AS waiter_code" : "'' AS waiter_code",
     hasDeliveryJoin ? 'b.batch_code AS delivery_batch_code' : "'' AS delivery_batch_code",
     hasDeliveryJoin ? 'b.public_token AS delivery_batch_public_token' : "'' AS delivery_batch_public_token",
     hasDeliveryJoin ? 'b.batch_status AS delivery_batch_status' : "'' AS delivery_batch_status",
@@ -142,6 +220,8 @@ async function buildKanbanOrdersQuery() {
   return `
       SELECT ${selectFields.join(',\n             ')}
         FROM orders o
+        ${hasTableJoin ? 'LEFT JOIN service_tables t ON t.id = o.table_id' : ''}
+        ${hasWaiterJoin ? 'LEFT JOIN service_waiters w ON w.id = o.waiter_id' : ''}
         ${hasDeliveryJoin ? 'LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id' : ''}
        ${hasStatus ? "WHERE o.status NOT IN ('entregue', 'cancelado')" : ''}
        ORDER BY ${hasCreatedAt ? 'o.created_at' : 'o.id'} ASC
@@ -272,6 +352,92 @@ function getLatestAttempt(attempts) {
   return Array.isArray(attempts) && attempts.length ? attempts[0] : null;
 }
 
+function buildLocalOrderPayload(order) {
+  return {
+    id: Number(order.id),
+    customer: order.customer,
+    phone: order.phone || '',
+    payment: order.payment || '',
+    total: Number(order.total || 0),
+    closedTotal: Number(order.closed_total || order.closedTotal || 0),
+    obs: order.obs || '',
+    status: normalizeStatusInput(order.status),
+    statusLabel: STATUS_LABEL[normalizeStatusInput(order.status)] || order.status,
+    serviceChannel: normalizeServiceChannel(order.service_channel || order.serviceChannel),
+    tableId: order.table_id ? Number(order.table_id) : null,
+    tableName: order.table_name || '',
+    waiterId: order.waiter_id ? Number(order.waiter_id) : null,
+    waiterName: order.waiter_name || '',
+    waiterCode: order.waiter_code || '',
+    commandCode: order.command_code || '',
+    localServiceStatus: normalizeLocalServiceStatus(order.local_service_status || order.localServiceStatus),
+    localServiceStatusLabel: LOCAL_SERVICE_STATUS_LABEL[normalizeLocalServiceStatus(order.local_service_status || order.localServiceStatus)] || 'Sem etapa local',
+    serviceTagColor: order.service_tag_color || '',
+    items: parseOrderItems(order.items),
+    createdAt: order.created_at,
+    updatedAt: order.updated_at,
+    openedAt: order.opened_at || order.created_at,
+    servedAt: order.served_at || null,
+    closedAt: order.closed_at || null,
+    closedPaymentMethod: order.closed_payment_method || '',
+  };
+}
+
+async function getLocalOrderById(id) {
+  const [rows] = await db.execute(
+    `SELECT o.*,
+            t.name AS table_name,
+            w.name AS waiter_name,
+            w.code AS waiter_code
+       FROM orders o
+       LEFT JOIN service_tables t ON t.id = o.table_id
+       LEFT JOIN service_waiters w ON w.id = o.waiter_id
+      WHERE o.id = ?`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function createOrderRecord(parsed, localSettings) {
+  const serviceChannel = normalizeServiceChannel(parsed.serviceChannel);
+  const isLocal = serviceChannel === 'local';
+  const commandCode = isLocal
+    ? (parsed.commandCode || (localSettings.autoGenerateCommandCode ? generateCommandCode(localSettings.commandPrefix) : ''))
+    : '';
+  const localServiceStatus = isLocal
+    ? normalizeLocalServiceStatus(parsed.localServiceStatus) || 'aberta'
+    : '';
+  const serviceTagColor = isLocal ? (parsed.serviceTagColor || localSettings.color || '') : '';
+
+  const [result] = await db.execute(
+    `INSERT INTO orders (
+      customer, address, phone, payment, total, items, obs, status, kanban_order, order_token,
+      service_channel, table_id, waiter_id, command_code, local_service_status, opened_at, service_tag_color
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'novo', 0, '', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+    [
+      parsed.customer,
+      isLocal ? '' : parsed.address,
+      parsed.phone,
+      parsed.payment,
+      parsed.total,
+      JSON.stringify(parsed.items),
+      parsed.obs,
+      serviceChannel,
+      parsed.tableId,
+      parsed.waiterId,
+      commandCode,
+      localServiceStatus,
+      serviceTagColor,
+    ]
+  );
+
+  const id = result.insertId;
+  const token = generateToken(id);
+  await db.execute('UPDATE orders SET order_token = ? WHERE id = ?', [token, id]);
+
+  return { id, token, commandCode };
+}
+
 // ---------------------------------------------------------------------------
 // Público — criar pedido (retorna id + token para rastreio)
 // ---------------------------------------------------------------------------
@@ -280,18 +446,19 @@ router.post('/', async (req, res) => {
   if (parsed.error) return res.status(400).json({ error: parsed.error });
 
   try {
-    const [result] = await db.execute(
-      `INSERT INTO orders (customer, address, phone, payment, total, items, obs, status, kanban_order, order_token)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'novo', 0, '')`,
-      [parsed.customer, parsed.address, parsed.phone, parsed.payment,
-       parsed.total, JSON.stringify(parsed.items), parsed.obs]
-    );
-    const id    = result.insertId;
-    const token = generateToken(id);
-    await db.execute('UPDATE orders SET order_token = ? WHERE id = ?', [token, id]);
+    const localSettings = await getLocalServiceSettings();
+    const isLocal = normalizeServiceChannel(parsed.serviceChannel) === 'local';
+    if (isLocal && localSettings.requireTable && !parsed.tableId) {
+      return res.status(400).json({ error: 'Selecione uma mesa para o atendimento local.' });
+    }
+    if (isLocal && localSettings.requireWaiter && !parsed.waiterId) {
+      return res.status(400).json({ error: 'Selecione um garçom para o atendimento local.' });
+    }
+
+    const { id, token, commandCode } = await createOrderRecord(parsed, localSettings);
 
     notifyClients('order-created');
-    res.json({ success: true, id, token });
+    res.json({ success: true, id, token, commandCode });
   } catch (err) {
     console.error('Erro ao salvar pedido:', err.message);
     res.status(500).json({ error: 'Erro ao salvar pedido' });
@@ -327,6 +494,196 @@ router.get('/track/:token', async (req, res) => {
   }
 });
 
+router.post('/local', requireAdmin, async (req, res) => {
+  const parsed = sanitizeOrderInput({ ...req.body, serviceChannel: 'local' });
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    if (localSettings.requireTable && !parsed.tableId) {
+      return res.status(400).json({ error: 'Selecione uma mesa para abrir a comanda.' });
+    }
+    if (localSettings.requireWaiter && !parsed.waiterId) {
+      return res.status(400).json({ error: 'Selecione um garçom para abrir a comanda.' });
+    }
+
+    const created = await createOrderRecord(parsed, localSettings);
+    const order = await getLocalOrderById(created.id);
+    notifyClients('order-created');
+    res.status(201).json({ success: true, ...created, order: buildLocalOrderPayload(order) });
+  } catch (err) {
+    console.error('Erro ao criar comanda local:', err.message);
+    res.status(500).json({ error: 'Erro ao criar comanda local.' });
+  }
+});
+
+router.get('/local/open', requireAdmin, async (_req, res) => {
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    const [rows] = await db.execute(
+      `SELECT o.*,
+              t.name AS table_name,
+              w.name AS waiter_name,
+              w.code AS waiter_code
+         FROM orders o
+         LEFT JOIN service_tables t ON t.id = o.table_id
+         LEFT JOIN service_waiters w ON w.id = o.waiter_id
+        WHERE o.service_channel = 'local'
+          AND COALESCE(o.closed_at, '') = ''
+        ORDER BY datetime(COALESCE(o.opened_at, o.created_at)) DESC, o.id DESC`
+    );
+
+    res.json({
+      items: rows.map((row) => buildLocalOrderPayload(row)),
+    });
+  } catch (err) {
+    console.error('Erro ao listar comandas abertas:', err.message);
+    res.status(500).json({ error: 'Erro ao listar comandas abertas.' });
+  }
+});
+
+router.post('/local/:id/items', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+  const parsed = sanitizeOrderInput({ ...req.body, customer: req.body.customer || 'Cliente local', serviceChannel: 'local' });
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    const order = await getLocalOrderById(id);
+    if (!order || normalizeServiceChannel(order.service_channel) !== 'local') {
+      return res.status(404).json({ error: 'Comanda local não encontrada.' });
+    }
+    if (order.closed_at) {
+      return res.status(409).json({ error: 'A comanda já foi fechada.' });
+    }
+
+    const currentItems = parseOrderItems(order.items);
+    const mergedItems = [...currentItems, ...parsed.items];
+    const addedTotal = parsed.items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 1)), 0);
+    const updatedTotal = parsed.total > 0 ? parsed.total : Number(order.total || 0) + addedTotal;
+    await db.execute(
+      `UPDATE orders
+          SET items = ?, total = ?, obs = ?, updated_at = datetime('now'),
+              status = CASE WHEN status = 'pronto_para_servir' THEN 'em_producao' ELSE status END,
+              local_service_status = 'aguardando_preparo'
+        WHERE id = ?`,
+      [JSON.stringify(mergedItems), updatedTotal, parsed.obs || order.obs || '', id]
+    );
+
+    const updated = await getLocalOrderById(id);
+    notifyClients('order-created');
+    res.json({ success: true, order: buildLocalOrderPayload(updated) });
+  } catch (err) {
+    console.error('Erro ao adicionar itens à comanda:', err.message);
+    res.status(500).json({ error: 'Erro ao adicionar itens à comanda.' });
+  }
+});
+
+router.post('/local/:id/close', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    const order = await getLocalOrderById(id);
+    if (!order || normalizeServiceChannel(order.service_channel) !== 'local') {
+      return res.status(404).json({ error: 'Comanda local não encontrada.' });
+    }
+    if (order.closed_at) {
+      return res.status(409).json({ error: 'A comanda já está fechada.' });
+    }
+
+    const payment = String(req.body.payment || '').trim() || order.payment || 'dinheiro';
+    const closedTotal = Number(req.body.closedTotal ?? req.body.total ?? order.total ?? 0);
+    const splitPayments = Array.isArray(req.body.splitPayments) ? req.body.splitPayments : [];
+    if (!localSettings.allowSplitPayment && splitPayments.length > 1) {
+      return res.status(400).json({ error: 'Pagamento dividido está desabilitado para este cliente.' });
+    }
+
+    await db.execute(
+      `UPDATE orders
+          SET payment = ?, closed_payment_method = ?, closed_total = ?, closed_at = datetime('now'),
+              local_service_status = 'fechado', status = 'entregue', updated_at = datetime('now')
+        WHERE id = ?`,
+      [payment, payment, closedTotal, id]
+    );
+
+    const updated = await getLocalOrderById(id);
+    notifyClients('order-status-changed');
+    res.json({ success: true, order: buildLocalOrderPayload(updated) });
+  } catch (err) {
+    console.error('Erro ao fechar comanda local:', err.message);
+    res.status(500).json({ error: 'Erro ao fechar comanda local.' });
+  }
+});
+
+router.post('/local/:id/reopen', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    const order = await getLocalOrderById(id);
+    if (!order || normalizeServiceChannel(order.service_channel) !== 'local') {
+      return res.status(404).json({ error: 'Comanda local não encontrada.' });
+    }
+
+    await db.execute(
+      `UPDATE orders
+          SET closed_at = NULL, closed_payment_method = '', local_service_status = 'em_atendimento',
+              status = 'em_producao', updated_at = datetime('now')
+        WHERE id = ?`,
+      [id]
+    );
+
+    const updated = await getLocalOrderById(id);
+    notifyClients('order-status-changed');
+    res.json({ success: true, order: buildLocalOrderPayload(updated) });
+  } catch (err) {
+    console.error('Erro ao reabrir comanda local:', err.message);
+    res.status(500).json({ error: 'Erro ao reabrir comanda local.' });
+  }
+});
+
+router.post('/local/:id/transfer-table', requireAdmin, async (req, res) => {
+  const id = parsePositiveId(req.params.id);
+  const tableId = parsePositiveId(req.body.tableId);
+  if (!id || !tableId) return res.status(400).json({ error: 'Comanda ou mesa inválida.' });
+
+  try {
+    const localSettings = await assertLocalServiceEnabled(res);
+    if (!localSettings) return;
+    if (!localSettings.allowTableTransfer) {
+      return res.status(403).json({ error: 'Troca de mesa está desabilitada para este cliente.' });
+    }
+
+    const order = await getLocalOrderById(id);
+    if (!order || normalizeServiceChannel(order.service_channel) !== 'local') {
+      return res.status(404).json({ error: 'Comanda local não encontrada.' });
+    }
+
+    await db.execute(
+      `UPDATE orders
+          SET table_id = ?, updated_at = datetime('now')
+        WHERE id = ?`,
+      [tableId, id]
+    );
+
+    const updated = await getLocalOrderById(id);
+    res.json({ success: true, order: buildLocalOrderPayload(updated) });
+  } catch (err) {
+    console.error('Erro ao transferir mesa da comanda:', err.message);
+    res.status(500).json({ error: 'Erro ao transferir mesa da comanda.' });
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Admin — listar pedidos para o Kanban
 // ---------------------------------------------------------------------------
@@ -342,9 +699,24 @@ router.get('/', requireAdmin, async (_req, res) => {
     const normalizedRows = rows
       .map((order) => {
         const normalizedStatus = normalizeStatusInput(order.status);
+        const serviceChannel = normalizeServiceChannel(order.service_channel);
+        const localServiceStatus = normalizeLocalServiceStatus(order.local_service_status);
         return {
           ...order,
           status: normalizedStatus,
+          statusLabel: STATUS_LABEL[normalizedStatus] || normalizedStatus,
+          serviceChannel,
+          localServiceStatus,
+          localServiceStatusLabel: LOCAL_SERVICE_STATUS_LABEL[localServiceStatus] || 'Sem etapa local',
+          tableId: order.table_id ? Number(order.table_id) : null,
+          tableName: order.table_name || '',
+          waiterId: order.waiter_id ? Number(order.waiter_id) : null,
+          waiterName: order.waiter_name || '',
+          waiterCode: order.waiter_code || '',
+          commandCode: order.command_code || '',
+          serviceTagColor: order.service_tag_color || '',
+          closedAt: order.closed_at || null,
+          servedAt: order.served_at || null,
           items: parseOrderItems(order.items),
           addressLat: order.address_lat,
           addressLng: order.address_lng,
@@ -552,7 +924,10 @@ router.get('/finance/summary', requireAdmin, async (req, res) => {
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
     const [rows] = await db.execute(
       `SELECT o.id, o.customer, o.payment, o.total, o.status, o.items,
-              o.created_at, o.updated_at, o.delivered_at, o.delivery_followup_state
+              o.created_at, o.updated_at, o.delivered_at, o.delivery_followup_state,
+              COALESCE(o.service_channel, 'delivery') AS service_channel,
+              COALESCE(o.closed_at, '') AS closed_at,
+              COALESCE(o.waiter_id, NULL) AS waiter_id
          FROM orders o
          ${whereSql}
         ORDER BY o.created_at DESC`,
@@ -579,6 +954,13 @@ router.get('/finance/summary', requireAdmin, async (req, res) => {
       cancelledCount: cancelledRows.length,
       averageTicket: Number(averageTicket.toFixed(2)),
       paymentBreakdown: aggregateByKey(normalizedRows, (row) => row.payment || 'Nao informado'),
+      serviceChannelBreakdown: aggregateByKey(normalizedRows, (row) => normalizeServiceChannel(row.service_channel), () => 1)
+        .map((item) => ({ ...item, count: item.value, value: undefined })),
+      waiterBreakdown: aggregateByKey(
+        normalizedRows.filter((row) => normalizeServiceChannel(row.service_channel) === 'local' && row.status === 'entregue'),
+        (row) => row.waiter_id ? `Garçom #${row.waiter_id}` : 'Sem garçom',
+        () => 1
+      ).map((item) => ({ ...item, count: item.value, value: undefined })),
       statusBreakdown: aggregateByKey(normalizedRows, (row) => STATUS_LABEL[row.status] || row.status, () => 1)
         .map((item) => ({ ...item, count: item.value, value: undefined })),
       dailySeries: buildOrderTimeSeries(normalizedRows, 'created_at', 'day'),
@@ -632,6 +1014,8 @@ router.get('/finance/details', requireAdmin, async (req, res) => {
     const [rows] = await db.execute(
       `SELECT o.id, o.customer, o.payment, o.total, o.status, o.created_at,
               o.updated_at, o.delivered_at, o.delivery_followup_state,
+              COALESCE(o.service_channel, 'delivery') AS service_channel,
+              COALESCE(o.command_code, '') AS command_code,
               b.batch_code, b.driver_name
          FROM orders o
          LEFT JOIN delivery_batches b ON b.id = o.delivery_batch_id
@@ -650,6 +1034,8 @@ router.get('/finance/details', requireAdmin, async (req, res) => {
         payment: row.payment,
         total: Number(row.total || 0),
         status: row.status,
+        serviceChannel: normalizeServiceChannel(row.service_channel),
+        commandCode: row.command_code || '',
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         deliveredAt: row.delivered_at,
@@ -675,14 +1061,43 @@ router.put('/:id/status', requireAdmin, async (req, res) => {
   if (!VALID_STATUSES.includes(status)) return res.status(400).json({ error: 'Status inválido' });
 
   try {
+    const order = await getLocalOrderById(id);
+    if (!order) return res.status(404).json({ error: 'Pedido não encontrado' });
+    const serviceChannel = normalizeServiceChannel(order.service_channel);
+    let localServiceStatus = normalizeLocalServiceStatus(order.local_service_status);
+    let servedAtSql = 'served_at';
+
+    if (serviceChannel === 'local') {
+      if (status === 'novo' || status === 'em_producao') {
+        localServiceStatus = 'aguardando_preparo';
+      } else if (status === 'pronto_para_servir') {
+        localServiceStatus = 'pronto_para_servir';
+        servedAtSql = "datetime('now')";
+      } else if (status === 'entregue') {
+        localServiceStatus = order.closed_at ? 'fechado' : 'em_atendimento';
+        servedAtSql = "COALESCE(served_at, datetime('now'))";
+      }
+    }
+
     const [result] = await db.execute(
-      `UPDATE orders SET status = ?, updated_at = datetime('now') WHERE id = ?`,
-      [status, id]
+      `UPDATE orders
+          SET status = ?,
+              updated_at = datetime('now'),
+              local_service_status = CASE
+                WHEN COALESCE(service_channel, 'delivery') = 'local' THEN ?
+                ELSE local_service_status
+              END,
+              served_at = CASE
+                WHEN COALESCE(service_channel, 'delivery') = 'local' THEN ${servedAtSql}
+                ELSE served_at
+              END
+        WHERE id = ?`,
+      [status, localServiceStatus, id]
     );
     if (result.affectedRows === 0) return res.status(404).json({ error: 'Pedido não encontrado' });
 
     notifyClients('order-status-changed');
-    res.json({ success: true, status, statusLabel: STATUS_LABEL[status] });
+    res.json({ success: true, status, statusLabel: STATUS_LABEL[status], serviceChannel });
   } catch (err) {
     console.error('Erro ao atualizar status:', err.message);
     res.status(500).json({ error: 'Erro ao atualizar status' });

@@ -481,6 +481,13 @@
         <p id="batch-modal-driver">Aguardando aceite do motoboy.</p>
       </div>
       <div class="batch-section">
+        <h4>Privacidade do motoboy</h4>
+        <p id="batch-modal-privacy">Sem solicitacao no momento.</p>
+        <div class="kb-inline-actions">
+          <button class="modal-btn" id="batch-approve-privacy-btn" onclick="approveBatchVisibilityExtension()">Autorizar +10 min</button>
+        </div>
+      </div>
+      <div class="batch-section">
         <h4>Paradas</h4>
         <div id="batch-modal-stops" class="batch-stops"></div>
       </div>
@@ -521,9 +528,18 @@
     sunset: { label: 'Entardecer', icon: '🌆' },
   };
   const PAYMENT_LABELS = { pix: 'PIX', dinheiro: 'Dinheiro', cartao: 'Cartão' };
+  const DEFAULT_LOCAL_SETTINGS = {
+    enabled: false,
+    label: 'Atendimento Local',
+    color: '#d97706',
+    kanbanLocalHighlightMode: 'full',
+    kanbanDeliveryHighlightMode: 'border',
+    readyColumnEnabled: true,
+  };
   const STATUS_LABELS = {
     novo: 'Novo Pedido',
     em_producao: 'Em Produção',
+    pronto_para_servir: 'Pronto para Servir',
     aguardando_envio: 'Aguardando Envio',
     preparando_rota: 'Preparando Rota',
     a_caminho: 'A Caminho',
@@ -533,6 +549,7 @@
   const STATUS_COLORS = {
     novo: '#3498db',
     em_producao: '#e67e22',
+    pronto_para_servir: '#16a34a',
     aguardando_envio: '#27ae60',
     preparando_rota: '#f1c40f',
     a_caminho: '#9b59b6',
@@ -544,15 +561,18 @@
     aceito_motoboy: 'Motoboy aceitou',
     liberado_cozinha: 'Liberado pela cozinha',
   };
-  const COLUMNS = [
-    { key: 'novo', label: 'Novo Pedido', nextLabel: 'Iniciar Produção', nextKey: 'em_producao' },
-    { key: 'em_producao', label: 'Em Produção', nextLabel: 'Pronto p/ Envio', nextKey: 'aguardando_envio' },
-    { key: 'aguardando_envio', label: 'Aguardando Envio', nextLabel: 'Separar p/ Rota', nextKey: 'preparando_rota' },
-    { key: 'preparando_rota', label: 'Preparando Rota', nextLabel: '', nextKey: '' },
-    { key: 'a_caminho', label: 'A Caminho', nextLabel: 'Marcar Entregue', nextKey: 'entregue' },
+  const BASE_COLUMNS = [
+    { key: 'novo', label: 'Novo Pedido' },
+    { key: 'em_producao', label: 'Em Produção' },
+    { key: 'pronto_para_servir', label: 'Pronto para Servir' },
+    { key: 'aguardando_envio', label: 'Aguardando Envio' },
+    { key: 'preparando_rota', label: 'Preparando Rota' },
+    { key: 'a_caminho', label: 'A Caminho' },
   ];
-  const COLUMN_ORDER = COLUMNS.map((col) => col.key);
+  const KANBAN_SORT_ORDER = [...BASE_COLUMNS.map((col) => col.key), 'entregue', 'cancelado'];
   const STATUS_ALIASES = {
+    pronto_para_servico: 'pronto_para_servir',
+    pronto_servir: 'pronto_para_servir',
     aguardando_entrega: 'aguardando_envio',
     separando_rota: 'preparando_rota',
     preparacao_rota: 'preparando_rota',
@@ -563,7 +583,13 @@
   };
 
   let orders = [];
-  let deliverySettings = { deliveryManagementEnabled: false, restaurantOriginAddress: '', googleMapsApiKeyConfigured: false, googleMapsApiKey: '' };
+  let deliverySettings = {
+    deliveryManagementEnabled: false,
+    restaurantOriginAddress: '',
+    googleMapsApiKeyConfigured: false,
+    googleMapsApiKey: '',
+    localServiceSettings: { ...DEFAULT_LOCAL_SETTINGS },
+  };
   let dragSrcId = null;
   let dragSrcCol = null;
   let sseConn = null;
@@ -574,6 +600,7 @@
   let routeMap = null;
   let routeDirectionsRenderer = null;
   let currentBatchModalUrl = '';
+  let currentBatchModalId = null;
 
   function esc(value) {
     return LaCoccinaSecurity.escapeHtml(String(value ?? ''));
@@ -655,8 +682,79 @@
     return STATUS_ALIASES[key] || key;
   }
 
+  function getLocalSettings() {
+    return {
+      ...DEFAULT_LOCAL_SETTINGS,
+      ...(deliverySettings?.localServiceSettings || {}),
+    };
+  }
+
+  function isLocalOrder(order) {
+    return String(order?.serviceChannel || order?.service_channel || '').trim().toLowerCase() === 'local';
+  }
+
+  function shouldShowReadyColumn() {
+    return getLocalSettings().readyColumnEnabled === true
+      || orders.some((order) => isLocalOrder(order) && normalizeStatusKey(order.status) === 'pronto_para_servir');
+  }
+
+  function getColumns() {
+    return BASE_COLUMNS.filter((col) => col.key !== 'pronto_para_servir' || shouldShowReadyColumn());
+  }
+
+  function getFlowForOrder(order) {
+    if (isLocalOrder(order)) {
+      return shouldShowReadyColumn()
+        ? ['novo', 'em_producao', 'pronto_para_servir', 'entregue']
+        : ['novo', 'em_producao', 'entregue'];
+    }
+    return ['novo', 'em_producao', 'aguardando_envio', 'preparando_rota', 'a_caminho', 'entregue'];
+  }
+
+  function getNextStep(order, currentStatus = normalizeStatusKey(order?.status)) {
+    const flow = getFlowForOrder(order);
+    const currentIndex = flow.indexOf(currentStatus);
+    const nextKey = currentIndex >= 0 ? (flow[currentIndex + 1] || '') : '';
+    const nextLabels = {
+      em_producao: 'Iniciar Produção',
+      pronto_para_servir: 'Pronto para Servir',
+      aguardando_envio: 'Pronto p/ Envio',
+      preparando_rota: 'Separar p/ Rota',
+      a_caminho: 'Marcar Saída',
+      entregue: isLocalOrder(order) ? 'Marcar servido' : 'Marcar Entregue',
+    };
+    return {
+      key: nextKey,
+      label: nextLabels[nextKey] || '',
+    };
+  }
+
+  function getCardHighlight(order) {
+    const localSettings = getLocalSettings();
+    const local = isLocalOrder(order);
+    const color = local
+      ? (String(order.serviceTagColor || '').trim() || localSettings.color || '#d97706')
+      : '#2563eb';
+    const mode = local ? localSettings.kanbanLocalHighlightMode : localSettings.kanbanDeliveryHighlightMode;
+    let cardStyle = '';
+    let badgeStyle = `background:${color}; color:#fff; border:1px solid ${color};`;
+    if (mode === 'full') {
+      cardStyle = `border-color:${color}; background:linear-gradient(180deg, ${color}22 0%, var(--kb-surface) 35%);`;
+    } else if (mode === 'border') {
+      cardStyle = `border-color:${color}; box-shadow: inset 0 0 0 1px ${color}55;`;
+    } else {
+      badgeStyle = `background:${color}22; color:${color}; border:1px solid ${color}55;`;
+    }
+    return {
+      color,
+      cardStyle,
+      badgeStyle,
+      label: local ? (localSettings.label || 'Atendimento Local') : 'Delivery',
+    };
+  }
+
   function columnIndex(status) {
-    return COLUMN_ORDER.indexOf(normalizeStatusKey(status));
+    return KANBAN_SORT_ORDER.indexOf(normalizeStatusKey(status));
   }
 
   function isDeliveryManagementEnabled() {
@@ -687,14 +785,27 @@
     if (!current || !target) return false;
     if (current === target) return true;
     if (['cancelado', 'entregue'].includes(target)) return true;
+    if (isLocalOrder(order) && ['aguardando_envio', 'preparando_rota', 'a_caminho'].includes(target)) {
+      return false;
+    }
+    if (!isLocalOrder(order) && target === 'pronto_para_servir') {
+      return false;
+    }
     if (current === 'preparando_rota') return !isDeliveryManagementEnabled() && target === 'a_caminho';
-    const currentIndex = columnIndex(current);
-    return currentIndex !== -1 && COLUMN_ORDER[currentIndex + 1] === target;
+    const flow = getFlowForOrder(order);
+    const currentIndex = flow.indexOf(current);
+    return currentIndex !== -1 && flow[currentIndex + 1] === target;
   }
 
   function transitionErrorMessage(order, targetStatus) {
     const current = normalizeStatusKey(order?.status);
     const target = normalizeStatusKey(targetStatus);
+    if (isLocalOrder(order)) {
+      if (['aguardando_envio', 'preparando_rota', 'a_caminho'].includes(target)) {
+        return 'Pedidos locais usam o fluxo: Novo Pedido -> Em Producao -> Pronto para Servir -> Servido.';
+      }
+      return 'Pedidos locais so podem avancar para a proxima etapa do salao.';
+    }
     if (current === 'preparando_rota' && target === 'a_caminho') {
       if (!isDeliveryManagementEnabled()) {
         return 'A gestao de entrega esta inativa. O Kanban segue manual e permite avancar para "A Caminho" sem lote.';
@@ -732,7 +843,7 @@
   }
 
   function renderProteinSummary() {
-    const active = orders.filter((order) => ['novo', 'em_producao', 'aguardando_envio'].includes(order.status));
+    const active = orders.filter((order) => ['novo', 'em_producao', 'pronto_para_servir', 'aguardando_envio'].includes(order.status));
     const counts = {};
     active.forEach((order) => {
       const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
@@ -757,7 +868,7 @@
   }
 
   function updateColCounts() {
-    COLUMNS.forEach((col) => {
+    getColumns().forEach((col) => {
       const colOrders = orders.filter((order) => order.status === col.key);
       const pendingWa = colOrders.filter((order) => !isWaConfirmed(order.id)).length;
       const countEl = document.querySelector(`.col-${col.key} .kb-col-count`);
@@ -832,18 +943,33 @@
     const waClass = waOk ? 'wa-confirmed' : 'wa-pending';
     const waRowCls = waOk ? 'wa-check-row confirmed' : 'wa-check-row';
     const normalizedStatus = normalizeStatusKey(order.status);
+    const localOrder = isLocalOrder(order);
     const canDrag = !(normalizedStatus === 'preparando_rota' && order.delivery_batch_id) && normalizedStatus !== 'a_caminho';
     const deliveryEnabled = isDeliveryManagementEnabled();
-    const nextKey = col.key === 'preparando_rota' && deliveryEnabled ? '' : col.nextKey;
-    const nextLabel = col.key === 'preparando_rota' && deliveryEnabled ? '' : col.nextLabel;
+    const nextStep = getNextStep(order, normalizedStatus);
+    const nextKey = col.key === 'preparando_rota' && deliveryEnabled ? '' : nextStep.key;
+    const nextLabel = col.key === 'preparando_rota' && deliveryEnabled ? '' : nextStep.label;
+    const highlight = getCardHighlight(order);
     const tags = [];
+    tags.push(`<span class="kb-tag" style="${highlight.badgeStyle}">${esc(highlight.label)}</span>`);
     if (order.delivery_batch_code) tags.push(`<span class="kb-tag batch">Lote ${esc(order.delivery_batch_code)}</span>`);
     if (order.delivery_batch_status) tags.push(`<span class="kb-tag status">${esc(batchStatusLabel(order.delivery_batch_status))}</span>`);
     if (order.delivery_vehicle_plate) tags.push(`<span class="kb-tag plate">${esc(order.delivery_vehicle_plate)}</span>`);
     if (order.delivery_sequence) tags.push(`<span class="kb-tag stop">Parada ${order.delivery_sequence}</span>`);
+    if (localOrder && order.tableName) tags.push(`<span class="kb-tag">${esc(`Mesa ${order.tableName}`)}</span>`);
+    if (localOrder && order.waiterName) tags.push(`<span class="kb-tag">${esc(`Garçom ${order.waiterName}`)}</span>`);
+    if (localOrder && order.commandCode) tags.push(`<span class="kb-tag">${esc(`Comanda ${order.commandCode}`)}</span>`);
+    const metaHtml = localOrder
+      ? `
+        <div class="kb-card-address">${esc(order.tableName ? `Mesa: ${order.tableName}` : 'Mesa não definida')}</div>
+        <div class="kb-card-address">${esc(order.waiterName ? `Garçom: ${order.waiterName}` : 'Garçom não definido')}</div>
+        <div class="kb-card-address">${esc(order.commandCode ? `Comanda: ${order.commandCode}` : 'Comanda manual')}</div>
+      `
+      : `<div class="kb-card-address">${esc(order.address || '')}</div>`;
 
     return `
       <div class="kb-card ${waClass} ${canDrag ? '' : 'static-card'}"
+           style="${highlight.cardStyle}"
            draggable="${canDrag}"
            data-id="${order.id}"
            data-col="${col.key}"
@@ -856,15 +982,16 @@
         </div>
         ${tags.length ? `<div class="kb-card-tags">${tags.join('')}</div>` : ''}
         <div class="kb-card-name">${esc(order.customer)}</div>
-        <div class="kb-card-address">${esc(order.address || '')}</div>
+        ${metaHtml}
         <div class="kb-card-items">${itemsHtml}</div>
         ${order.obs ? `<div class="kb-card-obs">📝 ${esc(order.obs)}</div>` : ''}
         <div class="kb-card-total">R$ ${parseFloat(order.total).toFixed(2)}</div>
-        <div class="kb-card-payment">${esc(order.payment || '').toUpperCase()}</div>
+        <div class="kb-card-payment">${esc(PAYMENT_LABELS[order.payment] || order.payment || 'Pagamento')}</div>
+        ${localOrder ? '' : `
         <div class="${waRowCls}" onclick="event.stopPropagation(); toggleWaConfirmed(${order.id})">
           <div class="wa-check-box">${waOk ? '✓' : ''}</div>
           <div class="wa-check-label">${waOk ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
-        </div>
+        </div>`}
         <div class="kb-card-actions" onclick="event.stopPropagation()">
           ${nextKey ? `<button class="btn-move-next" onclick="moveOrder(${order.id}, '${nextKey}')">${nextLabel}</button>` : ''}
           <button class="btn-cancel" onclick="moveOrder(${order.id}, 'cancelado')">Cancelar</button>
@@ -878,7 +1005,7 @@
     const board = document.getElementById('kb-board');
     board.innerHTML = '';
 
-    COLUMNS.forEach((col) => {
+    getColumns().forEach((col) => {
       const colOrders = orders.filter((order) => order.status === col.key);
       const batchPanels = buildBatchGroups(colOrders).map((group) => renderBatchPanel(group, col.key)).join('');
       const cards = colOrders.map((order) => renderCard(order, col)).join('');
@@ -1366,6 +1493,7 @@
         return;
       }
       const batch = await res.json();
+      currentBatchModalId = batch.id;
       currentBatchModalUrl = publicBatchUrl(batch.publicToken);
       document.getElementById('batch-modal-title').textContent = `Lote ${batch.batchCode}`;
       document.getElementById('batch-modal-desc').textContent = batchStatusLabel(batch.batchStatus);
@@ -1376,6 +1504,17 @@
       document.getElementById('batch-modal-driver').textContent = batch.driver?.name
         ? `${batch.driver.name} • ${batch.driver.whatsapp} • ${batch.driver.vehicleModel} • ${batch.driver.vehiclePlate}`
         : 'Aguardando aceite do motoboy.';
+      const visibility = batch.visibilityControl || {};
+      const approveBtn = document.getElementById('batch-approve-privacy-btn');
+      const privacyText = visibility.hasActiveDelivery
+        ? 'Entrega ativa. A visualizacao do motoboy permanece liberada.'
+        : visibility.extensionAuthorizedAt && visibility.extensionExpiresAt && Date.parse(visibility.extensionExpiresAt) > Date.now()
+          ? `Extensao ativa ate ${new Date(visibility.extensionExpiresAt).toLocaleString('pt-BR')}.`
+          : visibility.hasPendingExtensionRequest
+            ? `Pedido pendente desde ${new Date(visibility.extensionRequestedAt).toLocaleString('pt-BR')}.`
+            : 'Sem solicitacao no momento.';
+      document.getElementById('batch-modal-privacy').textContent = privacyText;
+      approveBtn.disabled = !visibility.hasPendingExtensionRequest || visibility.hasActiveDelivery;
       document.getElementById('batch-modal-stops').innerHTML = batch.orders.map((order) => `
         <div class="route-stop">
           <strong>Parada ${order.delivery_sequence || '-'} • ${esc(order.customer)}</strong>
@@ -1402,6 +1541,23 @@
     window.open(currentBatchModalUrl, '_blank', 'noopener');
   }
 
+  async function approveBatchVisibilityExtension() {
+    if (!currentBatchModalId) return;
+    try {
+      const res = await apiFetch(`${API}/api/delivery-batches/${currentBatchModalId}/approve-visibility-extension`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Nao foi possivel autorizar a extensao.');
+        return;
+      }
+      await loadOrders();
+      await openBatchModal(currentBatchModalId);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao autorizar a extensao de visualizacao.');
+    }
+  }
+
   async function confirmKitchenRelease(batchId) {
     if (!confirm('Confirmar a saida deste lote da cozinha?')) return;
     try {
@@ -1422,19 +1578,25 @@
   async function openOrderDetail(orderId) {
     const order = orders.find((item) => item.id === orderId);
     if (!order) return;
-    const col = COLUMNS.find((item) => item.key === order.status);
+    const localOrder = isLocalOrder(order);
+    const nextStep = getNextStep(order);
     const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
     const prevOrders = orders.filter((item) => item.phone === order.phone && item.id !== order.id);
     const trackUrl = order.order_token ? `${window.location.origin}/track.html?token=${order.order_token}` : null;
     const statusColor = STATUS_COLORS[order.status] || '#888';
+    const channelHighlight = getCardHighlight(order);
     document.getElementById('kd-order-id').textContent = `Pedido #${order.id}`;
     document.getElementById('kd-customer-name').textContent = order.customer;
     document.getElementById('kd-body').innerHTML = `
       <div class="kd-section">
         <div class="kd-section-title">Status atual</div>
         <span class="kd-status-badge" style="background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44">${STATUS_LABELS[order.status] || order.status}</span>
+        <div class="kd-action-row" style="margin-top:10px;">
+          <span class="kd-status-badge" style="${channelHighlight.badgeStyle}">${esc(channelHighlight.label)}</span>
+          ${localOrder && order.commandCode ? `<span class="kd-status-badge" style="background:${channelHighlight.color}18; color:${channelHighlight.color}; border:1px solid ${channelHighlight.color}33">Comanda ${esc(order.commandCode)}</span>` : ''}
+        </div>
         <div class="kd-action-row">
-          ${col?.nextKey && (order.status !== 'preparando_rota' || !isDeliveryManagementEnabled()) ? `<button onclick="moveOrder(${order.id}, '${col.nextKey}'); closeOrderDetail()" class="kd-action-btn primary">${col.nextLabel}</button>` : ''}
+          ${nextStep.key && (order.status !== 'preparando_rota' || !isDeliveryManagementEnabled()) ? `<button onclick="moveOrder(${order.id}, '${nextStep.key}'); closeOrderDetail()" class="kd-action-btn primary">${nextStep.label}</button>` : ''}
           <button onclick="moveOrder(${order.id}, 'cancelado'); closeOrderDetail()" class="kd-action-btn danger">Cancelar</button>
         </div>
       </div>
@@ -1442,10 +1604,18 @@
         <div class="kd-section-title">Dados do cliente</div>
         <div class="kd-row"><span class="kd-label">Nome</span><span class="kd-value">${esc(order.customer)}</span></div>
         <div class="kd-row"><span class="kd-label">Telefone</span><span class="kd-value green">${esc(order.phone)}</span></div>
-        <div class="kd-row"><span class="kd-label">Endereco</span><span class="kd-value">${esc(order.address || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">${localOrder ? 'Canal' : 'Endereco'}</span><span class="kd-value">${esc(localOrder ? 'Atendimento local' : (order.address || '—'))}</span></div>
         <div class="kd-row"><span class="kd-label">Pagamento</span><span class="kd-value">${PAYMENT_LABELS[order.payment] || esc(order.payment || '—')}</span></div>
         ${order.obs ? `<div class="kd-row"><span class="kd-label">Obs.</span><span class="kd-value italic">${esc(order.obs)}</span></div>` : ''}
       </div>
+      ${localOrder ? `
+      <div class="kd-section">
+        <div class="kd-section-title">Atendimento local</div>
+        <div class="kd-row"><span class="kd-label">Mesa</span><span class="kd-value">${esc(order.tableName || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">Garçom</span><span class="kd-value">${esc(order.waiterName || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">Comanda</span><span class="kd-value">${esc(order.commandCode || '—')}</span></div>
+        <div class="kd-row"><span class="kd-label">Etapa local</span><span class="kd-value">${esc(order.localServiceStatusLabel || '—')}</span></div>
+      </div>` : ''}
       <div class="kd-section">
         <div class="kd-section-title">Itens do pedido</div>
         ${items.map((item) => {
@@ -1454,16 +1624,16 @@
         }).join('')}
         <div class="kd-row kd-total-row"><span class="kd-label">Total</span><span class="kd-value gold">R$ ${parseFloat(order.total).toFixed(2)}</span></div>
       </div>
-      ${trackUrl ? `<div class="kd-section"><div class="kd-section-title">Codigo de rastreio</div><div class="kd-track-code" onclick="navigator.clipboard.writeText('${order.order_token}').then(()=>this.textContent='Copiado!').catch(()=>{})">${esc(order.order_token)}</div><div class="batch-link-wrap"><a href="${trackUrl}" target="_blank" rel="noopener" class="batch-link">Abrir pagina de rastreio do cliente →</a></div></div>` : ''}
-      <div class="kd-section" id="kd-batch-section">${order.delivery_batch_id ? '<div class="kd-section-title">Lote de entrega</div><div id="kd-batch-loading" class="kd-value kd-batch-loading">Carregando dados do lote...</div>' : '<div class="kd-section-title">Lote de entrega</div><div class="kd-value kd-batch-loading">Pedido sem lote associado.</div>'}</div>
+      ${!localOrder && trackUrl ? `<div class="kd-section"><div class="kd-section-title">Codigo de rastreio</div><div class="kd-track-code" onclick="navigator.clipboard.writeText('${order.order_token}').then(()=>this.textContent='Copiado!').catch(()=>{})">${esc(order.order_token)}</div><div class="batch-link-wrap"><a href="${trackUrl}" target="_blank" rel="noopener" class="batch-link">Abrir pagina de rastreio do cliente →</a></div></div>` : ''}
+      ${!localOrder ? `<div class="kd-section" id="kd-batch-section">${order.delivery_batch_id ? '<div class="kd-section-title">Lote de entrega</div><div id="kd-batch-loading" class="kd-value kd-batch-loading">Carregando dados do lote...</div>' : '<div class="kd-section-title">Lote de entrega</div><div class="kd-value kd-batch-loading">Pedido sem lote associado.</div>'}</div>` : ''}
       ${prevOrders.length ? `<div class="kd-section"><div class="kd-section-title">Pedidos anteriores (${esc(order.phone)})</div>${prevOrders.slice(0, 5).map((prev) => `<div class="kd-prev-order clickable" onclick="openOrderDetail(${prev.id})"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="kd-prev-date">#${prev.id} — ${new Date(prev.created_at + 'Z').toLocaleDateString('pt-BR')}</span><span class="kd-prev-total">R$ ${parseFloat(prev.total).toFixed(2)}</span></div><span class="kd-status-badge" style="background:${(STATUS_COLORS[prev.status] || '#888')}22;color:${STATUS_COLORS[prev.status] || '#888'};border:1px solid ${(STATUS_COLORS[prev.status] || '#888')}44;margin-top:4px;font-size:0.65rem;">${STATUS_LABELS[prev.status] || prev.status}</span></div>`).join('')}</div>` : ''}
-      <div class="kd-section">
+      ${localOrder ? '' : `<div class="kd-section">
         <div class="kd-section-title">Confirmacao WhatsApp</div>
         <div class="${isWaConfirmed(order.id) ? 'wa-check-row confirmed' : 'wa-check-row'}" onclick="toggleWaConfirmed(${order.id});">
           <div class="wa-check-box">${isWaConfirmed(order.id) ? '✓' : ''}</div>
           <div class="wa-check-label">${isWaConfirmed(order.id) ? 'Identificado no WhatsApp' : 'Aguardando identificação no WhatsApp'}</div>
         </div>
-      </div>
+      </div>`}
       <div class="kd-section">
         <div class="kd-section-title">Datas</div>
         <div class="kd-row"><span class="kd-label">Recebido</span><span class="kd-value">${new Date(order.created_at + 'Z').toLocaleString('pt-BR')}</span></div>
@@ -1474,7 +1644,7 @@
     document.getElementById('kb-detail-drawer').classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    if (order.delivery_batch_id) {
+    if (!localOrder && order.delivery_batch_id) {
       try {
         const res = await apiFetch(`${API}/api/delivery-batches/${order.delivery_batch_id}`);
         if (!res.ok) return;

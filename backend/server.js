@@ -21,6 +21,8 @@ const settingsRouter      = require('./routes/settings');
 const deliveryBatchesRouter = require('./routes/deliveryBatches');
 const accompanimentsRouter = require('./routes/accompaniments');
 const authRouter = require('./routes/auth');
+const serviceTablesRouter = require('./routes/serviceTables');
+const serviceWaitersRouter = require('./routes/serviceWaiters');
 const { requireAdmin } = require('./middleware/auth');
 const { upload, uploadsDir } = require('./middleware/upload');
 
@@ -125,6 +127,8 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/delivery-batches', deliveryBatchesRouter);
 app.use('/api/accompaniments', accompanimentsRouter);
+app.use('/api/service-tables', serviceTablesRouter);
+app.use('/api/service-waiters', serviceWaitersRouter);
 
 if (serveFrontend && hasFrontend) {
   const assetsDir = path.join(frontendDir, 'ASSETS');

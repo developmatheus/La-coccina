@@ -21,6 +21,11 @@ const RESULT_FILE = path.join(OUTPUT_DIR, 'resultado.json');
 const RAW_VIDEO_FILE = path.join(OUTPUT_DIR, 'tutorial-raw.webm');
 const FINAL_AUDIO_FILE = path.join(OUTPUT_DIR, 'narracao-final.wav');
 const FINAL_VIDEO_FILE = path.join(OUTPUT_DIR, 'tutorial-playwright-kanban.mp4');
+const VIDEO_WIDTH = 1440;
+const VIDEO_HEIGHT = 1024;
+const WINDOW_WIDTH = 1600;
+const WINDOW_HEIGHT = 1280;
+const VIDEO_TOP_SAFE_PADDING = 28;
 
 const scenes = [
   {
@@ -99,6 +104,28 @@ async function ensureDirs() {
 
 async function pause(page, seconds) {
   await page.waitForTimeout(seconds * 1000);
+}
+
+async function ensureVideoSafeFrame(page) {
+  await page.evaluate((safePadding) => {
+    if (!document.getElementById('__pw-video-safe-frame')) {
+      const style = document.createElement('style');
+      style.id = '__pw-video-safe-frame';
+      style.textContent = `
+        html { scroll-behavior: auto !important; }
+        body::before {
+          content: '';
+          display: block;
+          height: ${safePadding}px;
+          width: 100%;
+          pointer-events: none;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, VIDEO_TOP_SAFE_PADDING).catch(() => {});
+  await page.waitForTimeout(120);
 }
 
 async function writeSupportFiles() {
@@ -337,6 +364,7 @@ async function preparePresentationOrders() {
 
 async function loginAdminUi(page) {
   await page.goto(`${BASE_URL}/admin/login.html`, { waitUntil: 'domcontentloaded' });
+  await ensureVideoSafeFrame(page);
   await pause(page, 1.2);
   await page.fill('#username', ADMIN_USERNAME);
   await pause(page, 0.3);
@@ -352,6 +380,7 @@ async function openKanban(page) {
     localStorage.setItem('lc_kanban_enabled', 'true');
   });
   await page.goto(`${BASE_URL}/admin/kanban.html`, { waitUntil: 'domcontentloaded' });
+  await ensureVideoSafeFrame(page);
   await page.locator('#kb-board').waitFor({ timeout: 20000 });
 }
 
@@ -516,6 +545,7 @@ async function recordToolPresentation(page, scenario, sceneAssets) {
     await page.waitForTimeout(1500);
     await closeDrawerIfOpen(page);
     await page.reload({ waitUntil: 'domcontentloaded' });
+    await ensureVideoSafeFrame(page);
     await page.locator('#kb-board').waitFor({ timeout: 20000 });
     await page.locator('.kb-card').filter({ hasText: scenario.routeOrder.customer }).first().waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {});
   });
@@ -534,13 +564,16 @@ async function recordFlow(sceneAssets) {
   const browser = await chromium.launch({
     headless: process.env.HEADLESS !== 'false',
     slowMo: Number(process.env.SLOW_MO || 120) || 120,
+    args: [`--window-size=${WINDOW_WIDTH},${WINDOW_HEIGHT}`],
   });
 
   const context = await browser.newContext({
-    viewport: { width: 1440, height: 960 },
+    viewport: { width: VIDEO_WIDTH, height: VIDEO_HEIGHT },
+    screen: { width: WINDOW_WIDTH, height: WINDOW_HEIGHT },
+    deviceScaleFactor: 1,
     recordVideo: {
       dir: RAW_DIR,
-      size: { width: 1440, height: 960 },
+      size: { width: VIDEO_WIDTH, height: VIDEO_HEIGHT },
     },
   });
 

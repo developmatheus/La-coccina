@@ -10,6 +10,8 @@ const router = express.Router();
 
 const VALID_BATCH_STATUSES = ['preparado', 'aceito_motoboy', 'liberado_cozinha'];
 const DRIVER_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const DRIVER_NO_ACTIVE_VISIBILITY_GRACE_MS = 2 * 60 * 1000;
+const DRIVER_VISIBILITY_EXTENSION_MS = 10 * 60 * 1000;
 const DRIVER_FAILURE_REASONS = new Set(['cliente_ausente', 'endereco_incorreto', 'pedido_cancelado', 'outro']);
 const FOLLOWUP_STATES = new Set(['delayed', 'cancelled']);
 
@@ -67,6 +69,10 @@ async function ensureDeliveryBatchSchema() {
   await ensureColumn(conn, 'delivery_batches', 'current_order_id', 'INTEGER');
   await ensureColumn(conn, 'delivery_batches', 'driver_session_token', "TEXT NOT NULL DEFAULT ''");
   await ensureColumn(conn, 'delivery_batches', 'driver_session_expires_at', 'TEXT');
+  await ensureColumn(conn, 'delivery_batches', 'delivery_visibility_grace_started_at', 'TEXT');
+  await ensureColumn(conn, 'delivery_batches', 'driver_visibility_extension_requested_at', 'TEXT');
+  await ensureColumn(conn, 'delivery_batches', 'driver_visibility_extension_authorized_at', 'TEXT');
+  await ensureColumn(conn, 'delivery_batches', 'driver_visibility_extension_expires_at', 'TEXT');
 
   await conn.exec(`
     CREATE TABLE IF NOT EXISTS delivery_attempt_logs (
@@ -110,6 +116,10 @@ function generateDriverSessionToken() {
 
 function toSessionExpiryIso() {
   return new Date(Date.now() + DRIVER_SESSION_TTL_MS).toISOString();
+}
+
+function toFutureIso(ms) {
+  return new Date(Date.now() + Math.max(0, Number(ms) || 0)).toISOString();
 }
 
 function normalizeIds(value) {
@@ -189,13 +199,27 @@ async function getDeliveryManagementEnabled() {
   return ['1', 'true', 'yes', 'on'].includes(value);
 }
 
+async function getShowRouteProviderPicker() {
+  const value = String(await getConfigValue('showRouteProviderPicker') || '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(value);
+}
+
+async function getShowDriverCallButton() {
+  const value = String(await getConfigValue('showDriverCallButton') || '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(value);
+}
+
 async function loadBatchByToken(token) {
   await ensureDeliveryBatchSchema();
   const [rows] = await db.execute(
     `SELECT id, batch_code, public_token, batch_status, origin_address, maps_url,
             driver_name, driver_whatsapp, driver_cpf, vehicle_model, vehicle_plate,
             accepted_at, kitchen_confirmed_at, created_at, updated_at,
-            current_order_id, driver_session_token, driver_session_expires_at
+            current_order_id, driver_session_token, driver_session_expires_at,
+            delivery_visibility_grace_started_at,
+            driver_visibility_extension_requested_at,
+            driver_visibility_extension_authorized_at,
+            driver_visibility_extension_expires_at
        FROM delivery_batches
       WHERE public_token = ?`,
     [token]
@@ -324,8 +348,6 @@ function serializeRouteStop(order, attemptHistory = []) {
   if (!order) return null;
   const lat = Number(order.addressLat ?? order.address_lat);
   const lng = Number(order.addressLng ?? order.address_lng);
-  const attempts = Array.isArray(attemptHistory) ? attemptHistory : [];
-  const lastAttempt = attempts[0] || null;
   return {
     orderId: Number(order.id),
     sequence: order.delivery_sequence ?? null,
@@ -334,17 +356,8 @@ function serializeRouteStop(order, attemptHistory = []) {
     address_lat: hasUsableCoords(lat, lng) ? lat : null,
     address_lng: hasUsableCoords(lat, lng) ? lng : null,
     phone: order.phone || '',
-    amount: Number(order.total || 0),
-    paymentMethod: order.payment || '',
     status: order.status || '',
-    obs: order.obs || '',
     followupState: getFollowupState(order),
-    attemptCount: attempts.length,
-    lastAttemptAt: lastAttempt?.attemptedAt || order.deliveryAttemptedAt || order.delivery_attempted_at || null,
-    lastAttemptAction: lastAttempt?.action || '',
-    lastAttemptReason: lastAttempt?.reason || order.deliveryFailedReason || order.delivery_failed_reason || '',
-    lastAttemptNote: lastAttempt?.note || order.deliveryFailedNote || order.delivery_failed_note || '',
-    attemptHistoryPreview: attempts.slice(0, 3),
   };
 }
 
@@ -406,28 +419,25 @@ function buildWazeCurrentUrl(stop) {
   return `https://waze.com/ul?q=${encodeURIComponent(stop.address)}&navigate=yes`;
 }
 
-function getRouteWindow(batchOrders, currentOrderId, attemptMap = new Map(), limit = 3) {
+function getRouteWindow(batchOrders, currentOrderId, attemptMap = new Map(), limit = Number.MAX_SAFE_INTEGER) {
   const ordered = sortBatchOrders(batchOrders);
   const eligible = ordered.filter(isRouteEligible);
   const deferredOrders = ordered.filter(isDeferredOrder);
   const availableOrders = ordered.filter((order) => isSelectableCurrentStop(order));
   if (!eligible.length) {
-    const selectedDeferred = (Number(currentOrderId) || null)
-      ? availableOrders.find((order) => Number(order.id) === Number(currentOrderId))
-      : null;
     const deferredStops = deferredOrders
       .map((order) => serializeRouteStop(order, attemptMap.get(Number(order.id)) || []))
       .filter(Boolean);
     return {
-      currentOrderId: selectedDeferred ? Number(selectedDeferred.id) : null,
-      currentStop: selectedDeferred ? serializeRouteStop(selectedDeferred, attemptMap.get(Number(selectedDeferred.id)) || []) : null,
+      currentOrderId: null,
+      currentStop: null,
       nextStops: [],
       routeWindow: [],
       deferredStops,
       links: {
-        googleMapsCurrent: selectedDeferred ? buildGoogleMapsCurrentUrl(selectedDeferred) : '',
-        googleMapsWindow: selectedDeferred ? buildGoogleMapsCurrentUrl(selectedDeferred) : '',
-        wazeCurrent: selectedDeferred ? buildWazeCurrentUrl(selectedDeferred) : '',
+        googleMapsCurrent: '',
+        googleMapsWindow: '',
+        wazeCurrent: '',
       },
     };
   }
@@ -474,12 +484,189 @@ function getRouteWindow(batchOrders, currentOrderId, attemptMap = new Map(), lim
   };
 }
 
+function serializePublicOrder(order) {
+  const lat = Number(order.addressLat ?? order.address_lat);
+  const lng = Number(order.addressLng ?? order.address_lng);
+  return {
+    id: Number(order.id),
+    customer: order.customer || '',
+    address: order.address || '',
+    phone: order.phone || '',
+    status: order.status || '',
+    delivery_sequence: order.delivery_sequence ?? null,
+    addressLat: hasUsableCoords(lat, lng) ? lat : null,
+    addressLng: hasUsableCoords(lat, lng) ? lng : null,
+    deliveryFollowupState: getFollowupState(order),
+  };
+}
+
+function parseTimestamp(value) {
+  if (!value) return 0;
+  const normalized = String(value).includes('Z') ? String(value) : `${String(value)}Z`;
+  const timestamp = Date.parse(normalized);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function buildVisibilityControl(batch, routeWindow) {
+  const hasActiveDelivery = batch?.batch_status === 'liberado_cozinha' && Boolean(routeWindow?.currentStop);
+  const requestedAt = batch?.driver_visibility_extension_requested_at || null;
+  const authorizedAt = batch?.driver_visibility_extension_authorized_at || null;
+  const extensionExpiresAt = batch?.driver_visibility_extension_expires_at || null;
+  const graceStartedAt = batch?.delivery_visibility_grace_started_at || null;
+  const extensionExpiresTs = parseTimestamp(extensionExpiresAt);
+  const graceStartsTs = parseTimestamp(graceStartedAt);
+  const graceExpiresTs = graceStartsTs ? (graceStartsTs + DRIVER_NO_ACTIVE_VISIBILITY_GRACE_MS) : 0;
+  const now = Date.now();
+
+  if (batch?.batch_status !== 'liberado_cozinha') {
+    return {
+      hasActiveDelivery: false,
+      isVisible: false,
+      visibilityMode: 'pre_release',
+      visibleUntil: null,
+      restrictedReason: 'A visualização de clientes só é liberada quando a cozinha libera a rota.',
+      extensionRequestedAt: requestedAt,
+      extensionAuthorizedAt: authorizedAt,
+      extensionExpiresAt,
+      canRequestExtension: false,
+      hasPendingExtensionRequest: Boolean(requestedAt),
+    };
+  }
+
+  if (hasActiveDelivery) {
+    return {
+      hasActiveDelivery: true,
+      isVisible: true,
+      visibilityMode: 'active',
+      visibleUntil: null,
+      restrictedReason: '',
+      extensionRequestedAt: null,
+      extensionAuthorizedAt: null,
+      extensionExpiresAt: null,
+      canRequestExtension: false,
+      hasPendingExtensionRequest: false,
+    };
+  }
+
+  if (extensionExpiresTs > now) {
+    return {
+      hasActiveDelivery: false,
+      isVisible: true,
+      visibilityMode: 'extended',
+      visibleUntil: new Date(extensionExpiresTs).toISOString(),
+      restrictedReason: '',
+      extensionRequestedAt: requestedAt,
+      extensionAuthorizedAt: authorizedAt,
+      extensionExpiresAt: new Date(extensionExpiresTs).toISOString(),
+      canRequestExtension: false,
+      hasPendingExtensionRequest: false,
+    };
+  }
+
+  if (graceExpiresTs > now) {
+    return {
+      hasActiveDelivery: false,
+      isVisible: true,
+      visibilityMode: 'grace',
+      visibleUntil: new Date(graceExpiresTs).toISOString(),
+      restrictedReason: '',
+      extensionRequestedAt: requestedAt,
+      extensionAuthorizedAt: authorizedAt,
+      extensionExpiresAt,
+      canRequestExtension: !requestedAt,
+      hasPendingExtensionRequest: Boolean(requestedAt),
+    };
+  }
+
+  return {
+    hasActiveDelivery: false,
+    isVisible: false,
+    visibilityMode: 'restricted',
+    visibleUntil: null,
+    restrictedReason: requestedAt
+      ? 'A visualização foi bloqueada. O pedido de extensão aguarda autorização do restaurante.'
+      : 'Sem entrega ativa. A visualização dos dados foi bloqueada para atender à LGPD.',
+    extensionRequestedAt: requestedAt,
+    extensionAuthorizedAt: authorizedAt,
+    extensionExpiresAt,
+    canRequestExtension: !requestedAt,
+    hasPendingExtensionRequest: Boolean(requestedAt),
+  };
+}
+
+async function recomputeBatchVisibilityState(conn, batchId, preferredCurrentOrderId = null) {
+  const batch = await conn.get(
+    `SELECT id, batch_status, current_order_id, delivery_visibility_grace_started_at
+       FROM delivery_batches
+      WHERE id = ?`,
+    [batchId]
+  );
+  if (!batch) return null;
+
+  const orders = await conn.all(
+    `SELECT id, status, delivery_sequence, created_at,
+            delivery_failed_reason, delivery_failed_note, delivery_attempted_at,
+            delivery_followup_state
+       FROM orders
+      WHERE delivery_batch_id = ?
+      ORDER BY COALESCE(delivery_sequence, 999999) ASC, created_at ASC`,
+    [batchId]
+  );
+  const routeWindow = getRouteWindow(orders, preferredCurrentOrderId ?? batch.current_order_id, new Map());
+  const hasActiveDelivery = batch.batch_status === 'liberado_cozinha' && Boolean(routeWindow.currentStop);
+
+  if (hasActiveDelivery) {
+    await conn.run(
+      `UPDATE delivery_batches
+          SET current_order_id = ?,
+              delivery_visibility_grace_started_at = NULL,
+              driver_visibility_extension_requested_at = NULL,
+              driver_visibility_extension_authorized_at = NULL,
+              driver_visibility_extension_expires_at = NULL,
+              updated_at = datetime('now')
+        WHERE id = ?`,
+      [routeWindow.currentOrderId, batchId]
+    );
+    return routeWindow.currentOrderId;
+  }
+
+  if (batch.batch_status === 'liberado_cozinha') {
+    await conn.run(
+      `UPDATE delivery_batches
+          SET current_order_id = NULL,
+              delivery_visibility_grace_started_at = COALESCE(delivery_visibility_grace_started_at, datetime('now')),
+              updated_at = datetime('now')
+        WHERE id = ?`,
+      [batchId]
+    );
+    return null;
+  }
+
+  await conn.run(
+    `UPDATE delivery_batches
+        SET current_order_id = ?,
+            delivery_visibility_grace_started_at = NULL,
+            driver_visibility_extension_requested_at = NULL,
+            driver_visibility_extension_authorized_at = NULL,
+            driver_visibility_extension_expires_at = NULL,
+            updated_at = datetime('now')
+      WHERE id = ?`,
+    [routeWindow.currentOrderId, batchId]
+  );
+  return routeWindow.currentOrderId;
+}
+
 async function serializeBatch(batch) {
   const orders = await loadBatchOrders(batch.id);
   const attemptMap = groupAttemptLogsByOrder(await loadAttemptLogsForBatch(batch.id));
-  const routeWindow = getRouteWindow(orders, batch.current_order_id, attemptMap, 3);
+  const routeWindow = getRouteWindow(orders, batch.current_order_id, attemptMap);
   const driverCancellationMode = await getDriverCancellationMode();
   const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+  const showRouteProviderPicker = await getShowRouteProviderPicker();
+  const showDriverCallButton = await getShowDriverCallButton();
+  const visibility = buildVisibilityControl(batch, routeWindow);
+  const stopCount = orders.length;
+  const deliveredCount = orders.filter((order) => order.status === 'entregue').length;
   return {
     id: batch.id,
     batchCode: batch.batch_code,
@@ -499,13 +686,80 @@ async function serializeBatch(batch) {
     createdAt: batch.created_at,
     updatedAt: batch.updated_at,
     currentOrderId: routeWindow.currentOrderId,
+    stopCount,
+    deliveredCount,
     currentStop: routeWindow.currentStop,
     nextStops: routeWindow.nextStops,
     routeWindow: routeWindow.routeWindow,
     deferredStops: routeWindow.deferredStops,
     links: routeWindow.links,
-    operationConfig: { driverCancellationMode, deliveryManagementEnabled },
+    operationConfig: {
+      driverCancellationMode,
+      deliveryManagementEnabled,
+      showRouteProviderPicker,
+      showDriverCallButton,
+    },
+    visibilityControl: visibility,
     orders,
+  };
+}
+
+async function serializePublicBatch(batch) {
+  const orders = await loadBatchOrders(batch.id);
+  const attemptMap = groupAttemptLogsByOrder(await loadAttemptLogsForBatch(batch.id));
+  const routeWindow = getRouteWindow(orders, batch.current_order_id, attemptMap);
+  const driverCancellationMode = await getDriverCancellationMode();
+  const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+  const showRouteProviderPicker = await getShowRouteProviderPicker();
+  const showDriverCallButton = await getShowDriverCallButton();
+  const visibility = buildVisibilityControl(batch, routeWindow);
+  const canExposeCustomerData = deliveryManagementEnabled && visibility.isVisible;
+  const stopCount = orders.length;
+  const deliveredCount = orders.filter((order) => order.status === 'entregue').length;
+  const visibleRouteWindow = canExposeCustomerData ? routeWindow : {
+    currentOrderId: null,
+    currentStop: null,
+    nextStops: [],
+    routeWindow: [],
+    deferredStops: [],
+    links: {
+      googleMapsCurrent: '',
+      googleMapsWindow: '',
+      wazeCurrent: '',
+    },
+  };
+
+  return {
+    id: batch.id,
+    batchCode: batch.batch_code,
+    publicToken: batch.public_token,
+    batchStatus: batch.batch_status,
+    originAddress: batch.origin_address,
+    driver: {
+      name: batch.driver_name,
+      whatsapp: batch.driver_whatsapp,
+      vehiclePlate: batch.vehicle_plate,
+    },
+    acceptedAt: batch.accepted_at,
+    kitchenConfirmedAt: batch.kitchen_confirmed_at,
+    createdAt: batch.created_at,
+    updatedAt: batch.updated_at,
+    stopCount,
+    deliveredCount,
+    currentOrderId: visibleRouteWindow.currentOrderId,
+    currentStop: visibleRouteWindow.currentStop,
+    nextStops: visibleRouteWindow.nextStops,
+    routeWindow: visibleRouteWindow.routeWindow,
+    deferredStops: visibleRouteWindow.deferredStops,
+    links: visibleRouteWindow.links,
+    operationConfig: {
+      driverCancellationMode,
+      deliveryManagementEnabled,
+      showRouteProviderPicker,
+      showDriverCallButton,
+    },
+    privacy: visibility,
+    orders: canExposeCustomerData ? orders.map(serializePublicOrder) : [],
   };
 }
 
@@ -569,7 +823,7 @@ async function nextOpenOrderId(conn, batchId, currentOrderId) {
     [batchId]
   );
 
-  return getRouteWindow(rows, currentOrderId, new Map(), 3).currentOrderId || null;
+  return getRouteWindow(rows, currentOrderId, new Map()).currentOrderId || null;
 }
 
 async function insertAttemptLog(conn, { order, batchId, action, actorName, reason, note, nextStatus, nextFollowupState }) {
@@ -778,6 +1032,10 @@ router.post('/public/:token/accept', async (req, res) => {
                 vehicle_plate = ?,
                 accepted_at = datetime('now'),
                 batch_status = 'aceito_motoboy',
+                delivery_visibility_grace_started_at = NULL,
+                driver_visibility_extension_requested_at = NULL,
+                driver_visibility_extension_authorized_at = NULL,
+                driver_visibility_extension_expires_at = NULL,
                 current_order_id = COALESCE(current_order_id, (
                   SELECT id
                     FROM orders
@@ -795,7 +1053,7 @@ router.post('/public/:token/accept', async (req, res) => {
 
       notifyClients('delivery-batch-accepted');
       const updated = await loadBatchByToken(token);
-      res.json({ success: true, batch: await serializeBatch(updated), ...session });
+      res.json({ success: true, batch: await serializePublicBatch(updated), ...session });
     } catch (innerErr) {
       await conn.exec('ROLLBACK');
       throw innerErr;
@@ -839,7 +1097,7 @@ router.post('/public/:token/session', async (req, res) => {
     const conn = await db.raw();
     const session = await issueDriverSession(conn, batch.id);
     const updated = await loadBatchByToken(token);
-    res.json({ success: true, batch: await serializeBatch(updated), ...session });
+    res.json({ success: true, batch: await serializePublicBatch(updated), ...session });
   } catch (err) {
     console.error('Erro ao renovar sessão do motoboy:', err.message);
     res.status(500).json({ error: 'Erro ao renovar sessão do motoboy' });
@@ -885,6 +1143,10 @@ router.post('/:id/confirm-kitchen', requireAdmin, async (req, res) => {
         `UPDATE delivery_batches
             SET batch_status = 'liberado_cozinha',
                 kitchen_confirmed_at = datetime('now'),
+                delivery_visibility_grace_started_at = NULL,
+                driver_visibility_extension_requested_at = NULL,
+                driver_visibility_extension_authorized_at = NULL,
+                driver_visibility_extension_expires_at = NULL,
                 updated_at = datetime('now')
           WHERE id = ?`,
         [batchId]
@@ -899,6 +1161,8 @@ router.post('/:id/confirm-kitchen', requireAdmin, async (req, res) => {
           [order.id]
         );
       }
+
+      await recomputeBatchVisibilityState(conn, batchId);
 
       await conn.exec('COMMIT');
       notifyClients('delivery-batch-released');
@@ -928,7 +1192,7 @@ router.get('/public/:token', async (req, res) => {
     }
     const batch = await loadBatchByToken(token);
     if (!batch) return res.status(404).json({ error: 'Lote não encontrado.' });
-    res.json(await serializeBatch(batch));
+    res.json(await serializePublicBatch(batch));
   } catch (err) {
     console.error('Erro ao carregar lote público:', err.message);
     res.status(500).json({ error: 'Erro ao carregar lote' });
@@ -957,6 +1221,10 @@ router.patch('/public/:token/current-stop', async (req, res) => {
     }
 
     const batch = session.batch;
+    const visibility = buildVisibilityControl(batch, getRouteWindow(await loadBatchOrders(batch.id), batch.current_order_id, new Map()));
+    if (!visibility.isVisible) {
+      return res.status(403).json({ error: visibility.restrictedReason || 'Visualização de dados bloqueada no momento.' });
+    }
     const order = await loadBatchOrderById(batch.id, orderId);
     if (!order) {
       return res.status(404).json({ error: 'Pedido não pertence a este lote.' });
@@ -1003,6 +1271,7 @@ router.patch('/public/:token/current-stop', async (req, res) => {
           WHERE id = ?`,
         [orderId, batch.id]
       );
+      await recomputeBatchVisibilityState(conn, batch.id, orderId);
 
       await conn.exec('COMMIT');
     } catch (innerErr) {
@@ -1011,7 +1280,7 @@ router.patch('/public/:token/current-stop', async (req, res) => {
     }
 
     const updated = await loadBatchByToken(token);
-    const serialized = await serializeBatch(updated);
+    const serialized = await serializePublicBatch(updated);
     res.json({ success: true, currentOrderId: serialized.currentOrderId, batch: serialized });
   } catch (err) {
     console.error('Erro ao atualizar parada atual do lote:', err.message);
@@ -1050,6 +1319,10 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
     const batch = session.batch;
     if (!['aceito_motoboy', 'liberado_cozinha'].includes(batch.batch_status)) {
       return res.status(400).json({ error: 'Lote não está disponível para atualização operacional.' });
+    }
+    const visibility = buildVisibilityControl(batch, getRouteWindow(await loadBatchOrders(batch.id), batch.current_order_id, new Map()));
+    if (!visibility.isVisible) {
+      return res.status(403).json({ error: visibility.restrictedReason || 'Visualização de dados bloqueada no momento.' });
     }
 
     const order = await loadBatchOrderById(batch.id, orderId);
@@ -1141,11 +1414,12 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
           WHERE id = ?`,
         [nextOrderId, batch.id]
       );
+      await recomputeBatchVisibilityState(conn, batch.id, nextOrderId);
 
       await conn.exec('COMMIT');
       notifyClients('order-status-changed');
       const updated = await loadBatchByToken(token);
-      const serialized = await serializeBatch(updated);
+      const serialized = await serializePublicBatch(updated);
       res.json({
         success: true,
         action,
@@ -1162,6 +1436,115 @@ router.patch('/public/:token/orders/:orderId/status', async (req, res) => {
   }
 });
 
+router.post('/public/:token/request-visibility-extension', async (req, res) => {
+  const token = String(req.params.token || '').trim();
+  if (!token || token.length > 64) {
+    return res.status(400).json({ error: 'Token de lote inválido.' });
+  }
+
+  try {
+    const session = await requireDriverSession(req, token);
+    if (session.error) {
+      return res.status(session.error.status).json(session.error.body);
+    }
+
+    const batch = session.batch;
+    const routeWindow = getRouteWindow(await loadBatchOrders(batch.id), batch.current_order_id, new Map());
+    const visibility = buildVisibilityControl(batch, routeWindow);
+    if (visibility.hasActiveDelivery) {
+      return res.status(400).json({ error: 'Há entrega ativa no lote. A extensão só pode ser pedida quando a rota estiver sem parada atual.' });
+    }
+    if (batch.batch_status !== 'liberado_cozinha') {
+      return res.status(400).json({ error: 'A extensão só pode ser pedida após a liberação da cozinha.' });
+    }
+    if (visibility.extensionExpiresAt && parseTimestamp(visibility.extensionExpiresAt) > Date.now()) {
+      const updated = await loadBatchByToken(token);
+      return res.json({ success: true, alreadyExtended: true, batch: await serializePublicBatch(updated) });
+    }
+    if (visibility.hasPendingExtensionRequest) {
+      const updated = await loadBatchByToken(token);
+      return res.json({ success: true, alreadyRequested: true, batch: await serializePublicBatch(updated) });
+    }
+
+    const conn = await db.raw();
+    await conn.run(
+      `UPDATE delivery_batches
+          SET driver_visibility_extension_requested_at = datetime('now'),
+              updated_at = datetime('now')
+        WHERE id = ?`,
+      [batch.id]
+    );
+    notifyClients('delivery-batch-visibility-requested');
+    const updated = await loadBatchByToken(token);
+    res.json({ success: true, requested: true, batch: await serializePublicBatch(updated) });
+  } catch (err) {
+    console.error('Erro ao solicitar extensão de visibilidade:', err.message);
+    res.status(500).json({ error: 'Erro ao solicitar extensão de visibilidade' });
+  }
+});
+
+router.post('/:id/approve-visibility-extension', requireAdmin, async (req, res) => {
+  const batchId = parsePositiveId(req.params.id);
+  if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });
+
+  try {
+    await ensureDeliveryBatchSchema();
+    const [rows] = await db.execute(
+      `SELECT id, public_token, batch_status, current_order_id,
+              delivery_visibility_grace_started_at,
+              driver_visibility_extension_requested_at,
+              driver_visibility_extension_authorized_at,
+              driver_visibility_extension_expires_at
+         FROM delivery_batches
+        WHERE id = ?`,
+      [batchId]
+    );
+    const batch = rows[0];
+    if (!batch) return res.status(404).json({ error: 'Lote não encontrado.' });
+    if (batch.batch_status !== 'liberado_cozinha') {
+      return res.status(400).json({ error: 'A extensão só faz sentido com o lote já liberado para entrega.' });
+    }
+
+    const routeWindow = getRouteWindow(await loadBatchOrders(batchId), batch.current_order_id, new Map());
+    const visibility = buildVisibilityControl(batch, routeWindow);
+    if (visibility.hasActiveDelivery) {
+      return res.status(400).json({ error: 'Há entrega ativa no lote. Não é necessário autorizar extensão agora.' });
+    }
+    if (!visibility.hasPendingExtensionRequest) {
+      return res.status(400).json({ error: 'Não há pedido pendente de extensão para este lote.' });
+    }
+
+    const conn = await db.raw();
+    await conn.run(
+      `UPDATE delivery_batches
+          SET driver_visibility_extension_requested_at = NULL,
+              driver_visibility_extension_authorized_at = datetime('now'),
+              driver_visibility_extension_expires_at = ?,
+              updated_at = datetime('now')
+        WHERE id = ?`,
+      [toFutureIso(DRIVER_VISIBILITY_EXTENSION_MS), batchId]
+    );
+    notifyClients('delivery-batch-visibility-approved');
+    const updated = await db.execute(
+      `SELECT id, batch_code, public_token, batch_status, origin_address, maps_url,
+              driver_name, driver_whatsapp, driver_cpf, vehicle_model, vehicle_plate,
+              accepted_at, kitchen_confirmed_at, created_at, updated_at,
+              current_order_id, driver_session_token, driver_session_expires_at,
+              delivery_visibility_grace_started_at,
+              driver_visibility_extension_requested_at,
+              driver_visibility_extension_authorized_at,
+              driver_visibility_extension_expires_at
+         FROM delivery_batches
+        WHERE id = ?`,
+      [batchId]
+    );
+    res.json({ success: true, batch: await serializeBatch(updated[0][0]) });
+  } catch (err) {
+    console.error('Erro ao autorizar extensão de visibilidade:', err.message);
+    res.status(500).json({ error: 'Erro ao autorizar extensão de visibilidade' });
+  }
+});
+
 router.get('/:id', requireAdmin, async (req, res) => {
   const batchId = parsePositiveId(req.params.id);
   if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });
@@ -1171,7 +1554,12 @@ router.get('/:id', requireAdmin, async (req, res) => {
     const [rows] = await db.execute(
       `SELECT id, batch_code, public_token, batch_status, origin_address, maps_url,
               driver_name, driver_whatsapp, driver_cpf, vehicle_model, vehicle_plate,
-              accepted_at, kitchen_confirmed_at, created_at, updated_at
+              accepted_at, kitchen_confirmed_at, created_at, updated_at,
+              current_order_id, driver_session_token, driver_session_expires_at,
+              delivery_visibility_grace_started_at,
+              driver_visibility_extension_requested_at,
+              driver_visibility_extension_authorized_at,
+              driver_visibility_extension_expires_at
          FROM delivery_batches
         WHERE id = ?`,
       [batchId]

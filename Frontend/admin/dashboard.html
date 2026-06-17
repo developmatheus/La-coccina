@@ -1455,7 +1455,148 @@
       cursor: pointer;
       font-size: 0.86rem;
     }
+    .delivery-areas-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .delivery-areas-form {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.2fr) minmax(160px, 1.4fr) minmax(110px, 0.8fr) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .delivery-areas-form input[type="text"],
+    .delivery-areas-form input[type="number"] {
+      margin: 0;
+      padding: 9px 12px;
+      font-size: 0.84rem;
+    }
+    .delivery-areas-form label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #bbb;
+    }
+    .delivery-areas-note {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #777;
+      line-height: 1.45;
+    }
+    .delivery-areas-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      background: #0f0f0f;
+    }
+    .delivery-areas-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    .delivery-areas-table th,
+    .delivery-areas-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e1e1e;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .delivery-areas-table th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #777;
+      background: #111;
+    }
+    .delivery-areas-table tr:last-child td {
+      border-bottom: none;
+    }
+    .delivery-areas-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .delivery-area-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid #2a2a2a;
+    }
+    .delivery-area-chip.active {
+      background: rgba(39, 174, 96, 0.16);
+      color: #7ee2a8;
+      border-color: rgba(39, 174, 96, 0.35);
+    }
+    .delivery-area-chip.inactive {
+      background: rgba(255, 255, 255, 0.04);
+      color: #888;
+    }
+    .delivery-area-btn {
+      width: auto;
+      margin: 0;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      background: #171717;
+      color: #c7c7c7;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .delivery-area-btn:hover {
+      border-color: #ffcc00;
+      color: #ffcc00;
+    }
+    .delivery-area-btn.danger:hover {
+      border-color: #e74c3c;
+      color: #ff8c7a;
+    }
+    .delivery-area-suggestions {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #202020;
+    }
+    .delivery-area-suggestions-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .delivery-area-suggestion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      color: #d4d4d4;
+      font-size: 0.76rem;
+    }
+    .delivery-area-suggestion-pill button {
+      width: auto;
+      margin: 0;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
     @media (max-width: 720px) {
+      .delivery-areas-form {
+        grid-template-columns: 1fr;
+      }
       .admin-panel { padding: 16px; }
       .admin-header-shell { top: 8px; }
       .admin-header { padding: 8px; }
@@ -1529,6 +1670,7 @@
           <a id="btn-kanban-link" class="admin-utility-btn" href="kanban.html" style="display:none;">📋 Kanban</a>
           <a class="admin-utility-btn current-page" href="dashboard.html" aria-current="page">📊 Dashboard</a>
           <a class="admin-utility-btn" href="cadastros.html">🧾 Cadastros</a>
+          <a id="btn-local-service-link" class="admin-utility-btn" href="../local-service.html" style="display:none;">📱 Atendimento Local</a>
           <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
           <button id="btn-tool-panel" class="admin-utility-btn" onclick="toggleToolPanel()" title="Painel da ferramenta" aria-label="Configurações avançadas">⚙️</button>
           <button onclick="toggleRestaurantStatus()" id="status-btn">
@@ -1620,6 +1762,8 @@
           <div class="ops-metric-card"><span>Operacional aberto</span><strong id="finance-open">-</strong></div>
           <div class="ops-metric-card"><span>Pedidos</span><strong id="finance-orders-count">-</strong></div>
           <div class="ops-metric-card"><span>Ticket medio</span><strong id="finance-ticket">-</strong></div>
+          <div class="ops-metric-card"><span>Total local</span><strong id="finance-local-total">-</strong></div>
+          <div class="ops-metric-card"><span>Total delivery</span><strong id="finance-delivery-total">-</strong></div>
         </div>
 
         <div class="ops-finance-grid">
@@ -1632,6 +1776,18 @@
           <section class="ops-panel">
             <h3>Status dos pedidos</h3>
             <div class="ops-list" id="finance-status-breakdown">
+              <div class="ops-empty">Carregando...</div>
+            </div>
+          </section>
+          <section class="ops-panel">
+            <h3>Canal de atendimento</h3>
+            <div class="ops-list" id="finance-channel-breakdown">
+              <div class="ops-empty">Carregando...</div>
+            </div>
+          </section>
+          <section class="ops-panel">
+            <h3>Garçons</h3>
+            <div class="ops-list" id="finance-waiter-breakdown">
               <div class="ops-empty">Carregando...</div>
             </div>
           </section>
@@ -1662,6 +1818,8 @@
               <tr>
                 <th>Pedido</th>
                 <th>Cliente</th>
+                <th>Canal</th>
+                <th>Comanda</th>
                 <th>Data</th>
                 <th>Status</th>
                 <th>Pagamento</th>
@@ -1787,6 +1945,83 @@
                 </div>
               </div>
               <p id="cfg-driver-cancel-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Controles visiveis no PWA</strong>
+                <span>Permite esconder a escolha do app de navegacao e o botao de ligar quando voce quiser uma interface mais enxuta para o motoboy.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start;">
+                <div class="tool-choice-row" style="flex-direction:column; align-items:flex-start;">
+                  <label><input type="checkbox" id="cfg-show-route-provider-picker" style="width:auto; margin-right:8px;"> Mostrar seletor do app de rota</label>
+                  <label><input type="checkbox" id="cfg-show-driver-call-button" style="width:auto; margin-right:8px;"> Mostrar botao Ligar</label>
+                </div>
+                <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
+              </div>
+              <p id="cfg-delivery-visibility-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Areas de entrega</strong>
+                <span>Use o endereco-base e um raio para gerar sugestoes de cidade/bairro com Google Maps. Revise a lista antes de salvar; o cliente vera apenas os itens ativos.</span>
+              </div>
+              <div class="delivery-areas-grid">
+                <div class="delivery-areas-form">
+                  <input type="text" id="cfg-area-origin-address" placeholder="Endereco-base para sugestoes">
+                  <input type="number" id="cfg-area-radius-km" min="0.5" max="30" step="0.5" placeholder="Raio em km">
+                  <input type="number" id="cfg-area-default-fee" min="0" step="0.01" placeholder="Frete padrao">
+                  <label><input type="checkbox" id="cfg-area-default-active" checked style="width:auto; margin:0;"> Ativo por padrao</label>
+                  <button onclick="suggestDeliveryAreas()" class="btn-tool-save">Sugerir bairros/cidades</button>
+                </div>
+                <p class="delivery-areas-note">A descoberta por raio e assistida e pode variar conforme os nomes retornados pelo Google. O admin revisa, ajusta frete e decide o que fica ativo antes de salvar.</p>
+                <div id="cfg-area-suggestions" class="delivery-area-suggestions" style="display:none;">
+                  <div class="tool-choice-row" style="justify-content:space-between; align-items:flex-start;">
+                    <div>
+                      <strong style="display:block; color:#ddd; font-size:0.84rem;">Sugestoes encontradas</strong>
+                      <span id="cfg-area-suggestions-meta" style="font-size:0.76rem; color:#777;">-</span>
+                    </div>
+                    <div class="delivery-areas-actions">
+                      <button type="button" class="delivery-area-btn" onclick="acceptAllSuggestedDeliveryAreas()">Aceitar todas</button>
+                      <button type="button" class="delivery-area-btn danger" onclick="clearSuggestedDeliveryAreas()">Limpar</button>
+                    </div>
+                  </div>
+                  <div id="cfg-area-suggestions-list" class="delivery-area-suggestions-list"></div>
+                </div>
+                <div class="delivery-areas-form">
+                  <input type="hidden" id="cfg-area-edit-id">
+                  <input type="text" id="cfg-area-city" placeholder="Cidade">
+                  <input type="text" id="cfg-area-district" placeholder="Bairro">
+                  <input type="number" id="cfg-area-fee" min="0" step="0.01" placeholder="Frete">
+                  <label><input type="checkbox" id="cfg-area-active" checked style="width:auto; margin:0;"> Ativo</label>
+                  <div class="delivery-areas-actions">
+                    <button type="button" class="btn-tool-save" onclick="upsertDeliveryArea()">Adicionar / atualizar</button>
+                    <button type="button" class="btn-tool-reset" onclick="resetDeliveryAreaForm()">Limpar</button>
+                  </div>
+                </div>
+                <div class="delivery-areas-table-wrap">
+                  <table class="delivery-areas-table">
+                    <thead>
+                      <tr>
+                        <th>Cidade</th>
+                        <th>Bairro</th>
+                        <th>Frete</th>
+                        <th>Status</th>
+                        <th>Acoes</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cfg-delivery-areas-body">
+                      <tr><td colspan="5" class="ops-empty">Nenhuma area cadastrada.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tool-choice-row" style="justify-content:space-between; align-items:center;">
+                  <span id="cfg-delivery-areas-summary" style="font-size:0.76rem; color:#777;">0 areas cadastradas.</span>
+                  <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar areas e configuracoes</button>
+                </div>
+                <p id="cfg-delivery-areas-msg" class="tool-cfg-msg"></p>
+              </div>
             </div>
           </div>
         </div>
@@ -2467,6 +2702,18 @@
 
     function getAdminToken() {
       return sessionStorage.getItem('adminToken');
+    }
+
+    function getLocalServiceLaunchUrl() {
+      const token = getAdminToken();
+      return token ? `../local-service.html?token=${encodeURIComponent(token)}` : '../local-service.html';
+    }
+
+    function updateLocalServiceLinks(enabled = false) {
+      const link = document.getElementById('btn-local-service-link');
+      if (!link) return;
+      link.href = getLocalServiceLaunchUrl();
+      link.style.display = enabled ? 'inline-flex' : 'none';
     }
 
     function logoutAdmin() {
@@ -3157,6 +3404,220 @@
       });
     }
 
+    let deliveryAreasState = [];
+    let deliveryAreaSuggestionsState = [];
+
+    function normalizeDeliveryArea(area, index = 0) {
+      const city = String(area?.city || '').trim().replace(/\s+/g, ' ');
+      const district = String(area?.district || '').trim().replace(/\s+/g, ' ');
+      const fee = Number.parseFloat(String(area?.fee ?? '0').replace(',', '.'));
+      return {
+        id: String(area?.id || `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`),
+        city,
+        district,
+        fee: Number.isFinite(fee) && fee >= 0 ? Number(fee.toFixed(2)) : 0,
+        active: area?.active !== false,
+      };
+    }
+
+    function resetDeliveryAreaForm() {
+      document.getElementById('cfg-area-edit-id').value = '';
+      document.getElementById('cfg-area-city').value = '';
+      document.getElementById('cfg-area-district').value = '';
+      document.getElementById('cfg-area-fee').value = '';
+      document.getElementById('cfg-area-active').checked = true;
+    }
+
+    function updateDeliveryAreasSummary() {
+      const activeCount = deliveryAreasState.filter((area) => area.active).length;
+      document.getElementById('cfg-delivery-areas-summary').textContent =
+        `${deliveryAreasState.length} area(s) cadastrada(s), ${activeCount} ativa(s).`;
+    }
+
+    function renderDeliveryAreas() {
+      const body = document.getElementById('cfg-delivery-areas-body');
+      if (!deliveryAreasState.length) {
+        body.innerHTML = '<tr><td colspan="5" class="ops-empty">Nenhuma area cadastrada.</td></tr>';
+        updateDeliveryAreasSummary();
+        return;
+      }
+
+      body.innerHTML = deliveryAreasState.map((area) => `
+        <tr>
+          <td>${esc(area.city)}</td>
+          <td>${esc(area.district)}</td>
+          <td>R$ ${Number(area.fee || 0).toFixed(2)}</td>
+          <td><span class="delivery-area-chip ${area.active ? 'active' : 'inactive'}">${area.active ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <div class="delivery-areas-actions">
+              <button type="button" class="delivery-area-btn" onclick="editDeliveryArea('${esc(area.id)}')">Editar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleDeliveryAreaActive('${esc(area.id)}')">${area.active ? 'Desativar' : 'Ativar'}</button>
+              <button type="button" class="delivery-area-btn danger" onclick="removeDeliveryArea('${esc(area.id)}')">Remover</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      updateDeliveryAreasSummary();
+    }
+
+    function renderDeliveryAreaSuggestions(metaText = '') {
+      const wrapper = document.getElementById('cfg-area-suggestions');
+      const list = document.getElementById('cfg-area-suggestions-list');
+      const meta = document.getElementById('cfg-area-suggestions-meta');
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      meta.textContent = metaText || `${deliveryAreaSuggestionsState.length} sugestao(oes) pronta(s) para revisao.`;
+      if (!deliveryAreaSuggestionsState.length) {
+        wrapper.style.display = 'none';
+        list.innerHTML = '';
+        if (!metaText) msg.textContent = '';
+        return;
+      }
+      wrapper.style.display = 'grid';
+      list.innerHTML = deliveryAreaSuggestionsState.map((area) => `
+        <span class="delivery-area-suggestion-pill">
+          ${esc(`${area.city} - ${area.district}`)}
+          <button type="button" onclick="acceptSuggestedDeliveryArea('${esc(area.id)}')">Aceitar</button>
+          <button type="button" onclick="discardSuggestedDeliveryArea('${esc(area.id)}')">X</button>
+        </span>
+      `).join('');
+    }
+
+    function upsertDeliveryArea(areaOverride = null) {
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      const baseArea = areaOverride || {
+        id: document.getElementById('cfg-area-edit-id').value || '',
+        city: document.getElementById('cfg-area-city').value,
+        district: document.getElementById('cfg-area-district').value,
+        fee: document.getElementById('cfg-area-fee').value,
+        active: document.getElementById('cfg-area-active').checked,
+      };
+      const area = normalizeDeliveryArea(baseArea, deliveryAreasState.length);
+
+      if (!area.city || !area.district) {
+        msg.textContent = 'Informe cidade e bairro para adicionar a area.';
+        return;
+      }
+
+      const duplicateIndex = deliveryAreasState.findIndex((item) =>
+        item.id !== area.id &&
+        item.city.toLowerCase() === area.city.toLowerCase() &&
+        item.district.toLowerCase() === area.district.toLowerCase()
+      );
+      if (duplicateIndex >= 0) {
+        msg.textContent = 'Ja existe uma area com essa combinacao de cidade e bairro.';
+        return;
+      }
+
+      const currentIndex = deliveryAreasState.findIndex((item) => item.id === area.id);
+      if (currentIndex >= 0) {
+        deliveryAreasState[currentIndex] = area;
+      } else {
+        deliveryAreasState.push(area);
+      }
+
+      deliveryAreasState.sort((a, b) => `${a.city} ${a.district}`.localeCompare(`${b.city} ${b.district}`, 'pt-BR'));
+      renderDeliveryAreas();
+      resetDeliveryAreaForm();
+      msg.textContent = 'Area pronta para salvar nas configuracoes.';
+    }
+
+    function editDeliveryArea(areaId) {
+      const area = deliveryAreasState.find((item) => item.id === areaId);
+      if (!area) return;
+      document.getElementById('cfg-area-edit-id').value = area.id;
+      document.getElementById('cfg-area-city').value = area.city;
+      document.getElementById('cfg-area-district').value = area.district;
+      document.getElementById('cfg-area-fee').value = Number(area.fee || 0).toFixed(2);
+      document.getElementById('cfg-area-active').checked = area.active;
+    }
+
+    function toggleDeliveryAreaActive(areaId) {
+      deliveryAreasState = deliveryAreasState.map((area) =>
+        area.id === areaId ? { ...area, active: !area.active } : area
+      );
+      renderDeliveryAreas();
+      document.getElementById('cfg-delivery-areas-msg').textContent = 'Status da area atualizado. Salve para publicar.';
+    }
+
+    function removeDeliveryArea(areaId) {
+      deliveryAreasState = deliveryAreasState.filter((area) => area.id !== areaId);
+      renderDeliveryAreas();
+      document.getElementById('cfg-delivery-areas-msg').textContent = 'Area removida da grade local. Salve para confirmar.';
+    }
+
+    function clearSuggestedDeliveryAreas() {
+      deliveryAreaSuggestionsState = [];
+      renderDeliveryAreaSuggestions('');
+    }
+
+    function discardSuggestedDeliveryArea(areaId) {
+      deliveryAreaSuggestionsState = deliveryAreaSuggestionsState.filter((area) => area.id !== areaId);
+      renderDeliveryAreaSuggestions();
+    }
+
+    function acceptSuggestedDeliveryArea(areaId) {
+      const area = deliveryAreaSuggestionsState.find((item) => item.id === areaId);
+      if (!area) return;
+      upsertDeliveryArea(area);
+      discardSuggestedDeliveryArea(areaId);
+    }
+
+    function acceptAllSuggestedDeliveryAreas() {
+      const pending = [...deliveryAreaSuggestionsState];
+      pending.forEach((area) => upsertDeliveryArea(area));
+      clearSuggestedDeliveryAreas();
+    }
+
+    async function suggestDeliveryAreas() {
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      const originAddress = document.getElementById('cfg-area-origin-address').value.trim() || document.getElementById('cfg-delivery-origin').value.trim();
+      const radiusKm = Number.parseFloat(document.getElementById('cfg-area-radius-km').value);
+      const defaultFee = Number.parseFloat(String(document.getElementById('cfg-area-default-fee').value || '0').replace(',', '.'));
+      const defaultActive = document.getElementById('cfg-area-default-active').checked;
+
+      if (!originAddress || originAddress.length < 8) {
+        msg.textContent = 'Informe um endereco-base valido para buscar sugestoes.';
+        return;
+      }
+      if (!Number.isFinite(radiusKm) || radiusKm < 0.5 || radiusKm > 30) {
+        msg.textContent = 'Informe um raio entre 0.5 km e 30 km.';
+        return;
+      }
+
+      msg.textContent = 'Gerando sugestoes com Google Maps...';
+      try {
+        const res = await apiFetch(`${API_BASE}/api/settings/admin/delivery-areas/suggest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ originAddress, radiusKm })
+        });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao gerar sugestoes');
+          msg.textContent = 'Nao foi possivel gerar sugestoes.';
+          return;
+        }
+        const data = await res.json();
+        deliveryAreaSuggestionsState = Array.isArray(data.suggestions)
+          ? data.suggestions.map((area, index) => normalizeDeliveryArea({
+              ...area,
+              fee: Number.isFinite(defaultFee) && defaultFee >= 0 ? defaultFee : 0,
+              active: defaultActive,
+            }, index))
+          : [];
+        renderDeliveryAreaSuggestions(
+          deliveryAreaSuggestionsState.length
+            ? `${deliveryAreaSuggestionsState.length} sugestao(oes) encontradas a partir de ${data.origin?.address || originAddress}.`
+            : 'Nenhuma sugestao encontrada para esse endereco/raio.'
+        );
+        msg.textContent = deliveryAreaSuggestionsState.length
+          ? 'Revise as sugestoes antes de salvar.'
+          : 'Nenhuma sugestao encontrada. Ajuste o endereco ou o raio.';
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao consultar sugestoes.';
+      }
+    }
+
     function syncDeliveryManagementUi(enabled, mapsConfigured = false) {
       const active = enabled === true;
       const mapsStatus = document.getElementById('cfg-maps-status');
@@ -3164,6 +3625,12 @@
       document.querySelectorAll('input[name="cfg-driver-cancel-mode"]').forEach((input) => {
         input.disabled = !active;
       });
+      document.getElementById('cfg-show-route-provider-picker').disabled = !active;
+      document.getElementById('cfg-show-driver-call-button').disabled = !active;
+      document.getElementById('cfg-area-origin-address').disabled = !active;
+      document.getElementById('cfg-area-radius-km').disabled = !active;
+      document.getElementById('cfg-area-default-fee').disabled = !active;
+      document.getElementById('cfg-area-default-active').disabled = !active;
       if (!active) {
         mapsStatus.textContent = 'Google Maps: inativo com a gestao de entrega desligada';
         mapsStatus.style.color = '#9f8c7d';
@@ -3183,6 +3650,15 @@
         document.getElementById('cfg-delivery-management-enabled').checked = data.deliveryManagementEnabled === true;
         document.getElementById('cfg-delivery-origin').value = data.restaurantOriginAddress || '';
         setDriverCancellationMode(data.driverCancellationMode || 'auto');
+        document.getElementById('cfg-show-route-provider-picker').checked = data.showRouteProviderPicker === true;
+        document.getElementById('cfg-show-driver-call-button').checked = data.showDriverCallButton === true;
+        document.getElementById('cfg-area-origin-address').value = data.restaurantOriginAddress || '';
+        deliveryAreasState = Array.isArray(data.deliveryAreas)
+          ? data.deliveryAreas.map((area, index) => normalizeDeliveryArea(area, index))
+          : [];
+        updateLocalServiceLinks(data.localServiceSettings?.enabled === true);
+        renderDeliveryAreas();
+        clearSuggestedDeliveryAreas();
         syncDeliveryManagementUi(data.deliveryManagementEnabled === true, data.googleMapsApiKeyConfigured === true);
       } catch (e) {
         document.getElementById('cfg-maps-status').textContent = 'Google Maps: erro ao verificar';
@@ -3194,9 +3670,13 @@
       const deliveryManagementEnabled = isDeliveryManagementEnabled();
       const restaurantOriginAddress = document.getElementById('cfg-delivery-origin').value.trim();
       const driverCancellationMode = getSelectedDriverCancellationMode();
+      const showRouteProviderPicker = document.getElementById('cfg-show-route-provider-picker').checked;
+      const showDriverCallButton = document.getElementById('cfg-show-driver-call-button').checked;
       const msg = document.getElementById('cfg-delivery-msg');
       const cancelMsg = document.getElementById('cfg-driver-cancel-msg');
       const deliveryManagementMsg = document.getElementById('cfg-delivery-management-msg');
+      const visibilityMsg = document.getElementById('cfg-delivery-visibility-msg');
+      const deliveryAreasMsg = document.getElementById('cfg-delivery-areas-msg');
       if (deliveryManagementEnabled && restaurantOriginAddress.length < 8) {
         msg.textContent = 'Informe um endereço-base válido para entregas.';
         return;
@@ -3206,7 +3686,14 @@
         const res = await apiFetch(`${API_BASE}/api/settings/admin`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deliveryManagementEnabled, restaurantOriginAddress, driverCancellationMode })
+          body: JSON.stringify({
+            deliveryManagementEnabled,
+            restaurantOriginAddress,
+            driverCancellationMode,
+            showRouteProviderPicker,
+            showDriverCallButton,
+            deliveryAreas: deliveryAreasState,
+          })
         });
         if (!res.ok) {
           await handleApiError(res, 'Erro ao salvar endereço-base');
@@ -3223,9 +3710,15 @@
             ? '✅ Motoboy pode cancelar automaticamente.'
             : '✅ Cancelamentos do motoboy vao para confirmacao admin.')
           : 'Gestao de entrega inativa: cancelamento do motoboy desabilitado.';
+        visibilityMsg.textContent = deliveryManagementEnabled
+          ? `✅ PWA atualizado: seletor de rota ${showRouteProviderPicker ? 'visivel' : 'oculto'} e botao ligar ${showDriverCallButton ? 'visivel' : 'oculto'}.`
+          : 'Gestao de entrega inativa: controles do PWA ficam ocultos.';
+        deliveryAreasMsg.textContent = `✅ ${deliveryAreasState.length} area(s) de entrega salvas.`;
         setTimeout(() => { msg.textContent = ''; }, 3000);
         setTimeout(() => { deliveryManagementMsg.textContent = ''; }, 3000);
         setTimeout(() => { cancelMsg.textContent = ''; }, 3000);
+        setTimeout(() => { visibilityMsg.textContent = ''; }, 3000);
+        setTimeout(() => { deliveryAreasMsg.textContent = ''; }, 3000);
         loadDeliverySettings();
       } catch (e) {
         msg.textContent = 'Erro de conexão ao salvar endereço-base.';
@@ -3465,8 +3958,16 @@
         document.getElementById('finance-open').textContent = formatCurrency(summary.openOperationalValue);
         document.getElementById('finance-orders-count').textContent = String(summary.ordersCount || 0);
         document.getElementById('finance-ticket').textContent = formatCurrency(summary.averageTicket);
+        const serviceChannelBreakdown = Array.isArray(summary.serviceChannelBreakdown) ? summary.serviceChannelBreakdown : [];
+        const waiterBreakdown = Array.isArray(summary.waiterBreakdown) ? summary.waiterBreakdown : [];
+        const localRow = serviceChannelBreakdown.find((item) => String(item.label || '').toLowerCase() === 'local');
+        const deliveryRow = serviceChannelBreakdown.find((item) => String(item.label || '').toLowerCase() === 'delivery');
+        document.getElementById('finance-local-total').textContent = formatCurrency(localRow?.value || 0);
+        document.getElementById('finance-delivery-total').textContent = formatCurrency(deliveryRow?.value || 0);
         document.getElementById('finance-payment-breakdown').innerHTML = renderBreakdownList(summary.paymentBreakdown);
         document.getElementById('finance-status-breakdown').innerHTML = renderBreakdownList(summary.statusBreakdown, (item) => `${Number(item.count ?? item.value ?? 0)} pedidos`);
+        document.getElementById('finance-channel-breakdown').innerHTML = renderBreakdownList(serviceChannelBreakdown);
+        document.getElementById('finance-waiter-breakdown').innerHTML = renderBreakdownList(waiterBreakdown);
         document.getElementById('finance-top-customers').innerHTML = renderBreakdownList(summary.topCustomers);
         document.getElementById('finance-top-products').innerHTML = renderTopProducts(summary.topProducts);
         document.getElementById('finance-daily-series').innerHTML = renderBreakdownList(summary.dailySeries);
@@ -3476,6 +3977,8 @@
           <tr>
             <td><strong>#${item.id}</strong></td>
             <td>${esc(item.customer || 'Cliente')}</td>
+            <td>${esc(item.serviceChannel || 'delivery')}</td>
+            <td>${esc(item.commandCode || '-')}</td>
             <td>${formatDateOnly(item.createdAt)}</td>
             <td><span class="ops-badge ${getStatusBadgeClass(item.status, item.deliveryFollowupState)}">${esc(item.deliveryFollowupState || item.status)}</span></td>
             <td>${esc(item.payment || '-')}</td>
@@ -3483,13 +3986,14 @@
             <td>${item.batchCode ? `<span class="ops-badge">${esc(item.batchCode)}</span>` : '-'}</td>
             <td>${esc(item.driverName || '-')}</td>
           </tr>
-        `).join('') : renderEmptyState('Nenhum pedido encontrado para os filtros atuais.', 8);
+        `).join('') : renderEmptyState('Nenhum pedido encontrado para os filtros atuais.', 10);
       } catch (e) {
-        detailsBody.innerHTML = renderEmptyState('Erro de conexão ao carregar dados financeiros.', 8);
+        detailsBody.innerHTML = renderEmptyState('Erro de conexão ao carregar dados financeiros.', 10);
       }
     }
 
     window.onload = () => {
+      updateLocalServiceLinks();
       syncAdminThemeUi();
       loadRestaurantStatus();
       loadConfig();

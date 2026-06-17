@@ -1,0 +1,24 @@
+{
+  "id": "../../local-service.html",
+  "name": "La Coccina Atendimento Local",
+  "short_name": "Atendimento",
+  "description": "PWA operacional para atendimento local em tablet com mesa, garçom e comanda.",
+  "start_url": "../../local-service.html",
+  "scope": "../../",
+  "display": "standalone",
+  "orientation": "landscape",
+  "theme_color": "#d97706",
+  "background_color": "#0b0b0d",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

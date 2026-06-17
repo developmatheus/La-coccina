@@ -334,13 +334,20 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 10px;
+      min-width: 26px;
+      height: 26px;
+      justify-content: center;
+      padding: 0 8px;
       border-radius: 999px;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: #fde68a;
       border: 1px solid rgba(245, 158, 11, 0.28);
       background: rgba(146, 64, 14, 0.24);
+    }
+
+    #split-guide, #mode-badge, #batch-copy, #current-stop-copy, .eyebrow {
+      display: none;
     }
 
     .section-head {
@@ -381,7 +388,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 420px;
+      max-height: 520px;
       overflow: auto;
       padding-right: 4px;
     }
@@ -476,30 +483,6 @@
       line-height: 1.45;
     }
 
-    .support-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .support-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 0.84rem;
-    }
-
-    .support-row span:first-child {
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    .support-row span:last-child {
-      text-align: right;
-      word-break: break-word;
-    }
-
     .field input, .field textarea {
       width: 100%;
       border-radius: 14px;
@@ -549,7 +532,7 @@
     }
 
     .action-row-nav {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     }
 
     .fixed-actions .btn, .fixed-actions .link-btn {
@@ -561,12 +544,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 54px;
-      border-radius: 14px;
+      min-height: 44px;
+      min-width: 58px;
+      padding: 0 10px;
+      border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(255, 255, 255, 0.05);
-      font-weight: 800;
-      letter-spacing: 0.02em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
       color: var(--text);
     }
 
@@ -581,6 +567,10 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) 56px;
       gap: 8px;
+    }
+
+    .route-provider-wrap.single-provider {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .route-provider-toggle {
@@ -626,7 +616,6 @@
 
     .deferred-panel {
       position: absolute;
-      left: 0;
       right: 0;
       bottom: calc(100% + 10px);
       display: none;
@@ -638,6 +627,7 @@
       background: rgba(11, 11, 14, 0.98);
       box-shadow: 0 22px 42px rgba(0, 0, 0, 0.38);
       max-height: min(42vh, 340px);
+      width: min(calc(100vw - 16px), 360px);
       overflow: hidden;
     }
 
@@ -712,6 +702,27 @@
       color: var(--muted);
       text-align: center;
       line-height: 1.45;
+    }
+
+    .driver-deferred-fab {
+      position: absolute;
+      right: 8px;
+      bottom: calc(100% + 12px);
+      min-width: 42px;
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: rgba(146, 64, 14, 0.92);
+      color: #fde68a;
+      font-size: 0.76rem;
+      font-weight: 800;
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.32);
+      z-index: 31;
+    }
+
+    .driver-deferred-fab.hidden {
+      display: none;
     }
 
     .modal {
@@ -925,13 +936,10 @@
     <main id="app" class="hidden">
       <section class="card hero">
         <div>
-          <div class="eyebrow">Operacao em campo</div>
           <div class="badge-row" id="hero-badges"></div>
           <h1 id="batch-title">Lote</h1>
-          <p id="batch-copy">Carregando dados do lote...</p>
           <div class="mini-row" style="margin-top:12px;">
             <span class="badge info" id="live-badge">Sincronizando...</span>
-            <span class="badge brand" id="mode-badge">Modo compacto</span>
             <span class="pending-chip hidden" id="pending-chip">0 pendencias</span>
           </div>
         </div>
@@ -951,7 +959,6 @@
                 <h2 id="current-stop-title">Entrega atual</h2>
                 <span class="hint-icon" tabindex="0" role="note" id="current-stop-help" aria-label="Ajuda da entrega atual" data-tooltip="Use Maps ou Waze ao lado e confirme a entrega sem sair desta tela.">i</span>
               </div>
-              <p id="current-stop-copy">Use Maps ou Waze ao lado e confirme a entrega sem sair desta tela.</p>
             </div>
             <div class="badge-row">
               <span class="badge info" id="stop-status-badge">Carregando</span>
@@ -959,6 +966,12 @@
           </div>
 
           <div id="route-lock" class="status-lock hidden"></div>
+          <div id="privacy-lock" class="status-lock hidden">
+            <div id="privacy-lock-copy">A visualizacao desta tela sera limitada quando nao houver entrega ativa.</div>
+            <div class="mini-row" style="margin-top:10px;">
+              <button type="button" class="btn small hidden" id="privacy-request-btn">Pedir +10 min</button>
+            </div>
+          </div>
 
           <div id="current-stop-content">
             <div class="current-stop-header">
@@ -974,18 +987,8 @@
             <div class="details-grid">
               <div class="detail"><span>Telefone</span><a href="#" id="phone-link">-</a></div>
               <div class="detail"><span>WhatsApp</span><a href="#" id="wa-link" target="_blank" rel="noopener">-</a></div>
-              <div class="detail"><span>Pagamento</span><strong id="stop-payment">-</strong></div>
-              <div class="detail"><span>Valor</span><strong id="stop-total">-</strong></div>
-              <div class="detail"><span>Observacao</span><strong id="stop-obs">Sem observacao</strong></div>
-              <div class="detail"><span>Ultima tentativa</span><strong id="stop-attempt">-</strong></div>
               <div class="detail"><span>Situacao operacional</span><strong id="stop-followup-text">Em rota</strong></div>
-              <div class="detail"><span>Tentativas</span><strong id="stop-attempt-count">0</strong></div>
-              <div class="detail full">
-                <span>Historico recente</span>
-                <div class="attempt-timeline" id="stop-attempt-timeline">
-                  <div class="attempt-item-note">As ultimas tentativas aparecem aqui assim que a operacao avancar.</div>
-                </div>
-              </div>
+              <div class="detail"><span>Visualizacao</span><strong id="stop-visibility-window">Enquanto houver entrega ativa</strong></div>
             </div>
           </div>
         </section>
@@ -994,8 +997,8 @@
           <div class="section-head">
             <div>
               <div class="title-with-help">
-                <h3>Proximas entregas</h3>
-                <span class="hint-icon" tabindex="0" role="note" aria-label="Ajuda das proximas entregas" data-tooltip="ROTA abre a entrega atual e as proximas 3 pendentes no provedor selecionado.">i</span>
+                <h3>Rota completa</h3>
+                <span class="hint-icon" tabindex="0" role="note" aria-label="Ajuda da rota" data-tooltip="A rota mostra todas as entregas disponiveis no lote.">i</span>
               </div>
             </div>
             <button type="button" class="btn small" id="retry-btn">Reenviar</button>
@@ -1043,27 +1046,6 @@
           </form>
         </section>
 
-        <aside class="card" id="split-guide">
-          <div class="section-head">
-            <div>
-              <div class="title-with-help">
-                <h3>Uso em Android</h3>
-                <span class="hint-icon" tabindex="0" role="note" aria-label="Ajuda do uso em Android" data-tooltip="Ative a tela dividida manualmente com o navegador e o app de navegacao para operar em campo.">i</span>
-              </div>
-            </div>
-          </div>
-          <div class="support-list">
-            <div class="support-row"><span>Lote</span><span id="support-batch-code">-</span></div>
-            <div class="support-row"><span>Status</span><span id="support-batch-status">-</span></div>
-            <div class="support-row"><span>Origem</span><span id="support-origin">-</span></div>
-            <div class="support-row"><span>Motoboy</span><span id="support-driver">-</span></div>
-            <div class="support-row"><span>Conexao</span><span id="support-connection">-</span></div>
-          </div>
-          <div class="mini-row">
-            <button type="button" class="btn small" id="copy-link-btn">Copiar link</button>
-            <button type="button" class="btn small ghost hidden" id="support-install-btn">Instalar</button>
-          </div>
-        </aside>
       </section>
     </main>
   </div>
@@ -1084,6 +1066,7 @@
         <div class="deferred-empty">Nenhum pedido adiado ou cancelado neste lote.</div>
       </div>
     </div>
+    <button type="button" class="driver-deferred-fab hidden" id="deferred-fab">Adiados</button>
     <div class="fixed-actions-inner">
       <div class="action-row">
         <div class="route-provider-wrap">
@@ -1104,7 +1087,6 @@
         <button type="button" class="btn" id="prev-btn">Anterior</button>
         <button type="button" class="action-progress" id="progress-btn" disabled>1/X</button>
         <button type="button" class="btn" id="next-btn">Proximo</button>
-        <button type="button" class="btn" id="deferred-btn">Adiados</button>
       </div>
     </div>
   </div>
@@ -1325,9 +1307,7 @@
         address_lng: hasUsableCoords(lat, lng) ? lng : null,
         status: String(stop.status || ''),
         followupState: String(stop.followupState || ''),
-        attemptCount: Number(stop.attemptCount || 0),
-        lastAttemptAt: String(stop.lastAttemptAt || ''),
-        lastAttemptReason: String(stop.lastAttemptReason || ''),
+        phone: String(stop.phone || ''),
       };
     }
 
@@ -1366,12 +1346,28 @@
         operationConfig: {
           deliveryManagementEnabled: batch.operationConfig?.deliveryManagementEnabled !== false,
           driverCancellationMode: String(batch.operationConfig?.driverCancellationMode || ''),
+          showRouteProviderPicker: batch.operationConfig?.showRouteProviderPicker === true,
+          showDriverCallButton: batch.operationConfig?.showDriverCallButton === true,
+        },
+        privacy: {
+          isVisible: batch.privacy?.isVisible === true,
+          hasActiveDelivery: batch.privacy?.hasActiveDelivery === true,
+          visibilityMode: String(batch.privacy?.visibilityMode || ''),
+          visibleUntil: String(batch.privacy?.visibleUntil || ''),
+          restrictedReason: String(batch.privacy?.restrictedReason || ''),
+          extensionRequestedAt: String(batch.privacy?.extensionRequestedAt || ''),
+          extensionAuthorizedAt: String(batch.privacy?.extensionAuthorizedAt || ''),
+          extensionExpiresAt: String(batch.privacy?.extensionExpiresAt || ''),
+          canRequestExtension: batch.privacy?.canRequestExtension === true,
+          hasPendingExtensionRequest: batch.privacy?.hasPendingExtensionRequest === true,
         },
         driver: {
           name: String(batch.driver?.name || ''),
           whatsapp: String(batch.driver?.whatsapp || ''),
           vehiclePlate: String(batch.driver?.vehiclePlate || ''),
         },
+        stopCount: Number(batch.stopCount || 0),
+        deliveredCount: Number(batch.deliveredCount || 0),
         orders: compactOrders,
       });
     }
@@ -1429,11 +1425,38 @@
       return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString('pt-BR');
     }
 
-    function currentModeLabel() {
-      if (queryParam('modo') === 'compacto') return 'Modo compacto';
-      if (window.innerHeight <= 450) return 'Tela dividida';
-      if (window.innerWidth <= 820) return 'Compacto automatico';
-      return 'Motorista';
+    function parseClientDate(value) {
+      if (!value) return 0;
+      const normalized = String(value).includes('Z') ? String(value) : `${String(value)}Z`;
+      const timestamp = Date.parse(normalized);
+      return Number.isFinite(timestamp) ? timestamp : 0;
+    }
+
+    function getPrivacyState() {
+      const privacy = currentBatch?.privacy || {};
+      const visibleUntilTs = parseClientDate(privacy.visibleUntil);
+      if (privacy.isVisible && visibleUntilTs && visibleUntilTs <= Date.now()) {
+        return {
+          ...privacy,
+          isVisible: false,
+          visibilityMode: 'restricted',
+          restrictedReason: privacy.hasPendingExtensionRequest
+            ? 'A visualizacao foi bloqueada. O pedido de extensao aguarda autorizacao do restaurante.'
+            : 'Sem entrega ativa. A visualizacao dos dados foi bloqueada para atender a LGPD.',
+        };
+      }
+      return {
+        isVisible: privacy.isVisible === true,
+        hasActiveDelivery: privacy.hasActiveDelivery === true,
+        visibilityMode: privacy.visibilityMode || '',
+        visibleUntil: privacy.visibleUntil || '',
+        restrictedReason: privacy.restrictedReason || '',
+        extensionRequestedAt: privacy.extensionRequestedAt || '',
+        extensionAuthorizedAt: privacy.extensionAuthorizedAt || '',
+        extensionExpiresAt: privacy.extensionExpiresAt || '',
+        canRequestExtension: privacy.canRequestExtension === true,
+        hasPendingExtensionRequest: privacy.hasPendingExtensionRequest === true,
+      };
     }
 
     function renderNotice(kind, message) {
@@ -1454,12 +1477,11 @@
     }
 
     function setLiveState(isOnline, stale) {
-      const label = stale ? 'Exibindo ultimo lote salvo' : isOnline ? 'Sincronizado com o servidor' : 'Sem internet';
+      const label = stale ? 'Offline' : isOnline ? 'Online' : 'Offline';
       const css = stale ? 'warn' : isOnline ? 'success' : 'danger';
       const badge = document.getElementById('live-badge');
       badge.className = `badge ${css}`;
       badge.textContent = label;
-      document.getElementById('support-connection').textContent = label;
     }
 
     function ordersSorted() {
@@ -1489,6 +1511,14 @@
 
     function isDeliveryManagementEnabled() {
       return currentBatch?.operationConfig?.deliveryManagementEnabled !== false;
+    }
+
+    function shouldShowRouteProviderPicker() {
+      return currentBatch?.operationConfig?.showRouteProviderPicker === true;
+    }
+
+    function shouldShowDriverCallButton() {
+      return currentBatch?.operationConfig?.showDriverCallButton === true;
     }
 
     function getPendingActionMap() {
@@ -1545,7 +1575,7 @@
     }
 
     function buildGoogleMapsWindowFallback(stops) {
-      const routeStops = Array.isArray(stops) ? stops.filter(Boolean).slice(0, 4) : [];
+      const routeStops = Array.isArray(stops) ? stops.filter(Boolean) : [];
       if (!routeStops.length) return '';
       if (routeStops.length === 1) return buildGoogleMapsCurrentFallback(routeStops[0]);
       const destination = routeStops[routeStops.length - 1];
@@ -1603,12 +1633,19 @@
       const provider = getRouteProvider();
       const routeBtn = document.getElementById('route-btn');
       const routeToggle = document.getElementById('route-provider-toggle');
-      routeBtn.textContent = `ROTA ${getRouteProviderLabel()}`;
+      const wrap = document.querySelector('.route-provider-wrap');
+      const showPicker = shouldShowRouteProviderPicker();
+      wrap.classList.toggle('single-provider', !showPicker);
+      routeBtn.textContent = 'ROTA';
       routeBtn.disabled = !currentOrder || routeLocked || !getRouteUrl(provider, currentOrder, mapsWindowUrl, wazeCurrentUrl);
-      routeToggle.disabled = !currentOrder || routeLocked;
+      routeToggle.disabled = !showPicker || !currentOrder || routeLocked;
+      routeToggle.classList.toggle('hidden', !showPicker);
       document.querySelectorAll('[data-provider]').forEach((button) => {
         button.classList.toggle('active', button.dataset.provider === provider);
       });
+      if (!showPicker) {
+        closeRouteProviderMenu();
+      }
     }
 
     function openRouteByProvider(provider) {
@@ -1651,22 +1688,6 @@
       return 'Em rota';
     }
 
-    function renderAttemptTimeline(order) {
-      const items = getAttemptHistoryPreview(order);
-      if (!items.length) {
-        return '<div class="attempt-item-note">Nenhuma tentativa registrada para esta entrega.</div>';
-      }
-      return items.map((item) => `
-        <article class="attempt-item">
-          <div class="attempt-item-head">
-            <strong>${esc(String(item.action || 'tentativa').toUpperCase())}</strong>
-            <span>${esc(formatDateTime(item.attemptedAt || ''))}</span>
-          </div>
-          <div class="attempt-item-note">${esc([item.reason, item.note].filter(Boolean).join(' · ') || 'Sem observacao adicional.')}</div>
-        </article>
-      `).join('');
-    }
-
     function toggleDeferredPanel(force) {
       const panel = document.getElementById('deferred-panel');
       const shouldOpen = typeof force === 'boolean' ? force : !panel.classList.contains('open');
@@ -1680,10 +1701,15 @@
       toggleDeferredPanel(false);
     }
 
-    function renderDeferredList(activeOrderId = Number(getCurrentOrder()?.orderId || 0)) {
+    function renderDeferredList(activeOrderId = Number(getCurrentOrder()?.orderId || 0), allowSensitiveView = true) {
       const items = getDeferredStops();
       const list = document.getElementById('deferred-list');
       const copy = document.getElementById('deferred-panel-copy');
+      if (!allowSensitiveView) {
+        copy.textContent = 'Lista bloqueada sem entrega ativa.';
+        list.innerHTML = '<div class="deferred-empty">Os dados dos pedidos adiados ficam ocultos ate a extensao ser autorizada pelo restaurante.</div>';
+        return;
+      }
       copy.textContent = items.length
         ? `${items.length} item${items.length === 1 ? '' : 's'} fora da fila principal.`
         : '0 itens fora da fila principal.';
@@ -1700,8 +1726,7 @@
             </div>
             <span class="badge ${item.followupState === 'cancelled' ? 'danger' : 'warn'}">${esc(getOperationalStateLabel(item))}</span>
           </div>
-          <span>Entrega ${esc(String(item.sequence || '-'))} · ${esc(formatDateTime(item.lastAttemptAt || ''))}</span>
-          <span>${esc([item.lastAttemptReason, item.lastAttemptNote].filter(Boolean).join(' · ') || 'Sem observacao adicional')}</span>
+          <span>Entrega ${esc(String(item.sequence || '-'))}</span>
         </button>
       `).join('');
       list.querySelectorAll('[data-deferred-order-id]').forEach((button) => {
@@ -1715,7 +1740,6 @@
     function createLocalRouteStop(order) {
       const lat = Number(order?.addressLat ?? order?.address_lat);
       const lng = Number(order?.addressLng ?? order?.address_lng);
-      const attempts = getAttemptHistoryPreview(order);
       return {
         orderId: Number(order.id || order.orderId || 0) || null,
         sequence: Number(order.delivery_sequence ?? order.sequence ?? 0) || null,
@@ -1724,17 +1748,8 @@
         address_lat: hasUsableCoords(lat, lng) ? lat : null,
         address_lng: hasUsableCoords(lat, lng) ? lng : null,
         phone: String(order.phone || ''),
-        amount: Number(order.total ?? order.amount ?? 0) || 0,
-        paymentMethod: String(order.payment || order.paymentMethod || ''),
         status: String(order.status || ''),
-        obs: String(order.obs || ''),
         followupState: getFollowupState(order),
-        attemptCount: Number(order.attemptCount || attempts.length || 0),
-        lastAttemptAt: String(order.lastAttemptAt || order.deliveryAttemptedAt || order.delivery_attempted_at || ''),
-        lastAttemptAction: String(order.lastAttemptAction || attempts[0]?.action || ''),
-        lastAttemptReason: String(order.lastAttemptReason || order.deliveryFailedReason || order.delivery_failed_reason || attempts[0]?.reason || ''),
-        lastAttemptNote: String(order.lastAttemptNote || order.deliveryFailedNote || order.delivery_failed_note || attempts[0]?.note || ''),
-        attemptHistoryPreview: attempts,
       };
     }
 
@@ -1765,11 +1780,10 @@
         : null;
 
       if (!eligible.length) {
-        const currentStop = currentOrder ? createLocalRouteStop(currentOrder) : null;
-        currentBatch.currentOrderId = currentStop?.orderId || null;
-        currentBatch.currentStop = currentStop;
+        currentBatch.currentOrderId = null;
+        currentBatch.currentStop = null;
         currentBatch.nextStops = [];
-        currentBatch.routeWindow = currentStop ? [currentStop] : [];
+        currentBatch.routeWindow = [];
         currentBatch.deferredStops = deferredOrders.map(createLocalRouteStop).filter(Boolean);
       } else {
         if (!currentOrder && normalizedCurrentId) {
@@ -1930,8 +1944,12 @@
       document.getElementById('reuse-driver-btn').classList.toggle('hidden', readonly);
     }
 
-    function renderRouteList(currentOrder) {
+    function renderRouteList(currentOrder, allowSensitiveView = true) {
       const list = document.getElementById('route-list');
+      if (!allowSensitiveView) {
+        list.innerHTML = '<div class="status-lock">As proximas entregas ficam ocultas quando nao ha entrega ativa ou quando a visualizacao expira.</div>';
+        return;
+      }
       const pendingMap = getPendingActionMap();
       const items = getNextStops();
       list.innerHTML = items.length ? items.map((order, index) => {
@@ -1963,11 +1981,12 @@
       updateDriverCard();
 
       const orders = ordersSorted();
-      const deliveredCount = orders.filter((order) => order.status === 'entregue').length;
-      const currentOrder = getCurrentOrder();
+      const privacy = getPrivacyState();
+      const totalStops = Number(currentBatch.stopCount || orders.length || 0);
+      const deliveredCount = Number(currentBatch.deliveredCount || orders.filter((order) => order.status === 'entregue').length || 0);
+      const currentOrder = privacy.isVisible ? getCurrentOrder() : null;
       const currentIndex = Math.max(getCurrentOrderIndex(currentOrder), 0);
-      const currentOrderDetails = getCurrentOrderDetails() || currentOrder;
-      const currentOrderHistorySource = getAttemptHistoryPreview(currentOrderDetails).length ? currentOrderDetails : currentOrder;
+      const currentOrderDetails = privacy.isVisible ? (getCurrentOrderDetails() || currentOrder) : null;
       const currentStatus = currentOrder ? getDisplayStatus(currentOrderDetails || currentOrder) : { label: 'Sem parada', css: 'info' };
       const profile = currentBatch.driver?.name ? currentBatch.driver : getSavedDriverProfile();
       const phone = sanitizePhone(currentOrder?.phone);
@@ -1981,45 +2000,32 @@
       const followupText = getOperationalStateLabel(currentOrderDetails || currentOrder);
       const deliveryEnabled = isDeliveryManagementEnabled();
 
-      document.getElementById('mode-badge').textContent = currentModeLabel();
       document.getElementById('batch-title').textContent = `Lote ${currentBatch.batchCode || '-'}`;
-      document.getElementById('batch-copy').textContent = currentBatch.batchStatus === 'liberado_cozinha'
-        ? (deliveryEnabled
-          ? 'O celular mostra apenas a entrega atual e as proximas 3 pendentes. A navegacao abre em app externo.'
-          : 'Gestao de entrega inativa. O PWA permanece apenas como consulta do lote.')
-        : currentBatch.batchStatus === 'aceito_motoboy'
-          ? (deliveryEnabled
-            ? 'Lote aceito. Aguarde a liberacao da cozinha para iniciar as entregas.'
-            : 'Gestao de entrega inativa. As acoes do motoboy ficam bloqueadas.')
-          : (deliveryEnabled
-            ? 'Preencha seus dados para aceitar o lote e liberar a operacao do motoboy.'
-            : 'Gestao de entrega inativa no administrativo.');
       document.getElementById('hero-badges').innerHTML = `
         <span class="badge brand">Lote ${esc(currentBatch.batchCode || '-')}</span>
         <span class="badge ${currentBatch.batchStatus === 'liberado_cozinha' ? 'success' : currentBatch.batchStatus === 'aceito_motoboy' ? 'info' : 'warn'}">${esc(batchStatusLabel(currentBatch.batchStatus))}</span>
-        <span class="badge info">${orders.length} parada${orders.length === 1 ? '' : 's'}</span>
+        <span class="badge info">${totalStops} parada${totalStops === 1 ? '' : 's'}</span>
       `;
 
-      document.getElementById('stat-step').textContent = orders.length ? `${currentIndex + 1}/${orders.length}` : '-';
-      document.getElementById('stat-done').textContent = `${deliveredCount}/${orders.length}`;
+      document.getElementById('stat-step').textContent = totalStops ? `${currentIndex + 1}/${totalStops}` : '-';
+      document.getElementById('stat-done').textContent = `${deliveredCount}/${totalStops || 0}`;
       document.getElementById('stat-batch-status').textContent = batchStatusLabel(currentBatch.batchStatus);
       document.getElementById('stat-plate').textContent = currentBatch.driver?.vehiclePlate || profile?.vehiclePlate || '-';
-      document.getElementById('progress-btn').textContent = orders.length
-        ? `${currentOrder?.sequence || currentIndex + 1}/${orders.length}`
+      document.getElementById('progress-btn').textContent = totalStops
+        ? `${currentOrder?.sequence || currentIndex + 1}/${totalStops}`
         : '0/0';
 
       document.getElementById('stop-progress-badge').textContent = currentOrder
-        ? `Entrega ${currentOrder.sequence || currentIndex + 1}/${orders.length || currentOrder.sequence || 1}`
+        ? `Entrega ${currentOrder.sequence || currentIndex + 1}/${totalStops || currentOrder.sequence || 1}`
         : 'Sem entregas';
-      document.getElementById('stop-customer').textContent = currentOrder?.customerName || 'Nenhuma parada ativa';
-      document.getElementById('stop-address').textContent = currentOrder?.address || 'Endereco nao informado';
-      document.getElementById('stop-payment').textContent = currentOrder?.paymentMethod || '-';
-      document.getElementById('stop-total').textContent = formatMoney(currentOrder?.amount);
-      document.getElementById('stop-obs').textContent = currentOrder?.obs || 'Sem observacao';
-      document.getElementById('stop-attempt').textContent = formatDateTime(currentOrderDetails?.deliveryAttemptedAt || currentOrderDetails?.delivery_attempted_at || currentOrder?.lastAttemptAt);
-      document.getElementById('stop-attempt-count').textContent = String(currentOrder?.attemptCount || currentOrderDetails?.attemptCount || getAttemptHistoryPreview(currentOrder).length || 0);
+      document.getElementById('stop-customer').textContent = currentOrder?.customerName || (privacy.isVisible ? 'Nenhuma parada ativa' : 'Dados protegidos');
+      document.getElementById('stop-address').textContent = currentOrder?.address || (privacy.isVisible ? 'Endereco nao informado' : 'Endereco oculto ate nova autorizacao.');
       document.getElementById('stop-followup-text').textContent = followupText;
-      document.getElementById('stop-attempt-timeline').innerHTML = renderAttemptTimeline(currentOrderHistorySource);
+      document.getElementById('stop-visibility-window').textContent = privacy.hasActiveDelivery
+        ? 'Enquanto houver entrega ativa'
+        : privacy.visibleUntil
+          ? `Ate ${formatDateTime(privacy.visibleUntil)}`
+          : 'Bloqueada';
       document.getElementById('stop-status-badge').className = `badge ${currentStatus.css}`;
       document.getElementById('stop-status-badge').textContent = currentStatus.label;
       const followupBadge = document.getElementById('stop-followup-badge');
@@ -2034,47 +2040,60 @@
       document.getElementById('current-stop-title').textContent = currentOrder ? 'Entrega atual' : 'Aguardando rota';
       const currentStopHelp = document.getElementById('current-stop-help');
       const currentStopHelpText = currentOrder
-        ? `ROTA abre ${getRouteProviderLabel()} por padrao e a proxima entrega ja avanca automaticamente.`
-        : 'Assim que houver uma parada disponivel, esta area mostrara os detalhes essenciais.';
-      document.getElementById('current-stop-copy').textContent = currentStopHelpText;
+        ? 'A rota abre todas as paradas disponiveis do lote.'
+        : privacy.isVisible
+          ? 'Assim que houver uma parada disponivel, esta area mostrara os dados essenciais.'
+          : 'Sem entrega ativa, os dados do cliente ficam ocultos por LGPD.';
       currentStopHelp.setAttribute('data-tooltip', currentStopHelpText);
       currentStopHelp.setAttribute('aria-label', currentStopHelpText);
 
-      updateRouteProviderUi(currentOrder, mapsWindowUrl, wazeCurrentUrl, currentBatch.batchStatus !== 'liberado_cozinha');
+      const routeLocked = !deliveryEnabled || currentBatch.batchStatus !== 'liberado_cozinha' || !privacy.isVisible;
+      updateRouteProviderUi(currentOrder, mapsWindowUrl, wazeCurrentUrl, routeLocked);
       document.getElementById('wa-link').href = phone ? `https://wa.me/55${phone}` : '#';
       document.getElementById('wa-link').setAttribute('aria-disabled', phone ? 'false' : 'true');
       const phoneLink = document.getElementById('phone-link');
       phoneLink.textContent = currentOrder?.phone || '-';
       phoneLink.href = phone ? `tel:${phone}` : '#';
       phoneLink.setAttribute('aria-disabled', phone ? 'false' : 'true');
-      document.getElementById('support-batch-code').textContent = currentBatch.batchCode || '-';
-      document.getElementById('support-batch-status').textContent = batchStatusLabel(currentBatch.batchStatus);
-      document.getElementById('support-origin').textContent = currentBatch.originAddress || '-';
-      document.getElementById('support-driver').textContent = profile?.name || currentBatch.driver?.name || '-';
-
-      const routeLocked = !deliveryEnabled || currentBatch.batchStatus !== 'liberado_cozinha';
       const lockText = !deliveryEnabled
         ? 'Gestao de entrega inativa no administrativo. Rotas, PWA do motoboy e confirmacoes ficam bloqueadas.'
         : currentBatch.batchStatus === 'preparado'
         ? 'Aceite o lote primeiro. Depois a cozinha ainda precisa liberar a saida.'
-        : routeLocked
+        : currentBatch.batchStatus !== 'liberado_cozinha'
           ? 'A cozinha ainda nao liberou a rota. Maps, Waze e confirmacao de entrega ficam bloqueados ate a liberacao.'
+          : !privacy.isVisible
+            ? ''
           : '';
-      document.getElementById('route-lock').classList.toggle('hidden', !routeLocked);
+      document.getElementById('route-lock').classList.toggle('hidden', !lockText);
       document.getElementById('route-lock').textContent = lockText;
+      const privacyLock = document.getElementById('privacy-lock');
+      const privacyRequestBtn = document.getElementById('privacy-request-btn');
+      const privacyCopy = document.getElementById('privacy-lock-copy');
+      const showPrivacyLock = !privacy.hasActiveDelivery;
+      privacyLock.classList.toggle('hidden', !showPrivacyLock);
+      privacyCopy.textContent = privacy.hasActiveDelivery
+        ? ''
+        : privacy.isVisible
+          ? `Sem entrega ativa. Esta visualizacao fica disponivel ate ${formatDateTime(privacy.visibleUntil)}.`
+          : (privacy.restrictedReason || 'Sem entrega ativa. A visualizacao foi bloqueada.');
+      privacyRequestBtn.classList.toggle('hidden', !(privacy.canRequestExtension || privacy.hasPendingExtensionRequest));
+      privacyRequestBtn.disabled = privacy.hasPendingExtensionRequest;
+      privacyRequestBtn.textContent = privacy.hasPendingExtensionRequest ? 'Aguardando restaurante' : 'Pedir +10 min';
 
-      renderRouteList(currentOrder);
-      renderDeferredList(Number(currentOrder?.orderId || 0));
-      document.getElementById('deferred-btn').textContent = deferredStops.length ? `Adiados (${deferredStops.length})` : 'Adiados';
+      renderRouteList(currentOrder, privacy.isVisible);
+      renderDeferredList(Number(currentOrder?.orderId || 0), privacy.isVisible);
+      const deferredFab = document.getElementById('deferred-fab');
+      deferredFab.classList.toggle('hidden', routeLocked || !deferredStops.length);
+      deferredFab.textContent = deferredStops.length > 9 ? '9+' : String(deferredStops.length || 'Adiados');
 
-      ['route-btn', 'route-provider-toggle', 'call-btn', 'delivered-btn', 'failed-btn', 'prev-btn', 'next-btn', 'deferred-btn'].forEach((id) => {
+      ['route-btn', 'route-provider-toggle', 'call-btn', 'delivered-btn', 'failed-btn', 'prev-btn', 'next-btn'].forEach((id) => {
         const element = document.getElementById(id);
         element.disabled = !currentOrder || routeLocked;
       });
-      document.getElementById('call-btn').disabled = !phone || routeLocked;
+      document.getElementById('call-btn').classList.toggle('hidden', !shouldShowDriverCallButton());
+      document.getElementById('call-btn').disabled = !shouldShowDriverCallButton() || !phone || routeLocked;
       document.getElementById('prev-btn').disabled = !currentOrder || routeLocked || !hasPrevious;
       document.getElementById('next-btn').disabled = !currentOrder || routeLocked || !nextStops.length;
-      document.getElementById('deferred-btn').disabled = routeLocked || !deferredStops.length;
     }
 
     async function fetchBatch() {
@@ -2131,8 +2150,11 @@
           if (!options.silent && applied.forced && !applied.changed) {
             renderNotice('info', 'Sem mudancas nos dados ou no trajeto. Refresh forcado apos 5 minutos.');
           }
-        } else if (!options.silent) {
-          renderNotice('info', 'Sem mudancas nos dados ou no trajeto. Refresh ignorado.');
+        } else {
+          renderBatch();
+          if (!options.silent) {
+            renderNotice('info', 'Sem mudancas nos dados ou no trajeto. Refresh ignorado.');
+          }
         }
         await flushPendingQueue();
       } catch (error) {
@@ -2157,7 +2179,7 @@
           currentBatch = cachedBatch;
           markBatchApplied(currentBatch);
           setLiveState(navigator.onLine, true);
-          renderNotice('info', 'Sem resposta do servidor. Exibindo o ultimo lote salvo no aparelho.');
+          renderNotice('info', 'Sem resposta do servidor.');
           renderBatch();
         } else {
           renderNotice('error', error.message);
@@ -2317,6 +2339,26 @@
       renderBatch();
     }
 
+    async function requestVisibilityExtension() {
+      if (!currentBatch) return;
+      try {
+        await ensureDriverSession(false);
+        const response = await fetch(`${API}/api/delivery-batches/public/${encodeURIComponent(currentToken)}/request-visibility-extension`, {
+          method: 'POST',
+          headers: authorizedHeaders(),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Nao foi possivel solicitar a extensao.');
+        if (data.batch) {
+          applyBatchSnapshot(data.batch, { force: true });
+        }
+        renderNotice('success', data.alreadyRequested ? 'Pedido de extensao ja enviado ao restaurante.' : 'Pedido de +10 minutos enviado ao restaurante.');
+      } catch (error) {
+        console.error(error);
+        renderNotice('error', error.message);
+      }
+    }
+
     function openFailedModal() {
       selectedFailureReason = 'cliente_ausente';
       selectedFailureMode = 'delayed';
@@ -2389,7 +2431,6 @@
     function updateInstallButtons() {
       const visible = Boolean(deferredInstallPrompt);
       document.getElementById('install-btn').classList.toggle('hidden', !visible);
-      document.getElementById('support-install-btn').classList.toggle('hidden', !visible);
     }
 
     async function installApp() {
@@ -2413,16 +2454,6 @@
     function stopPolling() {
       clearInterval(pollTimer);
       pollTimer = null;
-    }
-
-    async function copyPublicLink() {
-      const url = `${window.location.origin}/delivery-batch.html?token=${encodeURIComponent(currentToken)}&modo=compacto`;
-      try {
-        await navigator.clipboard.writeText(url);
-        renderNotice('success', 'Link do lote copiado.');
-      } catch {
-        renderNotice('error', 'Nao foi possivel copiar o link neste aparelho.');
-      }
     }
 
     function restoreToken() {
@@ -2463,8 +2494,7 @@
     });
     document.getElementById('reuse-driver-btn').addEventListener('click', () => fillDriverForm(getSavedDriverProfile()));
     document.getElementById('retry-btn').addEventListener('click', () => flushPendingQueue().then(() => renderNotice('success', 'Fila de sincronizacao processada.')).catch(() => {}));
-    document.getElementById('copy-link-btn').addEventListener('click', copyPublicLink);
-    document.getElementById('support-install-btn').addEventListener('click', installApp);
+    document.getElementById('privacy-request-btn').addEventListener('click', requestVisibilityExtension);
     document.getElementById('install-btn').addEventListener('click', installApp);
     document.getElementById('route-btn').addEventListener('click', () => openRouteByProvider(getRouteProvider()));
     document.getElementById('route-provider-toggle').addEventListener('click', (event) => {
@@ -2480,7 +2510,7 @@
     });
     document.getElementById('prev-btn').addEventListener('click', () => moveCurrent(-1));
     document.getElementById('next-btn').addEventListener('click', () => moveCurrent(1));
-    document.getElementById('deferred-btn').addEventListener('click', () => toggleDeferredPanel());
+    document.getElementById('deferred-fab').addEventListener('click', () => toggleDeferredPanel());
     document.getElementById('close-deferred-btn').addEventListener('click', closeDeferredPanel);
     document.getElementById('delivered-btn').addEventListener('click', () => sendStatusAction('delivered'));
     document.getElementById('failed-btn').addEventListener('click', openFailedModal);
@@ -2505,7 +2535,7 @@
       if (!event.target.closest('.route-provider-wrap')) {
         closeRouteProviderMenu();
       }
-      if (!event.target.closest('#deferred-panel') && !event.target.closest('#deferred-btn')) {
+      if (!event.target.closest('#deferred-panel') && !event.target.closest('#deferred-fab')) {
         closeDeferredPanel();
       }
     });

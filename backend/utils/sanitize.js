@@ -58,11 +58,17 @@ function sanitizeProductInput(body) {
 }
 
 function sanitizeOrderInput(body) {
+  const serviceChannel = trimString(body.serviceChannel || body.service_channel, 20).toLowerCase() || 'delivery';
   const customer = trimString(body.customer, 120);
   const address = trimString(body.address, 300);
   const phone = trimString(body.phone, 20).replace(/[^\d+()\s-]/g, '');
   const payment = trimString(body.payment, 30);
   const obs = trimString(body.obs, 500);
+  const commandCode = trimString(body.commandCode || body.command_code, 40);
+  const localServiceStatus = trimString(body.localServiceStatus || body.local_service_status, 40).toLowerCase();
+  const serviceTagColor = trimString(body.serviceTagColor || body.service_tag_color, 7);
+  const tableId = parsePositiveId(body.tableId || body.table_id);
+  const waiterId = parsePositiveId(body.waiterId || body.waiter_id);
   const total = parsePrice(body.total) ?? 0;
   const rawItems = Array.isArray(body.items) ? body.items.slice(0, 50) : [];
   const items = rawItems
@@ -75,11 +81,33 @@ function sanitizeOrderInput(body) {
     }))
     .filter(item => item.id > 0 && item.name);
 
-  if (!customer || !phone) {
+  if (!['delivery', 'local'].includes(serviceChannel)) {
+    return { error: 'Canal de atendimento inválido' };
+  }
+
+  if (!customer) {
+    return { error: 'Nome é obrigatório' };
+  }
+
+  if (serviceChannel === 'delivery' && !phone) {
     return { error: 'Nome e telefone são obrigatórios' };
   }
 
-  return { customer, address, phone, payment, obs, total, items };
+  return {
+    serviceChannel,
+    customer,
+    address,
+    phone,
+    payment,
+    obs,
+    total,
+    items,
+    tableId,
+    waiterId,
+    commandCode,
+    localServiceStatus,
+    serviceTagColor,
+  };
 }
 
 function sanitizeAccompanimentInput(body) {

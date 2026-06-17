@@ -36,6 +36,59 @@
     .addr-chip-del { color:#444; font-size:0.8rem; margin-left:2px; }
     .addr-chip:hover .addr-chip-del { color:#e74c3c; }
 
+    .delivery-area-picker {
+      position: relative;
+    }
+    .delivery-area-input {
+      width: 100%;
+    }
+    .delivery-area-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 260px;
+      overflow: auto;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(18, 18, 18, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.35);
+    }
+    .delivery-area-dropdown.open {
+      display: flex;
+    }
+    .delivery-area-option {
+      width: 100%;
+      margin: 0;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: #f4efe7;
+      text-align: left;
+      cursor: pointer;
+    }
+    .delivery-area-option:hover {
+      border-color: rgba(255, 204, 0, 0.18);
+      background: rgba(255, 204, 0, 0.08);
+    }
+    .delivery-area-option small {
+      display: block;
+      margin-top: 4px;
+      color: #b8aa95;
+      font-size: 0.75rem;
+    }
+    .delivery-area-empty {
+      padding: 10px 12px;
+      color: #b8aa95;
+      font-size: 0.8rem;
+    }
+
     /* Obs com botão de limpar */
     .obs-wrap { position:relative; }
     .obs-wrap textarea { width:100%; padding-right:30px; }
@@ -137,15 +190,18 @@
       <div id="address-history-chips"></div>
     </div>
 
-    <select id="bairro" onchange="habilitarEndereco()">
-      <option value="0">Locais de entrega...</option>
-      <option value="0.0">Cachoeira do Bom Jesus</option>
-      <option value="8.99">Ingleses</option>
-      <option value="8.99">Vargem do bom jesus</option>
-      <option value="9.99">Vargem Grande/Pequena</option>
-      <option value="12.99">Rio Vermelho</option>
-      <option value="12.99">Canasvieiras</option>
-    </select>
+    <div class="delivery-area-picker" id="delivery-area-picker">
+      <input
+        type="text"
+        id="bairro-search"
+        class="delivery-area-input"
+        placeholder="Busque cidade ou bairro"
+        autocomplete="off"
+        oninput="handleDeliveryAreaInput()"
+        onfocus="openDeliveryAreaDropdown()">
+      <input type="hidden" id="bairro" value="">
+      <div class="delivery-area-dropdown" id="delivery-area-dropdown"></div>
+    </div>
 
     <input type="text" id="address" placeholder="Rua, número e complemento" disabled oninput="verificarCampos()">
     <input type="tel" id="phone" placeholder="WhatsApp (com DDD)" oninput="verificarCampos()">
@@ -232,11 +288,107 @@
        CARRINHO — La Coccina
        ========================================================================== */
     let cartSubtotal = 0;
+    let deliveryAreas = [];
+    let selectedDeliveryArea = null;
 
     // Modos de exibição de acompanhamentos: 'tags' | 'text' | 'edit'
     const ACC_DISPLAY_MODE = localStorage.getItem('lc_acc_display_mode') || 'tags';
 
     function esc(s) { return LaCoccinaSecurity.escapeHtml(s); }
+
+    function getSelectedDeliveryAreaLabel() {
+      return selectedDeliveryArea?.label || '';
+    }
+
+    function setSelectedDeliveryArea(area) {
+      selectedDeliveryArea = area || null;
+      document.getElementById('bairro').value = selectedDeliveryArea?.id || '';
+      document.getElementById('bairro-search').value = selectedDeliveryArea?.label || '';
+      habilitarEndereco();
+    }
+
+    function clearSelectedDeliveryArea() {
+      selectedDeliveryArea = null;
+      document.getElementById('bairro').value = '';
+      habilitarEndereco();
+    }
+
+    function getFilteredDeliveryAreas(query = '') {
+      const normalizedQuery = String(query || '').trim().toLowerCase();
+      if (!normalizedQuery) return deliveryAreas.slice(0, 40);
+      return deliveryAreas.filter((area) => {
+        const haystack = `${area.label} ${area.city} ${area.district}`.toLowerCase();
+        return haystack.includes(normalizedQuery);
+      }).slice(0, 40);
+    }
+
+    function renderDeliveryAreaDropdown(query = document.getElementById('bairro-search').value) {
+      const dropdown = document.getElementById('delivery-area-dropdown');
+      const filtered = getFilteredDeliveryAreas(query);
+      if (!deliveryAreas.length) {
+        dropdown.innerHTML = '<div class="delivery-area-empty">Nenhuma area de entrega configurada no momento.</div>';
+        return;
+      }
+      if (!filtered.length) {
+        dropdown.innerHTML = '<div class="delivery-area-empty">Nenhum bairro/cidade encontrado para essa busca.</div>';
+        return;
+      }
+      dropdown.innerHTML = filtered.map((area) => `
+        <button type="button" class="delivery-area-option" onclick="selectDeliveryArea('${esc(area.id)}')">
+          ${esc(area.label)}
+          <small>Frete R$ ${Number(area.fee || 0).toFixed(2)}</small>
+        </button>
+      `).join('');
+    }
+
+    function openDeliveryAreaDropdown() {
+      renderDeliveryAreaDropdown();
+      document.getElementById('delivery-area-dropdown').classList.add('open');
+    }
+
+    function closeDeliveryAreaDropdown() {
+      document.getElementById('delivery-area-dropdown').classList.remove('open');
+    }
+
+    function handleDeliveryAreaInput() {
+      const query = document.getElementById('bairro-search').value;
+      const currentLabel = getSelectedDeliveryAreaLabel();
+      if (!query || query.trim() !== currentLabel) {
+        selectedDeliveryArea = null;
+        document.getElementById('bairro').value = '';
+      }
+      renderDeliveryAreaDropdown(query);
+      document.getElementById('delivery-area-dropdown').classList.add('open');
+      habilitarEndereco();
+    }
+
+    function selectDeliveryArea(areaId) {
+      const area = deliveryAreas.find((item) => item.id === areaId) || null;
+      setSelectedDeliveryArea(area);
+      closeDeliveryAreaDropdown();
+    }
+
+    function restoreDeliveryAreaByLabel(label) {
+      if (!label) return false;
+      const match = deliveryAreas.find((area) => area.label === label);
+      if (!match) return false;
+      setSelectedDeliveryArea(match);
+      return true;
+    }
+
+    async function loadDeliveryAreas() {
+      try {
+        const res = await fetch(`${LaCoccinaSecurity.API_BASE}/api/settings/delivery-areas`);
+        if (!res.ok) throw new Error('Erro ao carregar areas de entrega.');
+        const data = await res.json();
+        deliveryAreas = Array.isArray(data.areas) ? data.areas : [];
+      } catch (error) {
+        console.warn('Nao foi possivel carregar areas de entrega:', error.message);
+        deliveryAreas = [];
+      }
+      renderDeliveryAreaDropdown('');
+      verificarCampos();
+    }
 
     function renderAccompaniments(item, index) {
       const acc = item.accompaniments;
@@ -317,7 +469,7 @@
     }
 
     function updateTotal(subtotal) {
-      const frete = parseFloat(document.getElementById('bairro').value) || 0;
+      const frete = Number(selectedDeliveryArea?.fee || 0);
       const total = subtotal + frete;
 
       document.getElementById('subtotal').textContent = subtotal.toFixed(2);
@@ -358,7 +510,7 @@
     }
 
     function habilitarEndereco() {
-      document.getElementById('address').disabled = document.getElementById('bairro').value === "0";
+      document.getElementById('address').disabled = !selectedDeliveryArea;
       updateTotal(cartSubtotal);
       verificarCampos();
     }
@@ -367,7 +519,6 @@
       const name = document.getElementById('customer-name').value.trim();
       const address = document.getElementById('address').value.trim();
       const phone = document.getElementById('phone').value.trim();
-      const bairro = document.getElementById('bairro').value;
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       const buttons = getCheckoutButtons();
       const mobileBar = document.getElementById('mobile-cart-bar');
@@ -386,7 +537,7 @@
         return;
       }
 
-      if (name && address && phone && bairro !== '0') {
+      if (name && address && phone && selectedDeliveryArea) {
         buttons.forEach((btn) => {
           btn.disabled = false;
           btn.classList.add('enabled');
@@ -404,7 +555,7 @@
 
     function buildWhatsAppMessage() {
       const name = document.getElementById('customer-name').value.trim();
-      const bairroText = document.getElementById('bairro').options[document.getElementById('bairro').selectedIndex].text;
+      const bairroText = getSelectedDeliveryAreaLabel();
       const address = document.getElementById('address').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const payment = document.getElementById('payment').value;
@@ -447,14 +598,13 @@
       const name    = document.getElementById('customer-name').value.trim();
       const address = document.getElementById('address').value.trim();
       const phone   = document.getElementById('phone').value.trim();
-      const bairro  = document.getElementById('bairro').value;
       const payment = document.getElementById('payment').value;
       const obs     = document.getElementById('obs').value.trim();
-      const bairroText = document.getElementById('bairro').options[document.getElementById('bairro').selectedIndex].text;
+      const bairroText = getSelectedDeliveryAreaLabel();
       const frete   = parseFloat(document.getElementById('frete').textContent) || 0;
 
       if (cart.length === 0) { alert('🛒 Seu carrinho está vazio!'); return; }
-      if (!name || !address || !phone || bairro === '0') {
+      if (!name || !address || !phone || !selectedDeliveryArea) {
         alert('⚠️ Preencha nome, local de entrega, endereço e WhatsApp.');
         return;
       }
@@ -540,15 +690,13 @@
       document.getElementById('payment').value        = saved.payment || 'pix';
 
       if (saved.bairro && saved.bairro !== '0') {
-        const sel = document.getElementById('bairro');
-        // Encontrar option pelo texto do bairro salvo
-        Array.from(sel.options).forEach(opt => {
-          if (opt.text === saved.bairro) sel.value = opt.value;
-        });
-        if (sel.value !== '0') {
+        if (restoreDeliveryAreaByLabel(saved.bairro)) {
           document.getElementById('address').disabled = false;
           document.getElementById('address').value = saved.address || '';
           updateTotal(cartSubtotal);
+        } else {
+          clearSelectedDeliveryArea();
+          document.getElementById('bairro-search').value = saved.bairro;
         }
       }
 
@@ -563,13 +711,12 @@
     }
 
     function autoSaveClient() {
-      const bairroSel = document.getElementById('bairro');
-      const bairroText = bairroSel.options[bairroSel.selectedIndex]?.text || '';
+      const bairroText = getSelectedDeliveryAreaLabel();
       const data = {
         name:    document.getElementById('customer-name').value.trim(),
         phone:   document.getElementById('phone').value.trim(),
         payment: document.getElementById('payment').value,
-        bairro:  bairroText !== 'Locais de entrega...' ? bairroText : '',
+        bairro:  bairroText || '',
         address: document.getElementById('address').value.trim(),
       };
       localStorage.setItem(CLIENT_KEY, JSON.stringify(data));
@@ -583,7 +730,8 @@
     function clearSavedClient() {
       localStorage.removeItem(CLIENT_KEY);
       ['customer-name', 'phone', 'address'].forEach(id => { document.getElementById(id).value = ''; });
-      document.getElementById('bairro').value = '0';
+      clearSelectedDeliveryArea();
+      document.getElementById('bairro-search').value = '';
       document.getElementById('address').disabled = true;
       document.getElementById('payment').value = 'pix';
       document.getElementById('client-saved-bar').style.display = 'none';
@@ -597,11 +745,10 @@
     }
 
     function saveClientSnapshot() {
-      const bairroSel  = document.getElementById('bairro');
-      const bairroText = bairroSel.options[bairroSel.selectedIndex]?.text || '';
+      const bairroText = getSelectedDeliveryAreaLabel();
       const snap = {
         name:    document.getElementById('customer-name').value.trim(),
-        bairro:  bairroText !== 'Locais de entrega...' ? bairroText : '',
+        bairro:  bairroText || '',
         address: document.getElementById('address').value.trim(),
         phone:   document.getElementById('phone').value.trim(),
         payment: document.getElementById('payment').value,
@@ -632,12 +779,13 @@
       document.getElementById('obs').value            = snap.obs     || '';
 
       if (snap.bairro) {
-        const sel = document.getElementById('bairro');
-        Array.from(sel.options).forEach(opt => { if (opt.text === snap.bairro) sel.value = opt.value; });
-        if (sel.value !== '0') {
+        if (restoreDeliveryAreaByLabel(snap.bairro)) {
           document.getElementById('address').disabled = false;
           document.getElementById('address').value = snap.address || '';
           updateTotal(cartSubtotal);
+        } else {
+          clearSelectedDeliveryArea();
+          document.getElementById('bairro-search').value = snap.bairro;
         }
       }
 
@@ -787,11 +935,18 @@
       loadUpsell(); // atualizar sugestões
     }
 
-    window.onload = () => {
+    window.onload = async () => {
+      await loadDeliveryAreas();
       loadCart();
       loadSavedClient();
       loadUpsell();
       verificarCampos();
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('#delivery-area-picker')) {
+          closeDeliveryAreaDropdown();
+        }
+      });
 
       getCheckoutButtons().forEach((button) => {
         button.addEventListener('click', () => {

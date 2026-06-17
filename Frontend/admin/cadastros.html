@@ -1455,7 +1455,148 @@
       cursor: pointer;
       font-size: 0.86rem;
     }
+    .delivery-areas-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .delivery-areas-form {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.2fr) minmax(160px, 1.4fr) minmax(110px, 0.8fr) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .delivery-areas-form input[type="text"],
+    .delivery-areas-form input[type="number"] {
+      margin: 0;
+      padding: 9px 12px;
+      font-size: 0.84rem;
+    }
+    .delivery-areas-form label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: #bbb;
+    }
+    .delivery-areas-note {
+      margin: 0;
+      font-size: 0.78rem;
+      color: #777;
+      line-height: 1.45;
+    }
+    .delivery-areas-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      background: #0f0f0f;
+    }
+    .delivery-areas-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    .delivery-areas-table th,
+    .delivery-areas-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e1e1e;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .delivery-areas-table th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #777;
+      background: #111;
+    }
+    .delivery-areas-table tr:last-child td {
+      border-bottom: none;
+    }
+    .delivery-areas-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .delivery-area-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid #2a2a2a;
+    }
+    .delivery-area-chip.active {
+      background: rgba(39, 174, 96, 0.16);
+      color: #7ee2a8;
+      border-color: rgba(39, 174, 96, 0.35);
+    }
+    .delivery-area-chip.inactive {
+      background: rgba(255, 255, 255, 0.04);
+      color: #888;
+    }
+    .delivery-area-btn {
+      width: auto;
+      margin: 0;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+      background: #171717;
+      color: #c7c7c7;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .delivery-area-btn:hover {
+      border-color: #ffcc00;
+      color: #ffcc00;
+    }
+    .delivery-area-btn.danger:hover {
+      border-color: #e74c3c;
+      color: #ff8c7a;
+    }
+    .delivery-area-suggestions {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid #202020;
+    }
+    .delivery-area-suggestions-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .delivery-area-suggestion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      color: #d4d4d4;
+      font-size: 0.76rem;
+    }
+    .delivery-area-suggestion-pill button {
+      width: auto;
+      margin: 0;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
     @media (max-width: 720px) {
+      .delivery-areas-form {
+        grid-template-columns: 1fr;
+      }
       .admin-panel { padding: 16px; }
       .admin-header-shell { top: 8px; }
       .admin-header { padding: 8px; }
@@ -1527,6 +1668,7 @@
         </div>
         <div class="admin-header-actions">
           <a id="btn-kanban-link" class="admin-utility-btn" href="kanban.html" style="display:none;">📋 Kanban</a>
+          <a id="btn-local-service-link" class="admin-utility-btn" href="../local-service.html" target="_blank" rel="noopener" style="display:none;">📱 Atendimento Local</a>
           <a class="admin-utility-btn" href="dashboard.html">📊 Dashboard</a>
           <a class="admin-utility-btn current-page" href="cadastros.html" aria-current="page">🧾 Cadastros</a>
           <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
@@ -1707,6 +1849,205 @@
                 </div>
               </div>
               <p id="cfg-driver-cancel-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Controles visiveis no PWA</strong>
+                <span>Permite esconder a escolha do app de navegacao e o botao de ligar quando voce quiser uma interface mais enxuta para o motoboy.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start;">
+                <div class="tool-choice-row" style="flex-direction:column; align-items:flex-start;">
+                  <label><input type="checkbox" id="cfg-show-route-provider-picker" style="width:auto; margin-right:8px;"> Mostrar seletor do app de rota</label>
+                  <label><input type="checkbox" id="cfg-show-driver-call-button" style="width:auto; margin-right:8px;"> Mostrar botao Ligar</label>
+                </div>
+                <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
+              </div>
+              <p id="cfg-delivery-visibility-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Areas de entrega</strong>
+                <span>Use o endereco-base e um raio para gerar sugestoes de cidade/bairro com Google Maps. Revise a lista antes de salvar; o cliente vera apenas os itens ativos.</span>
+              </div>
+              <div class="delivery-areas-grid">
+                <div class="delivery-areas-form">
+                  <input type="text" id="cfg-area-origin-address" placeholder="Endereco-base para sugestoes">
+                  <input type="number" id="cfg-area-radius-km" min="0.5" max="30" step="0.5" placeholder="Raio em km">
+                  <input type="number" id="cfg-area-default-fee" min="0" step="0.01" placeholder="Frete padrao">
+                  <label><input type="checkbox" id="cfg-area-default-active" checked style="width:auto; margin:0;"> Ativo por padrao</label>
+                  <button onclick="suggestDeliveryAreas()" class="btn-tool-save">Sugerir bairros/cidades</button>
+                </div>
+                <p class="delivery-areas-note">A descoberta por raio e assistida e pode variar conforme os nomes retornados pelo Google. O admin revisa, ajusta frete e decide o que fica ativo antes de salvar.</p>
+                <div id="cfg-area-suggestions" class="delivery-area-suggestions" style="display:none;">
+                  <div class="tool-choice-row" style="justify-content:space-between; align-items:flex-start;">
+                    <div>
+                      <strong style="display:block; color:#ddd; font-size:0.84rem;">Sugestoes encontradas</strong>
+                      <span id="cfg-area-suggestions-meta" style="font-size:0.76rem; color:#777;">-</span>
+                    </div>
+                    <div class="delivery-areas-actions">
+                      <button type="button" class="delivery-area-btn" onclick="acceptAllSuggestedDeliveryAreas()">Aceitar todas</button>
+                      <button type="button" class="delivery-area-btn danger" onclick="clearSuggestedDeliveryAreas()">Limpar</button>
+                    </div>
+                  </div>
+                  <div id="cfg-area-suggestions-list" class="delivery-area-suggestions-list"></div>
+                </div>
+                <div class="delivery-areas-form">
+                  <input type="hidden" id="cfg-area-edit-id">
+                  <input type="text" id="cfg-area-city" placeholder="Cidade">
+                  <input type="text" id="cfg-area-district" placeholder="Bairro">
+                  <input type="number" id="cfg-area-fee" min="0" step="0.01" placeholder="Frete">
+                  <label><input type="checkbox" id="cfg-area-active" checked style="width:auto; margin:0;"> Ativo</label>
+                  <div class="delivery-areas-actions">
+                    <button type="button" class="btn-tool-save" onclick="upsertDeliveryArea()">Adicionar / atualizar</button>
+                    <button type="button" class="btn-tool-reset" onclick="resetDeliveryAreaForm()">Limpar</button>
+                  </div>
+                </div>
+                <div class="delivery-areas-table-wrap">
+                  <table class="delivery-areas-table">
+                    <thead>
+                      <tr>
+                        <th>Cidade</th>
+                        <th>Bairro</th>
+                        <th>Frete</th>
+                        <th>Status</th>
+                        <th>Acoes</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cfg-delivery-areas-body">
+                      <tr><td colspan="5" class="ops-empty">Nenhuma area cadastrada.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="tool-choice-row" style="justify-content:space-between; align-items:center;">
+                  <span id="cfg-delivery-areas-summary" style="font-size:0.76rem; color:#777;">0 areas cadastradas.</span>
+                  <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar areas e configuracoes</button>
+                </div>
+                <p id="cfg-delivery-areas-msg" class="tool-cfg-msg"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tool-section">
+            <h3>Atendimento Local</h3>
+            <p class="tool-section-desc">Configure a operacao de salao/mesa, destacando o canal local no kanban e no PWA de tablet.</p>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Modulo local</strong>
+                <span>Ativa o PWA local, cadastros de mesas/garcons e os metadados de salao no kanban.</span>
+              </div>
+              <div class="tool-cfg-control">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; color:#bbb; font-size:0.88rem;">
+                  <input type="checkbox" id="cfg-local-service-enabled" style="width:auto; margin:0; cursor:pointer; accent-color:#ffcc00;">
+                  Habilitar atendimento local
+                </label>
+                <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar</button>
+              </div>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Identidade visual e regra do canal</strong>
+                <span>Define nome do modulo, cor principal e forma como o card local aparece no kanban.</span>
+              </div>
+              <div class="tool-cfg-control">
+                <input type="text" id="cfg-local-service-label" placeholder="Ex: Salao / Restaurante" style="min-width:220px;">
+                <input type="color" id="cfg-local-service-color" value="#d97706" style="width:64px; padding:4px;">
+                <select id="cfg-local-highlight-mode" style="min-width:180px;">
+                  <option value="full">Card inteiro</option>
+                  <option value="border">Apenas borda</option>
+                  <option value="badge">Somente badge</option>
+                </select>
+                <select id="cfg-delivery-highlight-mode" style="min-width:180px;">
+                  <option value="border">Delivery na borda</option>
+                  <option value="badge">Delivery por badge</option>
+                  <option value="full">Delivery no card inteiro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Comanda e obrigatoriedades</strong>
+                <span>Controla prefixo da comanda, geracao automatica e validacoes de mesa/garcom.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start;">
+                <input type="text" id="cfg-local-command-prefix" placeholder="Prefixo da comanda" style="width:120px;">
+                <select id="cfg-local-pwa-display-mode" style="min-width:180px;">
+                  <option value="confortavel">Tablet confortavel</option>
+                  <option value="compacto">Tablet compacto</option>
+                </select>
+                <input type="color" id="cfg-local-primary-accent" value="#f59e0b" style="width:64px; padding:4px;">
+                <div class="tool-choice-row" style="flex-direction:column; align-items:flex-start;">
+                  <label><input type="checkbox" id="cfg-local-ready-column-enabled" style="width:auto; margin-right:8px;"> Exibir coluna "Pronto para Servir"</label>
+                  <label><input type="checkbox" id="cfg-local-auto-command" style="width:auto; margin-right:8px;"> Gerar comanda automaticamente</label>
+                  <label><input type="checkbox" id="cfg-local-require-table" style="width:auto; margin-right:8px;"> Exigir mesa</label>
+                  <label><input type="checkbox" id="cfg-local-require-waiter" style="width:auto; margin-right:8px;"> Exigir garcom</label>
+                  <label><input type="checkbox" id="cfg-local-allow-transfer" style="width:auto; margin-right:8px;"> Permitir troca de mesa</label>
+                  <label><input type="checkbox" id="cfg-local-allow-split" style="width:auto; margin-right:8px;"> Permitir pagamento dividido</label>
+                </div>
+                <button onclick="saveDeliverySettings()" class="btn-tool-save">Salvar configuracoes locais</button>
+              </div>
+              <p id="cfg-local-service-msg" class="tool-cfg-msg"></p>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Mesas</strong>
+                <span>Cadastre as mesas usadas no salao para vincular pedidos e comandas.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start; width:100%; flex-direction:column;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
+                  <input type="hidden" id="cfg-table-edit-id">
+                  <input type="text" id="cfg-table-name" placeholder="Mesa 1" style="min-width:160px;">
+                  <input type="text" id="cfg-table-sector" placeholder="Setor" style="min-width:140px;">
+                  <input type="number" id="cfg-table-seats" placeholder="Lugares" min="0" style="width:110px;">
+                  <input type="number" id="cfg-table-sort" placeholder="Ordem" min="0" style="width:110px;">
+                  <button type="button" class="btn-tool-save" onclick="upsertServiceTable()">Adicionar / atualizar</button>
+                  <button type="button" class="btn-tool-reset" onclick="resetServiceTableForm()">Limpar</button>
+                </div>
+                <div class="table-scroll" style="width:100%;">
+                  <table class="ops-table">
+                    <thead>
+                      <tr><th>Mesa</th><th>Setor</th><th>Lugares</th><th>Status</th><th>Acoes</th></tr>
+                    </thead>
+                    <tbody id="cfg-service-tables-body">
+                      <tr><td colspan="5" class="ops-empty">Carregando mesas...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p id="cfg-service-tables-msg" class="tool-cfg-msg"></p>
+              </div>
+            </div>
+
+            <div class="tool-cfg-row">
+              <div class="tool-cfg-label">
+                <strong>Garcons</strong>
+                <span>Cadastre a equipe que ira operar o tablet e receber as comandas.</span>
+              </div>
+              <div class="tool-cfg-control" style="align-items:flex-start; width:100%; flex-direction:column;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
+                  <input type="hidden" id="cfg-waiter-edit-id">
+                  <input type="text" id="cfg-waiter-name" placeholder="Nome do garcom" style="min-width:180px;">
+                  <input type="text" id="cfg-waiter-code" placeholder="Codigo" style="width:120px;">
+                  <input type="number" id="cfg-waiter-sort" placeholder="Ordem" min="0" style="width:110px;">
+                  <button type="button" class="btn-tool-save" onclick="upsertServiceWaiter()">Adicionar / atualizar</button>
+                  <button type="button" class="btn-tool-reset" onclick="resetServiceWaiterForm()">Limpar</button>
+                </div>
+                <div class="table-scroll" style="width:100%;">
+                  <table class="ops-table">
+                    <thead>
+                      <tr><th>Garcom</th><th>Codigo</th><th>Status</th><th>Acoes</th></tr>
+                    </thead>
+                    <tbody id="cfg-service-waiters-body">
+                      <tr><td colspan="4" class="ops-empty">Carregando garcons...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p id="cfg-service-waiters-msg" class="tool-cfg-msg"></p>
+              </div>
             </div>
           </div>
         </div>
@@ -2389,6 +2730,18 @@
       return sessionStorage.getItem('adminToken');
     }
 
+    function getLocalServiceLaunchUrl() {
+      const token = getAdminToken();
+      return token ? `../local-service.html?token=${encodeURIComponent(token)}` : '../local-service.html';
+    }
+
+    function updateLocalServiceLinks(enabled = false) {
+      const link = document.getElementById('btn-local-service-link');
+      if (!link) return;
+      link.href = getLocalServiceLaunchUrl();
+      link.style.display = enabled ? 'inline-flex' : 'none';
+    }
+
     function logoutAdmin() {
       sessionStorage.removeItem('adminToken');
       localStorage.removeItem('adminLogged');
@@ -2675,6 +3028,8 @@
     async function loadToolPanelData() {
       await Promise.all([
         loadDeliverySettings(),
+        loadServiceTables(),
+        loadServiceWaiters(),
       ]);
     }
 
@@ -3077,6 +3432,601 @@
       });
     }
 
+    let deliveryAreasState = [];
+    let deliveryAreaSuggestionsState = [];
+    let serviceTablesState = [];
+    let serviceWaitersState = [];
+
+    function normalizeLocalServiceSettings(settings = {}) {
+      return {
+        enabled: settings.enabled === true,
+        label: String(settings.label || '').trim() || 'Atendimento Local',
+        color: /^#[0-9a-f]{6}$/i.test(String(settings.color || '').trim()) ? String(settings.color).trim() : '#d97706',
+        kanbanLocalHighlightMode: ['full', 'border', 'badge'].includes(settings.kanbanLocalHighlightMode) ? settings.kanbanLocalHighlightMode : 'full',
+        kanbanDeliveryHighlightMode: ['full', 'border', 'badge'].includes(settings.kanbanDeliveryHighlightMode) ? settings.kanbanDeliveryHighlightMode : 'border',
+        readyColumnEnabled: settings.readyColumnEnabled === true,
+        commandPrefix: String(settings.commandPrefix || '').trim() || 'CMD',
+        autoGenerateCommandCode: settings.autoGenerateCommandCode === true,
+        requireTable: settings.requireTable === true,
+        requireWaiter: settings.requireWaiter === true,
+        allowTableTransfer: settings.allowTableTransfer === true,
+        allowSplitPayment: settings.allowSplitPayment === true,
+        pwaDisplayMode: settings.pwaDisplayMode === 'compacto' ? 'compacto' : 'confortavel',
+        primaryAccent: /^#[0-9a-f]{6}$/i.test(String(settings.primaryAccent || '').trim()) ? String(settings.primaryAccent).trim() : '#f59e0b',
+      };
+    }
+
+    function applyLocalServiceSettings(settings = {}) {
+      const normalized = normalizeLocalServiceSettings(settings);
+      document.getElementById('cfg-local-service-enabled').checked = normalized.enabled;
+      document.getElementById('cfg-local-service-label').value = normalized.label;
+      document.getElementById('cfg-local-service-color').value = normalized.color;
+      document.getElementById('cfg-local-highlight-mode').value = normalized.kanbanLocalHighlightMode;
+      document.getElementById('cfg-delivery-highlight-mode').value = normalized.kanbanDeliveryHighlightMode;
+      document.getElementById('cfg-local-command-prefix').value = normalized.commandPrefix;
+      document.getElementById('cfg-local-pwa-display-mode').value = normalized.pwaDisplayMode;
+      document.getElementById('cfg-local-primary-accent').value = normalized.primaryAccent;
+      document.getElementById('cfg-local-ready-column-enabled').checked = normalized.readyColumnEnabled;
+      document.getElementById('cfg-local-auto-command').checked = normalized.autoGenerateCommandCode;
+      document.getElementById('cfg-local-require-table').checked = normalized.requireTable;
+      document.getElementById('cfg-local-require-waiter').checked = normalized.requireWaiter;
+      document.getElementById('cfg-local-allow-transfer').checked = normalized.allowTableTransfer;
+      document.getElementById('cfg-local-allow-split').checked = normalized.allowSplitPayment;
+      updateLocalServiceLinks(normalized.enabled);
+    }
+
+    function collectLocalServiceSettings() {
+      return normalizeLocalServiceSettings({
+        enabled: document.getElementById('cfg-local-service-enabled').checked,
+        label: document.getElementById('cfg-local-service-label').value,
+        color: document.getElementById('cfg-local-service-color').value,
+        kanbanLocalHighlightMode: document.getElementById('cfg-local-highlight-mode').value,
+        kanbanDeliveryHighlightMode: document.getElementById('cfg-delivery-highlight-mode').value,
+        readyColumnEnabled: document.getElementById('cfg-local-ready-column-enabled').checked,
+        commandPrefix: document.getElementById('cfg-local-command-prefix').value,
+        autoGenerateCommandCode: document.getElementById('cfg-local-auto-command').checked,
+        requireTable: document.getElementById('cfg-local-require-table').checked,
+        requireWaiter: document.getElementById('cfg-local-require-waiter').checked,
+        allowTableTransfer: document.getElementById('cfg-local-allow-transfer').checked,
+        allowSplitPayment: document.getElementById('cfg-local-allow-split').checked,
+        pwaDisplayMode: document.getElementById('cfg-local-pwa-display-mode').value,
+        primaryAccent: document.getElementById('cfg-local-primary-accent').value,
+      });
+    }
+
+    function normalizeServiceTable(table = {}, index = 0) {
+      return {
+        id: Number(table.id || 0),
+        name: String(table.name || '').trim(),
+        sector: String(table.sector || '').trim(),
+        seats: Math.max(0, Math.floor(Number(table.seats) || 0)),
+        active: table.active !== false,
+        sortOrder: Math.max(0, Math.floor(Number(table.sortOrder ?? table.sort_order) || index || 0)),
+      };
+    }
+
+    function resetServiceTableForm() {
+      document.getElementById('cfg-table-edit-id').value = '';
+      document.getElementById('cfg-table-name').value = '';
+      document.getElementById('cfg-table-sector').value = '';
+      document.getElementById('cfg-table-seats').value = '';
+      document.getElementById('cfg-table-sort').value = '';
+    }
+
+    function renderServiceTables() {
+      const body = document.getElementById('cfg-service-tables-body');
+      if (!serviceTablesState.length) {
+        body.innerHTML = '<tr><td colspan="5" class="ops-empty">Nenhuma mesa cadastrada.</td></tr>';
+        return;
+      }
+      body.innerHTML = serviceTablesState.map((table) => `
+        <tr>
+          <td>
+            <strong>${esc(table.name || 'Mesa')}</strong>
+            <div class="ops-table-meta">Ordem ${Number(table.sortOrder || 0)}</div>
+          </td>
+          <td>${esc(table.sector || '-')}</td>
+          <td>${Number(table.seats || 0)}</td>
+          <td><span class="delivery-area-chip ${table.active ? 'active' : 'inactive'}">${table.active ? 'Ativa' : 'Inativa'}</span></td>
+          <td>
+            <div class="delivery-areas-actions">
+              <button type="button" class="delivery-area-btn" onclick="editServiceTable(${Number(table.id)})">Editar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleServiceTableActive(${Number(table.id)})">${table.active ? 'Desativar' : 'Ativar'}</button>
+              <button type="button" class="delivery-area-btn danger" onclick="removeServiceTable(${Number(table.id)})">Desativar</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadServiceTables() {
+      const body = document.getElementById('cfg-service-tables-body');
+      const msg = document.getElementById('cfg-service-tables-msg');
+      body.innerHTML = '<tr><td colspan="5" class="ops-empty">Carregando mesas...</td></tr>';
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-tables`);
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao carregar mesas');
+          body.innerHTML = '<tr><td colspan="5" class="ops-empty">Erro ao carregar mesas.</td></tr>';
+          return;
+        }
+        const data = await res.json();
+        serviceTablesState = Array.isArray(data)
+          ? data.map((table, index) => normalizeServiceTable(table, index)).sort((a, b) => {
+              if (a.active !== b.active) return a.active ? -1 : 1;
+              if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+              return (a.name || '').localeCompare(b.name || '', 'pt-BR');
+            })
+          : [];
+        renderServiceTables();
+        msg.textContent = '';
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<tr><td colspan="5" class="ops-empty">Erro de conexao ao carregar mesas.</td></tr>';
+      }
+    }
+
+    function editServiceTable(tableId) {
+      const table = serviceTablesState.find((item) => item.id === Number(tableId));
+      if (!table) return;
+      document.getElementById('cfg-table-edit-id').value = String(table.id);
+      document.getElementById('cfg-table-name').value = table.name;
+      document.getElementById('cfg-table-sector').value = table.sector;
+      document.getElementById('cfg-table-seats').value = table.seats ? String(table.seats) : '';
+      document.getElementById('cfg-table-sort').value = String(table.sortOrder || 0);
+      document.getElementById('cfg-service-tables-msg').textContent = `Editando ${table.name}.`;
+    }
+
+    async function upsertServiceTable() {
+      const id = Number(document.getElementById('cfg-table-edit-id').value || 0);
+      const existing = serviceTablesState.find((item) => item.id === id);
+      const payload = {
+        name: document.getElementById('cfg-table-name').value.trim(),
+        sector: document.getElementById('cfg-table-sector').value.trim(),
+        seats: document.getElementById('cfg-table-seats').value,
+        sortOrder: document.getElementById('cfg-table-sort').value,
+        active: existing ? existing.active : true,
+      };
+      const msg = document.getElementById('cfg-service-tables-msg');
+      if (!payload.name) {
+        msg.textContent = 'Informe o nome da mesa.';
+        return;
+      }
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-tables${id ? `/${id}` : ''}`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          await handleApiError(res, id ? 'Erro ao atualizar mesa' : 'Erro ao cadastrar mesa');
+          return;
+        }
+        msg.textContent = id ? '✅ Mesa atualizada.' : '✅ Mesa cadastrada.';
+        resetServiceTableForm();
+        await loadServiceTables();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao salvar mesa.';
+      }
+    }
+
+    async function toggleServiceTableActive(tableId) {
+      const table = serviceTablesState.find((item) => item.id === Number(tableId));
+      if (!table) return;
+      const msg = document.getElementById('cfg-service-tables-msg');
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-tables/${table.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: table.name,
+            sector: table.sector,
+            seats: table.seats,
+            sortOrder: table.sortOrder,
+            active: !table.active,
+          }),
+        });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao alterar status da mesa');
+          return;
+        }
+        msg.textContent = `✅ Mesa ${!table.active ? 'ativada' : 'desativada'}.`;
+        await loadServiceTables();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao alterar status da mesa.';
+      }
+    }
+
+    async function removeServiceTable(tableId) {
+      const msg = document.getElementById('cfg-service-tables-msg');
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-tables/${Number(tableId)}`, { method: 'DELETE' });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao desativar mesa');
+          return;
+        }
+        msg.textContent = '✅ Mesa desativada.';
+        if (Number(document.getElementById('cfg-table-edit-id').value || 0) === Number(tableId)) {
+          resetServiceTableForm();
+        }
+        await loadServiceTables();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao desativar mesa.';
+      }
+    }
+
+    function normalizeServiceWaiter(waiter = {}, index = 0) {
+      return {
+        id: Number(waiter.id || 0),
+        name: String(waiter.name || '').trim(),
+        code: String(waiter.code || '').trim(),
+        active: waiter.active !== false,
+        sortOrder: Math.max(0, Math.floor(Number(waiter.sortOrder ?? waiter.sort_order) || index || 0)),
+      };
+    }
+
+    function resetServiceWaiterForm() {
+      document.getElementById('cfg-waiter-edit-id').value = '';
+      document.getElementById('cfg-waiter-name').value = '';
+      document.getElementById('cfg-waiter-code').value = '';
+      document.getElementById('cfg-waiter-sort').value = '';
+    }
+
+    function renderServiceWaiters() {
+      const body = document.getElementById('cfg-service-waiters-body');
+      if (!serviceWaitersState.length) {
+        body.innerHTML = '<tr><td colspan="4" class="ops-empty">Nenhum garcom cadastrado.</td></tr>';
+        return;
+      }
+      body.innerHTML = serviceWaitersState.map((waiter) => `
+        <tr>
+          <td>
+            <strong>${esc(waiter.name || 'Garcom')}</strong>
+            <div class="ops-table-meta">Ordem ${Number(waiter.sortOrder || 0)}</div>
+          </td>
+          <td>${esc(waiter.code || '-')}</td>
+          <td><span class="delivery-area-chip ${waiter.active ? 'active' : 'inactive'}">${waiter.active ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <div class="delivery-areas-actions">
+              <button type="button" class="delivery-area-btn" onclick="editServiceWaiter(${Number(waiter.id)})">Editar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleServiceWaiterActive(${Number(waiter.id)})">${waiter.active ? 'Desativar' : 'Ativar'}</button>
+              <button type="button" class="delivery-area-btn danger" onclick="removeServiceWaiter(${Number(waiter.id)})">Desativar</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadServiceWaiters() {
+      const body = document.getElementById('cfg-service-waiters-body');
+      const msg = document.getElementById('cfg-service-waiters-msg');
+      body.innerHTML = '<tr><td colspan="4" class="ops-empty">Carregando garcons...</td></tr>';
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-waiters`);
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao carregar garcons');
+          body.innerHTML = '<tr><td colspan="4" class="ops-empty">Erro ao carregar garcons.</td></tr>';
+          return;
+        }
+        const data = await res.json();
+        serviceWaitersState = Array.isArray(data)
+          ? data.map((waiter, index) => normalizeServiceWaiter(waiter, index)).sort((a, b) => {
+              if (a.active !== b.active) return a.active ? -1 : 1;
+              if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+              return (a.name || '').localeCompare(b.name || '', 'pt-BR');
+            })
+          : [];
+        renderServiceWaiters();
+        msg.textContent = '';
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<tr><td colspan="4" class="ops-empty">Erro de conexao ao carregar garcons.</td></tr>';
+      }
+    }
+
+    function editServiceWaiter(waiterId) {
+      const waiter = serviceWaitersState.find((item) => item.id === Number(waiterId));
+      if (!waiter) return;
+      document.getElementById('cfg-waiter-edit-id').value = String(waiter.id);
+      document.getElementById('cfg-waiter-name').value = waiter.name;
+      document.getElementById('cfg-waiter-code').value = waiter.code;
+      document.getElementById('cfg-waiter-sort').value = String(waiter.sortOrder || 0);
+      document.getElementById('cfg-service-waiters-msg').textContent = `Editando ${waiter.name}.`;
+    }
+
+    async function upsertServiceWaiter() {
+      const id = Number(document.getElementById('cfg-waiter-edit-id').value || 0);
+      const existing = serviceWaitersState.find((item) => item.id === id);
+      const payload = {
+        name: document.getElementById('cfg-waiter-name').value.trim(),
+        code: document.getElementById('cfg-waiter-code').value.trim(),
+        sortOrder: document.getElementById('cfg-waiter-sort').value,
+        active: existing ? existing.active : true,
+      };
+      const msg = document.getElementById('cfg-service-waiters-msg');
+      if (!payload.name) {
+        msg.textContent = 'Informe o nome do garcom.';
+        return;
+      }
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-waiters${id ? `/${id}` : ''}`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          await handleApiError(res, id ? 'Erro ao atualizar garcom' : 'Erro ao cadastrar garcom');
+          return;
+        }
+        msg.textContent = id ? '✅ Garcom atualizado.' : '✅ Garcom cadastrado.';
+        resetServiceWaiterForm();
+        await loadServiceWaiters();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao salvar garcom.';
+      }
+    }
+
+    async function toggleServiceWaiterActive(waiterId) {
+      const waiter = serviceWaitersState.find((item) => item.id === Number(waiterId));
+      if (!waiter) return;
+      const msg = document.getElementById('cfg-service-waiters-msg');
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-waiters/${waiter.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: waiter.name,
+            code: waiter.code,
+            sortOrder: waiter.sortOrder,
+            active: !waiter.active,
+          }),
+        });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao alterar status do garcom');
+          return;
+        }
+        msg.textContent = `✅ Garcom ${!waiter.active ? 'ativado' : 'desativado'}.`;
+        await loadServiceWaiters();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao alterar status do garcom.';
+      }
+    }
+
+    async function removeServiceWaiter(waiterId) {
+      const msg = document.getElementById('cfg-service-waiters-msg');
+      try {
+        const res = await apiFetch(`${API_BASE}/api/service-waiters/${Number(waiterId)}`, { method: 'DELETE' });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao desativar garcom');
+          return;
+        }
+        msg.textContent = '✅ Garcom desativado.';
+        if (Number(document.getElementById('cfg-waiter-edit-id').value || 0) === Number(waiterId)) {
+          resetServiceWaiterForm();
+        }
+        await loadServiceWaiters();
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao desativar garcom.';
+      }
+    }
+
+    function normalizeDeliveryArea(area, index = 0) {
+      const city = String(area?.city || '').trim().replace(/\s+/g, ' ');
+      const district = String(area?.district || '').trim().replace(/\s+/g, ' ');
+      const fee = Number.parseFloat(String(area?.fee ?? '0').replace(',', '.'));
+      return {
+        id: String(area?.id || `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`),
+        city,
+        district,
+        fee: Number.isFinite(fee) && fee >= 0 ? Number(fee.toFixed(2)) : 0,
+        active: area?.active !== false,
+      };
+    }
+
+    function resetDeliveryAreaForm() {
+      document.getElementById('cfg-area-edit-id').value = '';
+      document.getElementById('cfg-area-city').value = '';
+      document.getElementById('cfg-area-district').value = '';
+      document.getElementById('cfg-area-fee').value = '';
+      document.getElementById('cfg-area-active').checked = true;
+    }
+
+    function updateDeliveryAreasSummary() {
+      const activeCount = deliveryAreasState.filter((area) => area.active).length;
+      document.getElementById('cfg-delivery-areas-summary').textContent =
+        `${deliveryAreasState.length} area(s) cadastrada(s), ${activeCount} ativa(s).`;
+    }
+
+    function renderDeliveryAreas() {
+      const body = document.getElementById('cfg-delivery-areas-body');
+      if (!deliveryAreasState.length) {
+        body.innerHTML = '<tr><td colspan="5" class="ops-empty">Nenhuma area cadastrada.</td></tr>';
+        updateDeliveryAreasSummary();
+        return;
+      }
+
+      body.innerHTML = deliveryAreasState.map((area) => `
+        <tr>
+          <td>${esc(area.city)}</td>
+          <td>${esc(area.district)}</td>
+          <td>R$ ${Number(area.fee || 0).toFixed(2)}</td>
+          <td><span class="delivery-area-chip ${area.active ? 'active' : 'inactive'}">${area.active ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <div class="delivery-areas-actions">
+              <button type="button" class="delivery-area-btn" onclick="editDeliveryArea('${esc(area.id)}')">Editar</button>
+              <button type="button" class="delivery-area-btn" onclick="toggleDeliveryAreaActive('${esc(area.id)}')">${area.active ? 'Desativar' : 'Ativar'}</button>
+              <button type="button" class="delivery-area-btn danger" onclick="removeDeliveryArea('${esc(area.id)}')">Remover</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      updateDeliveryAreasSummary();
+    }
+
+    function renderDeliveryAreaSuggestions(metaText = '') {
+      const wrapper = document.getElementById('cfg-area-suggestions');
+      const list = document.getElementById('cfg-area-suggestions-list');
+      const meta = document.getElementById('cfg-area-suggestions-meta');
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      meta.textContent = metaText || `${deliveryAreaSuggestionsState.length} sugestao(oes) pronta(s) para revisao.`;
+      if (!deliveryAreaSuggestionsState.length) {
+        wrapper.style.display = 'none';
+        list.innerHTML = '';
+        if (!metaText) msg.textContent = '';
+        return;
+      }
+      wrapper.style.display = 'grid';
+      list.innerHTML = deliveryAreaSuggestionsState.map((area) => `
+        <span class="delivery-area-suggestion-pill">
+          ${esc(`${area.city} - ${area.district}`)}
+          <button type="button" onclick="acceptSuggestedDeliveryArea('${esc(area.id)}')">Aceitar</button>
+          <button type="button" onclick="discardSuggestedDeliveryArea('${esc(area.id)}')">X</button>
+        </span>
+      `).join('');
+    }
+
+    function upsertDeliveryArea(areaOverride = null) {
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      const baseArea = areaOverride || {
+        id: document.getElementById('cfg-area-edit-id').value || '',
+        city: document.getElementById('cfg-area-city').value,
+        district: document.getElementById('cfg-area-district').value,
+        fee: document.getElementById('cfg-area-fee').value,
+        active: document.getElementById('cfg-area-active').checked,
+      };
+      const area = normalizeDeliveryArea(baseArea, deliveryAreasState.length);
+
+      if (!area.city || !area.district) {
+        msg.textContent = 'Informe cidade e bairro para adicionar a area.';
+        return;
+      }
+
+      const duplicateIndex = deliveryAreasState.findIndex((item) =>
+        item.id !== area.id &&
+        item.city.toLowerCase() === area.city.toLowerCase() &&
+        item.district.toLowerCase() === area.district.toLowerCase()
+      );
+      if (duplicateIndex >= 0) {
+        msg.textContent = 'Ja existe uma area com essa combinacao de cidade e bairro.';
+        return;
+      }
+
+      const currentIndex = deliveryAreasState.findIndex((item) => item.id === area.id);
+      if (currentIndex >= 0) {
+        deliveryAreasState[currentIndex] = area;
+      } else {
+        deliveryAreasState.push(area);
+      }
+
+      deliveryAreasState.sort((a, b) => `${a.city} ${a.district}`.localeCompare(`${b.city} ${b.district}`, 'pt-BR'));
+      renderDeliveryAreas();
+      resetDeliveryAreaForm();
+      msg.textContent = 'Area pronta para salvar nas configuracoes.';
+    }
+
+    function editDeliveryArea(areaId) {
+      const area = deliveryAreasState.find((item) => item.id === areaId);
+      if (!area) return;
+      document.getElementById('cfg-area-edit-id').value = area.id;
+      document.getElementById('cfg-area-city').value = area.city;
+      document.getElementById('cfg-area-district').value = area.district;
+      document.getElementById('cfg-area-fee').value = Number(area.fee || 0).toFixed(2);
+      document.getElementById('cfg-area-active').checked = area.active;
+    }
+
+    function toggleDeliveryAreaActive(areaId) {
+      deliveryAreasState = deliveryAreasState.map((area) =>
+        area.id === areaId ? { ...area, active: !area.active } : area
+      );
+      renderDeliveryAreas();
+      document.getElementById('cfg-delivery-areas-msg').textContent = 'Status da area atualizado. Salve para publicar.';
+    }
+
+    function removeDeliveryArea(areaId) {
+      deliveryAreasState = deliveryAreasState.filter((area) => area.id !== areaId);
+      renderDeliveryAreas();
+      document.getElementById('cfg-delivery-areas-msg').textContent = 'Area removida da grade local. Salve para confirmar.';
+    }
+
+    function clearSuggestedDeliveryAreas() {
+      deliveryAreaSuggestionsState = [];
+      renderDeliveryAreaSuggestions('');
+    }
+
+    function discardSuggestedDeliveryArea(areaId) {
+      deliveryAreaSuggestionsState = deliveryAreaSuggestionsState.filter((area) => area.id !== areaId);
+      renderDeliveryAreaSuggestions();
+    }
+
+    function acceptSuggestedDeliveryArea(areaId) {
+      const area = deliveryAreaSuggestionsState.find((item) => item.id === areaId);
+      if (!area) return;
+      upsertDeliveryArea(area);
+      discardSuggestedDeliveryArea(areaId);
+    }
+
+    function acceptAllSuggestedDeliveryAreas() {
+      const pending = [...deliveryAreaSuggestionsState];
+      pending.forEach((area) => upsertDeliveryArea(area));
+      clearSuggestedDeliveryAreas();
+    }
+
+    async function suggestDeliveryAreas() {
+      const msg = document.getElementById('cfg-delivery-areas-msg');
+      const originAddress = document.getElementById('cfg-area-origin-address').value.trim() || document.getElementById('cfg-delivery-origin').value.trim();
+      const radiusKm = Number.parseFloat(document.getElementById('cfg-area-radius-km').value);
+      const defaultFee = Number.parseFloat(String(document.getElementById('cfg-area-default-fee').value || '0').replace(',', '.'));
+      const defaultActive = document.getElementById('cfg-area-default-active').checked;
+
+      if (!originAddress || originAddress.length < 8) {
+        msg.textContent = 'Informe um endereco-base valido para buscar sugestoes.';
+        return;
+      }
+      if (!Number.isFinite(radiusKm) || radiusKm < 0.5 || radiusKm > 30) {
+        msg.textContent = 'Informe um raio entre 0.5 km e 30 km.';
+        return;
+      }
+
+      msg.textContent = 'Gerando sugestoes com Google Maps...';
+      try {
+        const res = await apiFetch(`${API_BASE}/api/settings/admin/delivery-areas/suggest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ originAddress, radiusKm })
+        });
+        if (!res.ok) {
+          await handleApiError(res, 'Erro ao gerar sugestoes');
+          msg.textContent = 'Nao foi possivel gerar sugestoes.';
+          return;
+        }
+        const data = await res.json();
+        deliveryAreaSuggestionsState = Array.isArray(data.suggestions)
+          ? data.suggestions.map((area, index) => normalizeDeliveryArea({
+              ...area,
+              fee: Number.isFinite(defaultFee) && defaultFee >= 0 ? defaultFee : 0,
+              active: defaultActive,
+            }, index))
+          : [];
+        renderDeliveryAreaSuggestions(
+          deliveryAreaSuggestionsState.length
+            ? `${deliveryAreaSuggestionsState.length} sugestao(oes) encontradas a partir de ${data.origin?.address || originAddress}.`
+            : 'Nenhuma sugestao encontrada para esse endereco/raio.'
+        );
+        msg.textContent = deliveryAreaSuggestionsState.length
+          ? 'Revise as sugestoes antes de salvar.'
+          : 'Nenhuma sugestao encontrada. Ajuste o endereco ou o raio.';
+      } catch (error) {
+        console.error(error);
+        msg.textContent = 'Erro de conexao ao consultar sugestoes.';
+      }
+    }
+
     function syncDeliveryManagementUi(enabled, mapsConfigured = false) {
       const active = enabled === true;
       const mapsStatus = document.getElementById('cfg-maps-status');
@@ -3084,6 +4034,12 @@
       document.querySelectorAll('input[name="cfg-driver-cancel-mode"]').forEach((input) => {
         input.disabled = !active;
       });
+      document.getElementById('cfg-show-route-provider-picker').disabled = !active;
+      document.getElementById('cfg-show-driver-call-button').disabled = !active;
+      document.getElementById('cfg-area-origin-address').disabled = !active;
+      document.getElementById('cfg-area-radius-km').disabled = !active;
+      document.getElementById('cfg-area-default-fee').disabled = !active;
+      document.getElementById('cfg-area-default-active').disabled = !active;
       if (!active) {
         mapsStatus.textContent = 'Google Maps: inativo com a gestao de entrega desligada';
         mapsStatus.style.color = '#9f8c7d';
@@ -3103,6 +4059,15 @@
         document.getElementById('cfg-delivery-management-enabled').checked = data.deliveryManagementEnabled === true;
         document.getElementById('cfg-delivery-origin').value = data.restaurantOriginAddress || '';
         setDriverCancellationMode(data.driverCancellationMode || 'auto');
+        document.getElementById('cfg-show-route-provider-picker').checked = data.showRouteProviderPicker === true;
+        document.getElementById('cfg-show-driver-call-button').checked = data.showDriverCallButton === true;
+        document.getElementById('cfg-area-origin-address').value = data.restaurantOriginAddress || '';
+        deliveryAreasState = Array.isArray(data.deliveryAreas)
+          ? data.deliveryAreas.map((area, index) => normalizeDeliveryArea(area, index))
+          : [];
+        applyLocalServiceSettings(data.localServiceSettings || {});
+        renderDeliveryAreas();
+        clearSuggestedDeliveryAreas();
         syncDeliveryManagementUi(data.deliveryManagementEnabled === true, data.googleMapsApiKeyConfigured === true);
       } catch (e) {
         document.getElementById('cfg-maps-status').textContent = 'Google Maps: erro ao verificar';
@@ -3114,9 +4079,15 @@
       const deliveryManagementEnabled = isDeliveryManagementEnabled();
       const restaurantOriginAddress = document.getElementById('cfg-delivery-origin').value.trim();
       const driverCancellationMode = getSelectedDriverCancellationMode();
+      const showRouteProviderPicker = document.getElementById('cfg-show-route-provider-picker').checked;
+      const showDriverCallButton = document.getElementById('cfg-show-driver-call-button').checked;
+      const localServiceSettings = collectLocalServiceSettings();
       const msg = document.getElementById('cfg-delivery-msg');
       const cancelMsg = document.getElementById('cfg-driver-cancel-msg');
       const deliveryManagementMsg = document.getElementById('cfg-delivery-management-msg');
+      const visibilityMsg = document.getElementById('cfg-delivery-visibility-msg');
+      const deliveryAreasMsg = document.getElementById('cfg-delivery-areas-msg');
+      const localServiceMsg = document.getElementById('cfg-local-service-msg');
       if (deliveryManagementEnabled && restaurantOriginAddress.length < 8) {
         msg.textContent = 'Informe um endereço-base válido para entregas.';
         return;
@@ -3126,7 +4097,15 @@
         const res = await apiFetch(`${API_BASE}/api/settings/admin`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deliveryManagementEnabled, restaurantOriginAddress, driverCancellationMode })
+          body: JSON.stringify({
+            deliveryManagementEnabled,
+            restaurantOriginAddress,
+            driverCancellationMode,
+            showRouteProviderPicker,
+            showDriverCallButton,
+            deliveryAreas: deliveryAreasState,
+            localServiceSettings,
+          })
         });
         if (!res.ok) {
           await handleApiError(res, 'Erro ao salvar endereço-base');
@@ -3143,12 +4122,23 @@
             ? '✅ Motoboy pode cancelar automaticamente.'
             : '✅ Cancelamentos do motoboy vao para confirmacao admin.')
           : 'Gestao de entrega inativa: cancelamento do motoboy desabilitado.';
+        visibilityMsg.textContent = deliveryManagementEnabled
+          ? `✅ PWA atualizado: seletor de rota ${showRouteProviderPicker ? 'visivel' : 'oculto'} e botao ligar ${showDriverCallButton ? 'visivel' : 'oculto'}.`
+          : 'Gestao de entrega inativa: controles do PWA ficam ocultos.';
+        deliveryAreasMsg.textContent = `✅ ${deliveryAreasState.length} area(s) de entrega salvas.`;
+        localServiceMsg.textContent = localServiceSettings.enabled
+          ? '✅ Configuracoes do atendimento local salvas.'
+          : '✅ Atendimento local desabilitado para este cliente.';
         setTimeout(() => { msg.textContent = ''; }, 3000);
         setTimeout(() => { deliveryManagementMsg.textContent = ''; }, 3000);
         setTimeout(() => { cancelMsg.textContent = ''; }, 3000);
+        setTimeout(() => { visibilityMsg.textContent = ''; }, 3000);
+        setTimeout(() => { deliveryAreasMsg.textContent = ''; }, 3000);
+        setTimeout(() => { localServiceMsg.textContent = ''; }, 3000);
         loadDeliverySettings();
       } catch (e) {
         msg.textContent = 'Erro de conexão ao salvar endereço-base.';
+        localServiceMsg.textContent = 'Erro de conexao ao salvar configuracoes locais.';
       }
     }
 
@@ -3410,6 +4400,7 @@
     }
 
     window.onload = () => {
+      updateLocalServiceLinks();
       syncAdminThemeUi();
       loadRestaurantStatus();
       loadConfig();
