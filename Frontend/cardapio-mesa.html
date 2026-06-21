@@ -710,27 +710,44 @@
     // LÓGICA ESPECÍFICA DO CARDÁPIO DE MESA
     // ---------------------------------------------------------
     
-    // Pegar ID da mesa da URL (ex: ?mesa=5)
+    // Pegar token da mesa da URL (ex: ?t=abc123def)
     const urlParams = new URLSearchParams(window.location.search);
-    const tableId = urlParams.get('mesa') || '';
+    const tableToken = urlParams.get('t') || urlParams.get('mesa') || ''; // Suporte legado a 'mesa' por enquanto
     
-    document.addEventListener('DOMContentLoaded', () => {
+    let currentTableId = null;
+    let currentTableName = '';
+
+    document.addEventListener('DOMContentLoaded', async () => {
       const tableDisplay = document.getElementById('table-name-display');
-      if (tableId) {
-        tableDisplay.textContent = `Mesa ${tableId}`;
-      } else {
+      
+      if (!tableToken) {
         tableDisplay.textContent = 'Mesa não identificada';
         alert('Por favor, escaneie o QR Code da mesa novamente.');
+        return;
       }
-      
-      // Override cart key for table service to not conflict with delivery
-      window.CART_KEY = 'cart_mesa_' + tableId;
-      updateCartCount();
+
+      try {
+        const res = await fetch(`${API_BASE}/api/service-tables/token/${tableToken}`);
+        if (!res.ok) throw new Error('Mesa inválida');
+        
+        const data = await res.json();
+        currentTableId = data.id;
+        currentTableName = data.name;
+        
+        tableDisplay.textContent = currentTableName;
+        
+        // Override cart key for table service to not conflict with delivery
+        window.CART_KEY = 'cart_mesa_' + currentTableId;
+        updateCartCount();
+      } catch (err) {
+        tableDisplay.textContent = 'Mesa não encontrada';
+        alert('Mesa inválida ou inativa. Verifique o QR Code.');
+      }
     });
 
     function callWaiter() {
-      if (!tableId) return alert('Mesa não identificada.');
-      const msg = `Olá, a Mesa ${tableId} está chamando o garçom!`;
+      if (!currentTableName) return alert('Mesa não identificada.');
+      const msg = `Olá, a ${currentTableName} está chamando o garçom!`;
       window.open(`https://wa.me/5548984138554?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
@@ -849,7 +866,7 @@
     }
 
     async function sendTableOrder() {
-      if (!tableId) return alert('Mesa não identificada.');
+      if (!tableToken || !currentTableId) return alert('Mesa não identificada.');
       const cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
       if (cart.length === 0) return;
 
@@ -871,7 +888,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            tableId: tableId,
+            tableToken: tableToken,
             total: total,
             items: items,
             payment: 'pix'

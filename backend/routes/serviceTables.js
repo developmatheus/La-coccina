@@ -29,7 +29,7 @@ function normalizeTablePayload(body = {}) {
 router.get('/', requireAdmin, async (_req, res) => {
   try {
     const [rows] = await db.execute(
-      `SELECT id, name, sector, seats, active, sort_order, created_at
+      `SELECT id, name, sector, seats, active, sort_order, created_at, qr_token
          FROM service_tables
         ORDER BY active DESC, sort_order ASC, name ASC`
     );
@@ -40,6 +40,7 @@ router.get('/', requireAdmin, async (_req, res) => {
       seats: Number(row.seats || 0),
       active: Boolean(row.active),
       sortOrder: Number(row.sort_order || 0),
+      qrToken: row.qr_token || '',
       createdAt: row.created_at,
     })));
   } catch (err) {
@@ -50,18 +51,40 @@ router.get('/', requireAdmin, async (_req, res) => {
 
 router.post('/', requireAdmin, async (req, res) => {
   const parsed = normalizeTablePayload(req.body);
-  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  if (parsed.error) return res.status(400).json({ error: parsed.error });       
 
   try {
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(6).toString('hex');
+    
     const [result] = await db.execute(
-      `INSERT INTO service_tables (name, sector, seats, active, sort_order)
-       VALUES (?, ?, ?, ?, ?)`,
-      [parsed.name, parsed.sector, parsed.seats, parsed.active ? 1 : 0, parsed.sortOrder]
+      `INSERT INTO service_tables (name, sector, seats, active, sort_order, qr_token)     
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [parsed.name, parsed.sector, parsed.seats, parsed.active ? 1 : 0, parsed.sortOrder, token]
     );
-    res.status(201).json({ success: true, id: result.insertId });
+    res.status(201).json({ success: true, id: result.insertId, qrToken: token });
   } catch (err) {
     console.error('Erro ao criar mesa:', err.message);
     res.status(500).json({ error: 'Erro ao criar mesa.' });
+  }
+});
+
+router.get('/token/:token', async (req, res) => {
+  const token = String(req.params.token || '').trim();
+  if (!token) return res.status(400).json({ error: 'Token inválido.' });
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT id, name FROM service_tables WHERE qr_token = ? AND active = 1`,
+      [token]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Mesa não encontrada ou inativa.' });
+    }
+    res.json({ id: rows[0].id, name: rows[0].name });
+  } catch (err) {
+    console.error('Erro ao buscar mesa por token:', err.message);
+    res.status(500).json({ error: 'Erro ao buscar mesa.' });
   }
 });
 

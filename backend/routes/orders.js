@@ -507,21 +507,22 @@ router.post('/customer-table', async (req, res) => {
       return res.status(409).json({ error: 'O atendimento local está desabilitado.' });
     }
 
-    const tableId = parsed.tableId;
-    if (!tableId) {
-      return res.status(400).json({ error: 'Mesa não informada.' });
+    const tableToken = parsed.tableToken;
+    if (!tableToken) {
+      return res.status(400).json({ error: 'Sessão de mesa inválida.' });
     }
 
-    // Verificar se a mesa existe
-    const [tableRows] = await db.execute('SELECT id, name FROM service_tables WHERE id = ?', [tableId]);
+    // Verificar se a mesa existe usando o token
+    const [tableRows] = await db.execute('SELECT id, name FROM service_tables WHERE qr_token = ? AND active = 1', [tableToken]);
     if (!tableRows.length) {
-      return res.status(400).json({ error: 'Mesa inválida.' });
+      return res.status(400).json({ error: 'Mesa inválida ou inativa.' });
     }
+    const tableId = tableRows[0].id;
     const tableName = tableRows[0].name;
 
-    // Setar customer name padrão
+    // Setar customer name padrão se não vier preenchido
     if (!parsed.customer || parsed.customer === 'Cliente') {
-      parsed.customer = `Cliente Mesa ${tableName}`;
+      parsed.customer = `Cliente ${tableName}`;
     }
 
     // Buscar comanda aberta para esta mesa
