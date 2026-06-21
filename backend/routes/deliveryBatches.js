@@ -1104,6 +1104,80 @@ router.post('/public/:token/session', async (req, res) => {
   }
 });
 
+router.post('/:id/undo', requireAdmin, async (req, res) => {
+  const batchId = parseInt(req.body.id || req.params.id, 10);
+  if (isNaN(batchId) || batchId <= 0) {
+    return res.status(400).json({ error: 'Lote inválido.' });
+  }
+
+  try {
+    const deliveryManagementEnabled = await getDeliveryManagementEnabled();
+    if (!deliveryManagementEnabled) {
+      return res.status(409).json({ error: 'A gestão de entrega está inativa no administrativo.' });
+    }
+
+    const conn = await db.getConnection();
+    try {
+      await conn.exec('BEGIN IMMEDIATE');
+
+      const batch = await loadBatchById(batchId);
+      if (!batch) {
+        await conn.exec('ROLLBACK');
+        return res.status(404).json({ error: 'Lote não encontrado.' });
+      }
+
+      if (batch.status === 'finalizado') {
+        await conn.exec('ROLLBACK');
+        return res.status(409).json({ error: 'Este lote já foi finalizado e não pode ser desfeito.' });
+      }
+
+      // Reverter status dos pedidos do lote para 'aguardando_envio'
+      const [orderRows] = await conn.all('SELECT id, status, customer FROM orders WHERE delivery_batch_id = ?', [batchId]);
+      
+      if (orderRows.length > 0) {
+        const orderIds = orderRows.map(o => o.id);
+        const placeholders = orderIds.map(() => '?').join(',');
+        
+        await conn.run(
+          `UPDATE orders 
+           SET status = 'aguardando_envio', 
+               delivery_batch_id = NULL,
+               delivery_sequence = NULL,
+               delivery_batch_code = NULL
+           WHERE id IN (${placeholders})`,
+          orderIds
+        );
+
+        // Adicionar histórico para cada pedido revertido
+        const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        for (const order of orderRows) {
+          await conn.run(
+            `INSERT INTO order_history (order_id, action, previous_status, new_status, actor_name, note, created_at)
+             VALUES (?, 'status_change', ?, 'aguardando_envio', 'Admin', 'Rota desfeita manualmente', ?)`,
+            [order.id, order.status, now]
+          );
+        }
+      }
+
+      // Deletar o lote
+      await conn.run('DELETE FROM delivery_batches WHERE id = ?', [batchId]);
+
+      await conn.exec('COMMIT');
+
+      notifyClients('order-status-changed');
+      notifyClients('delivery-batch-updated');
+
+      res.json({ success: true, message: 'Rota desfeita com sucesso.' });
+    } catch (innerErr) {
+      await conn.exec('ROLLBACK');
+      throw innerErr;
+    }
+  } catch (err) {
+    console.error('Erro ao desfazer lote:', err.message);
+    res.status(500).json({ error: 'Erro ao desfazer lote.' });
+  }
+});
+
 router.post('/:id/confirm-kitchen', requireAdmin, async (req, res) => {
   const batchId = parsePositiveId(req.params.id);
   if (!batchId) return res.status(400).json({ error: 'Lote inválido.' });

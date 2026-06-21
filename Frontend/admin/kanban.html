@@ -909,6 +909,10 @@
       if (colKey === 'preparando_rota' && first.delivery_batch_status === 'aceito_motoboy') {
         actions.push(`<button class="batch-btn warn" onclick="confirmKitchenRelease(${batchGroup.batchId})">Confirmar saída</button>`);
       }
+      if (first.delivery_batch_status !== 'finalizado') {
+        const isAccepted = first.delivery_batch_status !== 'preparado';
+        actions.push(`<button class="batch-btn danger" onclick="undoRoute(${batchGroup.batchId}, ${isAccepted})">Desfazer rota</button>`);
+      }
     }
     return `
       <div class="kb-batch-panel">
@@ -1572,6 +1576,27 @@
     } catch (error) {
       console.error(error);
       alert('Erro ao confirmar saida do lote.');
+    }
+  }
+
+  async function undoRoute(batchId, isAccepted) {
+    if (isAccepted) {
+      if (!confirm('Realmente deseja cancelar a corrida do motoboy? Motoboy não poderá visualizar dados das entregas nem confirmá-las')) return;
+    } else {
+      if (!confirm('Deseja desfazer este lote e retornar os pedidos para Aguardando Envio?')) return;
+    }
+
+    try {
+      const res = await apiFetch(`${API}/api/delivery-batches/${batchId}/undo`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Erro ao desfazer rota.');
+        return;
+      }
+      await loadOrders();
+    } catch (e) {
+      console.error('Erro ao desfazer rota:', e);
+      alert('Erro de comunicação ao desfazer a rota.');
     }
   }
 
