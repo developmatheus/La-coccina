@@ -494,6 +494,75 @@ router.get('/track/:token', async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Público — pedido direto da mesa pelo cliente (QR Code)
+// ---------------------------------------------------------------------------
+router.post('/customer-table', async (req, res) => {
+  const parsed = sanitizeOrderInput({ ...req.body, serviceChannel: 'local' });
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+  try {
+    const localSettings = await getLocalServiceSettings();
+    if (!localSettings.enabled) {
+      return res.status(409).json({ error: 'O atendimento local está desabilitado.' });
+    }
+
+    const tableId = parsed.tableId;
+    if (!tableId) {
+      return res.status(400).json({ error: 'Mesa não informada.' });
+    }
+
+    // Verificar se a mesa existe
+    const [tableRows] = await db.execute('SELECT id, name FROM service_tables WHERE id = ?', [tableId]);
+    if (!tableRows.length) {
+      return res.status(400).json({ error: 'Mesa inválida.' });
+    }
+    const tableName = tableRows[0].name;
+
+    // Setar customer name padrão
+    if (!parsed.customer || parsed.customer === 'Cliente') {
+      parsed.customer = `Cliente Mesa ${tableName}`;
+    }
+
+    // Buscar comanda aberta para esta mesa
+    const [rows] = await db.execute(
+      `SELECT id FROM orders WHERE table_id = ? AND service_channel = 'local' AND COALESCE(closed_at, '') = '' ORDER BY id DESC LIMIT 1`,
+      [tableId]
+    );
+
+    if (rows.length > 0) {
+      // Adicionar itens na comanda existente
+      const id = rows[0].id;
+      const order = await getLocalOrderById(id);
+      
+      const currentItems = parseOrderItems(order.items);
+      const mergedItems = [...currentItems, ...parsed.items];
+      const addedTotal = parsed.items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 1)), 0);
+      const updatedTotal = Number(order.total || 0) + addedTotal;
+      
+      await db.execute(
+        `UPDATE orders
+            SET items = ?, total = ?, updated_at = datetime('now'),
+                status = CASE WHEN status = 'pronto_para_servir' THEN 'em_producao' ELSE status END,
+                local_service_status = 'aguardando_preparo'
+          WHERE id = ?`,
+        [JSON.stringify(mergedItems), updatedTotal, id]
+      );
+      
+      notifyClients('order-created');
+      return res.json({ success: true, appended: true, id, message: 'Itens adicionados à comanda da mesa.' });
+    } else {
+      // Criar nova comanda para a mesa
+      const { id, token, commandCode } = await createOrderRecord(parsed, localSettings);
+      notifyClients('order-created');
+      return res.json({ success: true, appended: false, id, token, commandCode, message: 'Nova comanda aberta para a mesa.' });
+    }
+  } catch (err) {
+    console.error('Erro ao processar pedido de mesa:', err.message);
+    res.status(500).json({ error: 'Erro ao processar pedido da mesa.' });
+  }
+});
+
 router.post('/local', requireAdmin, async (req, res) => {
   const parsed = sanitizeOrderInput({ ...req.body, serviceChannel: 'local' });
   if (parsed.error) return res.status(400).json({ error: parsed.error });

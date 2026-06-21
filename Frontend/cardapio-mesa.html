@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Digital - La Coccina</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="ASSETS/imagens/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="ASSETS/imagens/favicon-192.png">
+  <link rel="apple-touch-icon" href="ASSETS/imagens/favicon-192.png">
+
+  <link rel="stylesheet" href="ASSETS/CSS/global.css">
+  <link rel="stylesheet" href="ASSETS/CSS/index-page.css">
+  <link rel="stylesheet" href="ASSETS/CSS/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Modal de seleção de acompanhamentos */
+    #acc-sel-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82); z-index: 2000;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #acc-sel-box {
+      background: #1a1a1a; border-radius: 20px; padding: 0;
+      width: 100%; max-width: 460px; max-height: 88vh;
+      display: flex; flex-direction: column; position: relative;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    }
+    .acc-modal-header {
+      padding: 22px 24px 14px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .acc-modal-header h3 { margin: 0 0 2px; font-size: 1.1rem; color: #fff; }
+    .acc-modal-header .acc-subtitle { color: #888; font-size: 0.82rem; margin: 0 0 8px; }
+    .acc-counter-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #111; border-radius: 8px; padding: 8px 12px; margin-top: 8px;
+    }
+    .acc-counter-bar span { font-size: 0.85rem; color: #ccc; }
+    .acc-counter-val { font-weight: 700; color: #ffcc00; font-size: 1rem; }
+    .acc-counter-bar .acc-extra-total { color: #ffcc00; font-size: 0.85rem; font-weight: 600; }
+    #acc-sel-list {
+      overflow-y: auto; padding: 8px 0; flex: 1;
+    }
+    .acc-check-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 24px; cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid #222;
+    }
+    .acc-check-item:last-child { border-bottom: none; }
+    .acc-check-item:hover { background: #222; }
+    .acc-check-item.is-selected { background: #1e2e1e; }
+    .acc-check-item input[type=checkbox] { display: none; }
+    .acc-checkmark {
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid #444; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; background: #2a2a2a;
+    }
+    .acc-check-item.is-selected .acc-checkmark {
+      background: #27ae60; border-color: #27ae60;
+    }
+    .acc-checkmark::after { content: '✓'; color: #fff; font-size: 0.85rem; display: none; }
+    .acc-check-item.is-selected .acc-checkmark::after { display: block; }
+    .acc-check-label { flex: 1; min-width: 0; }
+    .acc-check-label strong { display: block; font-size: 0.95rem; color: #fff; font-weight: 500; }
+    .acc-check-label .acc-price-tag {
+      font-size: 0.78rem; color: #ffcc00; font-weight: 600; margin-top: 1px;
+    }
+    .acc-check-label .acc-default-tag {
+      font-size: 0.7rem; background: #1a4a2a; color: #4caf50;
+      padding: 1px 7px; border-radius: 50px; margin-left: 6px;
+    }
+    /* Controle de quantidade extra por acompanhamento */
+    .acc-qty-wrap {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 6px;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.2s ease, opacity 0.2s ease;
+      opacity: 0;
+    }
+    .acc-check-item.is-selected .acc-qty-wrap {
+      max-height: 40px; opacity: 1;
+    }
+    .acc-qty-label { font-size: 0.7rem; color: #666; white-space: nowrap; }
+    .acc-qty-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1.5px solid #3a3a3a; background: #222;
+      color: #ccc; font-size: 1rem; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; user-select: none;
+    }
+    .acc-qty-btn:hover { border-color: #ffcc00; color: #ffcc00; }
+    .acc-qty-val { font-size: 0.9rem; font-weight: 700; color: #fff; min-width: 18px; text-align: center; }
+
+    .acc-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #2a2a2a;
+      display: flex; gap: 10px;
+    }
+    .acc-modal-footer button {
+      flex: 1; padding: 14px; border: none; border-radius: 50px;
+      font-weight: bold; cursor: pointer; font-size: 1rem; transition: opacity 0.2s;
+    }
+    #btn-acc-confirm { background: #ffcc00; color: #000; }
+    #btn-acc-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+    #btn-acc-cancel  { background: #2a2a2a; color: #fff; flex: 0 0 auto; padding: 14px 22px; }
+  </style>
+
+  <meta name="description" content="Marmitas caseiras deliciosas em Florianópolis. Comida feita com amor, ingredientes frescos e sabor autêntico. Entrega rápida em Cachoeira do Bom Jesus, Ingleses, Canasvieiras e região.">
+  <meta name="keywords" content="marmita florianopolis, comida caseira florianopolis, marmita delivery floripa, almoço marmita, comida feita em casa, marmita cachoeira do bom jesus, marmita ingleses, marmita canasvieiras, la coccina, prato do dia florianopolis">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="pt-BR">
+  <meta name="author" content="La Coccina">
+  <meta name="geo.region" content="BR-SC">
+  <meta name="geo.placename" content="Florianópolis">
+  <meta property="og:title" content="La Coccina - Marmitas Caseiras em Florianópolis">
+  <meta property="og:description" content="Comida caseira deliciosa com entrega em Florianópolis. Marmitas, pratos do dia e muito sabor!">
+  <meta property="og:image" content="https://developmatheus.github.io/La-coccina/Frontend/ASSETS/imagens/icons.png">
+  <meta property="og:url" content="https://developmatheus.github.io/La-coccina/Frontend/">
+  <meta property="og:type" content="website">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <img src="ASSETS/imagens/Mascote 3.webp" alt="La Coccina" class="hero-mascot">
+    </div>
+  </header>
+
+  <div id="status-bar" style="display:none; padding:10px; text-align:center; background:#ffcc00; color:#000; font-weight:bold;"></div>
+
+  <section class="hero">
+    <div class="hero-layout">
+      <div class="hero-left">
+        <img src="ASSETS/imagens/Mascote 3.webp" alt="La Coccina" class="hero-mascot">
+        <h1 class="hero-title">Cardápio Digital<br><span id="table-name-display">Carregando Mesa...</span></h1>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="hero-cta" data-scroll-to="cardapio">Ver Cardápio</button>
+          <button type="button" class="hero-cta" style="background: #27ae60; color: white;" onclick="callWaiter()">🔔 Chamar Garçom</button>
+        </div>
+      </div>
+
+      <div id="daily-special-column" class="hero-daily">
+        <div style="width:100%;">
+          <h2 id="daily-title" style="display:none; color:#ffcc00; font-size: 2.3rem; margin-bottom: 15px; text-align:center;"></h2>
+          <div id="daily-special" style="width:100%;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="menu-section" id="cardapio">
+    <h2 class="section-title">🍲 Marmitas</h2>
+    <div class="products-slider">
+      <button type="button" class="slider-btn prev" data-slider="marmitas-grid" data-dir="-1" aria-label="Marmitas anteriores">❮</button>
+      <div class="products-row" id="marmitas-grid"></div>
+      <button type="button" class="slider-btn next" data-slider="marmitas-grid" data-dir="1" aria-label="Próximas marmitas">❯</button>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <h2 class="section-title">🥤 Bebidas</h2>
+    <div class="products-slider">
+      <button type="button" class="slider-btn prev" data-slider="bebidas-grid" data-dir="-1" aria-label="Bebidas anteriores">❮</button>
+      <div class="products-row" id="bebidas-grid"></div>
+      <button type="button" class="slider-btn next" data-slider="bebidas-grid" data-dir="1" aria-label="Próximas bebidas">❯</button>
+    </div>
+  </div>
+
+  <div id="cart-float-btn" class="cart-float" onclick="openTableCart()" title="Carrinho">
+    🛒 <span id="cart-count-float">0</span>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navegacao rapida">
+    <button type="button" class="bottom-nav__button bottom-nav__button--active" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 10.5 12 3l9 7.5"></path>
+          <path d="M5.5 9.5V21h13V9.5"></path>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Topo</span>
+    </button>
+    <button type="button" class="bottom-nav__button" data-scroll-to="cardapio">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16"></path>
+          <path d="M4 12h16"></path>
+          <path d="M4 17h10"></path>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Cardapio</span>
+    </button>
+    <button type="button" class="bottom-nav__button bottom-nav__cart" onclick="openTableCart()">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="19" r="1.6"></circle>
+          <circle cx="18" cy="19" r="1.6"></circle>
+          <path d="M3 5h2l2.2 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.76L20 8H7"></path>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Meu Pedido</span>
+      <span id="cart-count-bottom" class="bottom-nav__badge is-hidden">0</span>
+    </button>
+  </nav>
+
+  <!-- Table Cart Modal -->
+  <div id="table-cart-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:3000; align-items:flex-end; justify-content:center;">
+    <div id="table-cart-box" style="background:#1a1a1a; width:100%; max-width:600px; height:85vh; border-radius:20px 20px 0 0; display:flex; flex-direction:column; padding:20px; box-shadow:0 -10px 40px rgba(0,0,0,0.5);">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:15px;">
+        <h2 style="margin:0; color:#fff;">🛒 Meu Pedido</h2>
+        <button onclick="closeTableCart()" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      
+      <div id="table-cart-items" style="flex:1; overflow-y:auto; margin-bottom:15px;">
+        <!-- Items go here -->
+      </div>
+      
+      <div style="border-top:1px solid #333; padding-top:15px;">
+        <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold; color:#ffcc00; margin-bottom:15px;">
+          <span>Total:</span>
+          <span id="table-cart-total">R$ 0,00</span>
+        </div>
+        <button onclick="sendTableOrder()" id="btn-send-table-order" style="width:100%; background:#27ae60; color:#fff; border:none; padding:15px; font-size:1.1rem; font-weight:bold; border-radius:12px; cursor:pointer;">
+          Enviar Pedido para a Cozinha
+        </button>
+        <p style="text-align:center; color:#aaa; font-size:0.8rem; margin-top:10px;">O pagamento (Pix) será realizado ao final do atendimento.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="ASSETS/js/config.js"></script>
+  <script src="ASSETS/js/security.js"></script>
+  <script src="ASSETS/js/scroll-smooth.js"></script>
+  <script src="ASSETS/js/script.js"></script>
+
+  <script>
+    const API_BASE = LaCoccinaSecurity.API_BASE;
+    const esc = LaCoccinaSecurity.escapeHtml;
+    const safeJson = LaCoccinaSecurity.safeJsonForHtml;
+    const imgUrl = LaCoccinaSecurity.uploadUrl;
+    let menuEventSource = null;
+    let refreshDebounceTimer = null;
+    let sseReconnectTimer = null;
+    let fallbackPollTimer = null;
+    let isRefreshing = false;
+
+    function isActive(product) {
+      return product.active === 1 || product.active === true;
+    }
+
+    async function fetchPublicMenu() {
+      const res = await fetch(`${API_BASE}/api/products/menu`);
+      if (!res.ok) throw new Error('Falha ao carregar cardápio');
+      return res.json();
+    }
+
+    const REFRESH_DEBOUNCE_MS = Number(localStorage.getItem('lc_refresh_debounce') || 1000);
+
+    function scheduleSiteRefresh() {
+      clearTimeout(refreshDebounceTimer);
+      refreshDebounceTimer = setTimeout(refreshSiteData, REFRESH_DEBOUNCE_MS);
+    }
+
+    // Polling de fallback: só agenda o próximo ciclo APÓS o atual terminar.
+    // Evita sobreposição quando o SSE está indisponível.
+    function scheduleFallbackPoll() {
+      clearTimeout(fallbackPollTimer);
+      fallbackPollTimer = setTimeout(async () => {
+        await refreshSiteData();
+        scheduleFallbackPoll();
+      }, 60000);
+    }
+
+    async function refreshSiteData() {
+      // Guard: se já está atualizando, ignora a chamada concurrent.
+      if (isRefreshing) return;
+      isRefreshing = true;
+      try {
+        const products = await fetchPublicMenu();
+        renderMenu(products);
+        renderDailySpecial(products);
+        pruneInactiveFromCart(products);
+        await updateClientStatusBar();
+      } catch (e) {
+        console.error('Erro ao atualizar site:', e);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    function pruneInactiveFromCart(products) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (!cart.length) return;
+      const activeIds = new Set(products.map((p) => p.id));
+      const filtered = cart.filter((item) => activeIds.has(item.id));
+      if (filtered.length !== cart.length) {
+        localStorage.setItem('cart', JSON.stringify(filtered));
+        updateCartCount();
+      }
+    }
+
+    function connectLiveUpdates() {
+      if (menuEventSource) {
+        menuEventSource.close();
+        menuEventSource = null;
+      }
+
+      menuEventSource = new EventSource(`${API_BASE}/api/products/stream`);
+
+      menuEventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'connected') return;
+          if (data.type === 'menu-updated' || data.type === 'status-updated') {
+            scheduleSiteRefresh();
+          }
+        } catch {
+          scheduleSiteRefresh();
+        }
+      };
+
+      menuEventSource.onerror = () => {
+        if (menuEventSource) {
+          menuEventSource.close();
+          menuEventSource = null;
+        }
+        // SSE caiu: ativa polling de fallback enquanto tenta reconectar.
+        scheduleFallbackPoll();
+        clearTimeout(sseReconnectTimer);
+        sseReconnectTimer = setTimeout(connectLiveUpdates, 8000);
+      };
+
+      menuEventSource.onopen = () => {
+        // SSE reconectou: cancela o polling de fallback.
+        clearTimeout(fallbackPollTimer);
+      };
+    }
+
+    function renderDailySpecial(products) {
+      try {
+        const daily = products.find(p => (p.isDailySpecial === true || p.isDailySpecial == 1) && isActive(p));
+        const column = document.getElementById('daily-special-column');
+        const title = document.getElementById('daily-title');
+        const container = document.getElementById('daily-special');
+
+        if (daily) {
+          column.style.display = 'flex';
+          title.style.display = 'block';
+          const isCustomizable = daily.details?.is_customizable;
+          const dailyBtnAction = isCustomizable
+            ? `openAccompanimentsModal(${safeJson(daily)})`
+            : `addToCart(${safeJson(daily)}, [])`;
+          const dailyBtnLabel = isCustomizable ? 'Personalizar e Adicionar' : 'Adicionar ao Carrinho';
+          const dailyBtn = `<button class="add-to-cart daily-special-button" onclick='${dailyBtnAction}'>${dailyBtnLabel}</button>`;
+          container.innerHTML = `
+            <div class="daily-special-box">
+              <h2 class="daily-special-heading">🌟 Prato do Dia</h2>
+              <img src="${imgUrl(daily.image)}" alt="${esc(daily.name)}">
+              <h3 class="daily-special-name">${esc(daily.name)}</h3>
+              <p class="daily-special-description">${esc(daily.desc || '')}</p>
+              <div class="daily-special-actions">
+                <strong class="daily-special-price">R$ ${parseFloat(daily.price).toFixed(2)}</strong>
+                ${dailyBtn}
+              </div>
+            </div>`;
+        } else {
+          column.style.display = 'none';
+          title.style.display = 'none';
+          container.innerHTML = '';
+        }
+      } catch (e) {
+        console.error('Erro no Prato do Dia:', e);
+      }
+    }
+
+    function renderMenu(products) {
+      try {
+        const marmitasGrid = document.getElementById('marmitas-grid');
+        const bebidasGrid = document.getElementById('bebidas-grid');
+        marmitasGrid.innerHTML = '';
+        bebidasGrid.innerHTML = '';
+
+        products.filter(p => p.category === 'marmita' && isActive(p)).forEach(product => {
+          marmitasGrid.appendChild(createCard(product));
+        });
+
+        products.filter(p => p.category === 'bebida' && isActive(p)).forEach(product => {
+          bebidasGrid.appendChild(createCard(product));
+        });
+      } catch (e) {
+        console.error('Erro ao carregar cardápio:', e);
+      }
+    }
+
+    function buildDetailTags(product) {
+      const d = product.details || {};
+      const tags = [];
+      if (product.category === 'marmita') {
+        if (d.protein)         tags.push({ label: d.protein, color: '#c0392b' });
+        if (d.is_customizable) tags.push({ label: '✏️ Personalizável', color: '#7d3c98' });
+        else if (d.sides)      d.sides.split(',').forEach(s => s.trim() && tags.push({ label: s.trim(), color: '#2c7a4b' }));
+      } else {
+        if (d.volume)     tags.push({ label: d.volume,     color: '#1a6fa8' });
+        if (d.serve_type) tags.push({ label: d.serve_type, color: '#6c3483' });
+      }
+      if (!tags.length) return '';
+      return `<div class="product-tags">${tags.map(t =>
+        `<span class="product-tag" style="background:${t.color}">${esc(t.label)}</span>`
+      ).join('')}</div>`;
+    }
+
+    function createCard(product) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const isCustomizable = product.details?.is_customizable;
+      const cartButton = isCustomizable
+        ? `<button class="add-to-cart" onclick='openAccompanimentsModal(${safeJson(product)})'>Personalizar e Adicionar</button>`
+        : `<button class="add-to-cart" onclick='addToCart(${safeJson(product)}, [])'>Adicionar ao Carrinho</button>`;
+      const imageHtml = product.image ? `<img src="${imgUrl(product.image)}" alt="${esc(product.name)}">` : '';
+      card.innerHTML = `
+        ${imageHtml}
+        <div class="card-content">
+          <h3>${esc(product.name)}</h3>
+          ${buildDetailTags(product)}
+          <p>${esc(product.desc || '')}</p>
+          <strong>R$ ${parseFloat(product.price).toFixed(2)}</strong>
+          ${cartButton}
+        </div>`;
+      return card;
+    }
+
+    // Modal de seleção de acompanhamentos (pratos personalizáveis)
+    let _accModalProduct = null;
+
+    let _accModalMin = 0;
+    let _accModalMax = 0;
+
+    async function openAccompanimentsModal(product) {
+      if (!(await isStoreOpen())) { alert('🔴 O restaurante está fechado no momento.'); return; }
+      _accModalProduct = product;
+
+      document.getElementById('acc-sel-title').textContent = product.name;
+      document.getElementById('acc-sel-subtitle').textContent = product.desc || '';
+      document.getElementById('acc-sel-list').innerHTML = '<p style="padding:24px; color:#888">Carregando...</p>';
+      document.getElementById('acc-sel-overlay').style.display = 'flex';
+      document.getElementById('btn-acc-confirm').disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/accompaniments/product/${product.id}`);
+        const items = await res.json();
+
+        const cfg = items[0] || {};
+        _accModalMin = cfg.min_sides || 0;
+        _accModalMax = cfg.max_sides || 0;
+
+        document.getElementById('acc-sel-list').dataset.min = _accModalMin;
+        document.getElementById('acc-sel-list').dataset.max = _accModalMax;
+
+        if (!items.length) {
+          document.getElementById('acc-sel-list').innerHTML =
+            '<p style="padding:24px; color:#888; font-size:0.9rem">Nenhum acompanhamento disponível para este prato.</p>';
+          _updateAccCounter();
+          return;
+        }
+
+        document.getElementById('acc-sel-list').innerHTML = items.map(a => {
+          const priceTag = a.extra_price > 0
+            ? `<span class="acc-price-tag">+ R$ ${parseFloat(a.extra_price).toFixed(2)}</span>`
+            : '';
+          const defaultTag = a.is_default
+            ? `<span class="acc-default-tag">padrão</span>` : '';
+          return `
+            <div class="acc-check-item${a.is_default ? ' is-selected' : ''}"
+                 data-id="${a.id}"
+                 data-price="${a.extra_price}"
+                 data-name="${esc(a.name)}"
+                 data-selected="${a.is_default ? '1' : '0'}"
+                 data-extraqty="0">
+              <div class="acc-checkmark" onclick="_toggleAccItem(this.parentElement)"></div>
+              <div class="acc-check-label">
+                <strong onclick="_toggleAccItem(this.closest('.acc-check-item'))">${esc(a.name)}${defaultTag}</strong>
+                <div class="acc-qty-wrap">
+                  <span class="acc-qty-label">+ extra${a.extra_price > 0 ? ` (R$&nbsp;${parseFloat(a.extra_price).toFixed(2)}/un)` : ' (incluso)'}:</span>
+                  <button type="button" class="acc-qty-btn" onclick="_accQtyChange(this.closest('.acc-check-item'), -1)">−</button>
+                  <span class="acc-qty-val">0</span>
+                  <button type="button" class="acc-qty-btn" onclick="_accQtyChange(this.closest('.acc-check-item'), 1)">+</button>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+
+        _updateAccCounter();
+      } catch (e) {
+        document.getElementById('acc-sel-list').innerHTML =
+          '<p style="padding:24px; color:#e74c3c">Erro ao carregar opções.</p>';
+      }
+    }
+
+    function _toggleAccItem(el) {
+      const isSelected = el.dataset.selected === '1';
+      el.dataset.selected = isSelected ? '0' : '1';
+      el.classList.toggle('is-selected', !isSelected);
+      if (isSelected) {
+        // Ao desmarcar: zera extras
+        el.dataset.extraqty = '0';
+        const valEl = el.querySelector('.acc-qty-val');
+        if (valEl) valEl.textContent = '0';
+      }
+      _updateAccCounter();
+    }
+
+    function _accQtyChange(el, delta) {
+      // extraqty = porções ADICIONAIS além da 1ª inclusa
+      const current = parseInt(el.dataset.extraqty || '0');
+      const next = Math.max(0, current + delta);
+      el.dataset.extraqty = String(next);
+      const valEl = el.querySelector('.acc-qty-val');
+      if (valEl) valEl.textContent = next;
+      _updateAccCounter();
+    }
+
+    function _updateAccCounter() {
+      const selectedEls = Array.from(document.querySelectorAll('.acc-check-item[data-selected="1"]'));
+      // Min/max baseado em itens DISTINTOS selecionados
+      const count = selectedEls.length;
+      // Extra total: itens com extra_price * (qty - 1) unidades extras, mais o preço base × qty
+      const extraTotal = selectedEls.reduce((s, el) => {
+        const qty      = parseInt(el.dataset.qty || '1');
+        const price    = parseFloat(el.dataset.price || 0);
+        const extraQty = parseInt(el.dataset.extraqty || '0');
+        // 1ª unidade gratuita (inclusa), cada adicional tem preço extra
+        return s + price * extraQty;
+      }, 0);
+
+      const min = _accModalMin, max = _accModalMax;
+      const hasLimit = max > 0;
+
+      let label = `${count} selecionado${count !== 1 ? 's' : ''}`;
+      if (hasLimit) label += ` de ${max}`;
+      // Mostrar extras se houver qty > 1
+      const extrasCount = selectedEls.reduce((s, el) => s + parseInt(el.dataset.extraqty || '0'), 0);
+      if (extrasCount > 0) label += ` · ${extrasCount} extra${extrasCount !== 1 ? 's' : ''}`;
+      document.getElementById('acc-count-label').textContent = label;
+
+      const extraEl = document.getElementById('acc-extra-label');
+      extraEl.textContent = extraTotal > 0 ? `+ R$ ${extraTotal.toFixed(2)}` : '';
+
+      const hint = document.getElementById('acc-limit-hint');
+      if (hasLimit) {
+        hint.textContent = `Mín: ${min} · Máx: ${max}`;
+        hint.style.color = (count < min || count > max) ? '#e74c3c' : '#4caf50';
+      } else {
+        hint.textContent = 'Selecione à vontade';
+        hint.style.color = '#888';
+      }
+
+      const confirmBtn = document.getElementById('btn-acc-confirm');
+      const valid = !hasLimit || (count >= min && count <= max);
+      confirmBtn.disabled = !valid;
+
+      const base = parseFloat(_accModalProduct?.price || 0);
+      const total = base + extraTotal;
+      confirmBtn.textContent = valid
+        ? `✅ Adicionar — R$ ${total.toFixed(2)}`
+        : `Escolha entre ${min} e ${max}`;
+    }
+
+    function confirmAccompaniments() {
+      const selected = Array.from(document.querySelectorAll('.acc-check-item[data-selected="1"]'));
+      // Cada item selecionado entra uma vez (1ª porção, inclusa).
+      // Se extraqty > 0, adiciona entradas extras com o preço por unidade adicional.
+      const selectedAcc = [];
+      selected.forEach(el => {
+        const extraQty   = parseInt(el.dataset.extraqty || '0');
+        const extraPrice = parseFloat(el.dataset.price || 0);
+        selectedAcc.push({
+          id:          Number(el.dataset.id),
+          name:        el.dataset.name,
+          extra_price: 0, // 1ª porção sempre inclusa
+        });
+        for (let i = 0; i < extraQty; i++) {
+          selectedAcc.push({
+            id:          Number(el.dataset.id),
+            name:        `${el.dataset.name} (extra)`,
+            extra_price: extraPrice,
+          });
+        }
+      });
+      // Capturar o produto ANTES de fechar o modal (closeAccSel zera _accModalProduct)
+      const product = _accModalProduct;
+      closeAccSel();
+      addToCart(product, selectedAcc);
+    }
+
+    function closeAccSel() {
+      document.getElementById('acc-sel-overlay').style.display = 'none';
+      _accModalProduct = null;
+    }
+
+    async function isStoreOpen() {
+      try {
+        const res = await fetch(`${API_BASE}/api/products/status`);
+        const data = await res.json();
+        return data.isOpen;
+      } catch {
+        return false;
+      }
+    }
+
+    function updateClientStatusBar() {
+      const statusBar = document.getElementById('status-bar');
+      return fetch(`${API_BASE}/api/products/status`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.isOpen) {
+            statusBar.style.background = '#27ae60';
+            statusBar.innerHTML = '🟢 Restaurante Aberto';
+          } else {
+            statusBar.style.background = '#e74c3c';
+            statusBar.innerHTML = '🔴 Restaurante Fechado';
+          }
+        });
+    }
+
+    async function addToCart(product, selectedAcc = []) {
+      if (!(await isStoreOpen())) {
+        alert('🔴 O restaurante está fechado no momento.');
+        return;
+      }
+
+      const extraPrice = selectedAcc.reduce((sum, a) => sum + (a.extra_price || 0), 0);
+      const finalPrice = parseFloat(product.price) + extraPrice;
+
+      // Cada combinação produto+acompanhamentos é tratada como item único no carrinho
+      const accKey = selectedAcc.map(a => a.id).sort().join(',');
+      const cartKey = `${product.id}:${accKey}`;
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existing = cart.find(item => item._cartKey === cartKey);
+
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        cart.push({
+          ...product,
+          price: finalPrice,
+          _basePrice: product.price,
+          _cartKey: cartKey,
+          accompaniments: selectedAcc,
+          quantity: 1,
+        });
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      showToast(`✅ ${product.name} adicionado!`);
+    }
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      const floatCount = document.getElementById('cart-count-float');
+      const bottomCount = document.getElementById('cart-count-bottom');
+      floatCount.textContent = count;
+      if (bottomCount) {
+        bottomCount.textContent = count;
+        bottomCount.classList.toggle('is-hidden', count < 1);
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#27ae60; color:white; padding:15px 30px; border-radius:50px; z-index:9999;';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 1800);
+    }
+
+    function checkCartBeforeOpen() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      if (cart.length === 0) {
+        alert('🛒 Seu carrinho está vazio!');
+        return;
+      }
+      window.location.href = 'cart.html';
+    }
+
+    window.onload = () => {
+      refreshSiteData();
+      updateCartCount();
+      connectLiveUpdates();
+      scheduleFallbackPoll();
+      // Mostrar botão de rastreio se houver pedido recente (últimas 4h)
+      const orders = JSON.parse(localStorage.getItem('lc_orders') || '[]');
+      const recent = orders.find(o => Date.now() - o.createdAt < 4 * 60 * 60 * 1000);
+      if (recent) {
+        const btn = document.getElementById('track-btn');
+        btn.style.display = 'flex';
+        btn.href = `track.html?token=${recent.token}`;
+      }
+    };
+
+    // ---------------------------------------------------------
+    // LÓGICA ESPECÍFICA DO CARDÁPIO DE MESA
+    // ---------------------------------------------------------
+    
+    // Pegar ID da mesa da URL (ex: ?mesa=5)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tableId = urlParams.get('mesa') || '';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const tableDisplay = document.getElementById('table-name-display');
+      if (tableId) {
+        tableDisplay.textContent = `Mesa ${tableId}`;
+      } else {
+        tableDisplay.textContent = 'Mesa não identificada';
+        alert('Por favor, escaneie o QR Code da mesa novamente.');
+      }
+      
+      // Override cart key for table service to not conflict with delivery
+      window.CART_KEY = 'cart_mesa_' + tableId;
+      updateCartCount();
+    });
+
+    function callWaiter() {
+      if (!tableId) return alert('Mesa não identificada.');
+      const msg = `Olá, a Mesa ${tableId} está chamando o garçom!`;
+      window.open(`https://wa.me/5548984138554?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // Sobrescrever a função isStoreOpen para sempre retornar true no salão (opcional, mas bom)
+    async function isStoreOpen() {
+      return true; // No salão, o garçom controla, cliente sempre pode pedir se tiver QR Code.
+    }
+
+    // Override addToCart para usar CART_KEY
+    async function addToCart(product, selectedAcc = []) {
+      const extraPrice = selectedAcc.reduce((sum, a) => sum + (a.extra_price || 0), 0);
+      const finalPrice = parseFloat(product.price) + extraPrice;
+      const accKey = selectedAcc.map(a => a.id).sort().join(',');
+      const cartKey = `${product.id}:${accKey}`;
+
+      let cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
+      const existing = cart.find(i => i._cartKey === cartKey);
+
+      if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+      } else {
+        cart.push({
+          ...product,
+          price: finalPrice,
+          _basePrice: product.price,
+          accompaniments: selectedAcc,
+          quantity: 1,
+          _cartKey: cartKey
+        });
+      }
+
+      localStorage.setItem(window.CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+      
+      const floatBtn = document.getElementById('cart-float-btn');
+      floatBtn.classList.add('pop');
+      setTimeout(() => floatBtn.classList.remove('pop'), 300);
+      
+      // Feedback visual
+      const btn = event.currentTarget;
+      const originalText = btn.textContent;
+      btn.textContent = 'Adicionado! ✓';
+      btn.style.background = '#27ae60';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 1500);
+    }
+
+    function updateCartCount() {
+      if(!window.CART_KEY) return;
+      const cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
+      const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      document.getElementById('cart-count-float').textContent = count;
+      
+      const bottomBadge = document.getElementById('cart-count-bottom');
+      if (bottomBadge) {
+        bottomBadge.textContent = count;
+        bottomBadge.classList.toggle('is-hidden', count === 0);
+      }
+    }
+
+    function openTableCart() {
+      const cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
+      const itemsContainer = document.getElementById('table-cart-items');
+      const totalContainer = document.getElementById('table-cart-total');
+      const btnSend = document.getElementById('btn-send-table-order');
+      
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:40px;">Seu pedido está vazio.</p>';
+        totalContainer.textContent = 'R$ 0,00';
+        btnSend.disabled = true;
+        btnSend.style.opacity = '0.5';
+      } else {
+        let total = 0;
+        itemsContainer.innerHTML = cart.map((item, index) => {
+          const qty = item.quantity || 1;
+          const itemTotal = parseFloat(item.price) * qty;
+          total += itemTotal;
+          
+          let accHtml = '';
+          if (item.accompaniments && item.accompaniments.length > 0) {
+            accHtml = `<div style="font-size:0.8rem; color:#888; margin-top:4px;">Com: ${item.accompaniments.map(a => a.name).join(', ')}</div>`;
+          }
+          
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:12px; margin-bottom:10px;">
+              <div style="flex:1;">
+                <strong style="color:#fff; font-size:1rem;">${qty}x ${esc(item.name)}</strong>
+                ${accHtml}
+                <div style="color:#ffcc00; font-weight:bold; margin-top:5px;">R$ ${itemTotal.toFixed(2)}</div>
+              </div>
+              <button onclick="removeTableCartItem(${index})" style="background:#e74c3c; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer;">Remover</button>
+            </div>
+          `;
+        }).join('');
+        
+        totalContainer.textContent = `R$ ${total.toFixed(2)}`;
+        btnSend.disabled = false;
+        btnSend.style.opacity = '1';
+      }
+      
+      document.getElementById('table-cart-overlay').style.display = 'flex';
+    }
+
+    function closeTableCart() {
+      document.getElementById('table-cart-overlay').style.display = 'none';
+    }
+
+    function removeTableCartItem(index) {
+      let cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
+      cart.splice(index, 1);
+      localStorage.setItem(window.CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+      openTableCart(); // refresh
+    }
+
+    async function sendTableOrder() {
+      if (!tableId) return alert('Mesa não identificada.');
+      const cart = JSON.parse(localStorage.getItem(window.CART_KEY) || '[]');
+      if (cart.length === 0) return;
+
+      const btnSend = document.getElementById('btn-send-table-order');
+      btnSend.disabled = true;
+      btnSend.textContent = 'Enviando...';
+
+      const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * (item.quantity || 1)), 0);
+      const items = cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        qty: item.quantity || 1,
+        accompaniments: item.accompaniments || []
+      }));
+
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/customer-table`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tableId: tableId,
+            total: total,
+            items: items,
+            payment: 'pix'
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ Pedido enviado para a cozinha com sucesso!');
+          localStorage.removeItem(window.CART_KEY);
+          updateCartCount();
+          closeTableCart();
+        } else {
+          alert('Erro: ' + (data.error || 'Não foi possível enviar o pedido.'));
+        }
+      } catch (e) {
+        alert('Erro de conexão ao enviar pedido.');
+      } finally {
+        btnSend.disabled = false;
+        btnSend.textContent = 'Enviar Pedido para a Cozinha';
+      }
+    }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-overlay">
+      <div class="footer-content" style="padding: 25px 5% 18px 5%;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 300px;">
+            <h2 style="margin-bottom: 8px;">La Coccina</h2>
+            <p style="margin-bottom: 8px;">Sabor que conquista todos os dias.</p>
+            <p style="margin:4px 0;">Endereço: Cachoeira do Bom Jesus, Florianópolis - SC</p>
+            <p style="margin:4px 0;">Horário: Terça a Domingo, 10:00 às 15:00</p>
+          </div>
+
+          <div style="flex: 1; text-align: center; min-width: 320px;">
+            <img src="ASSETS/imagens/icons.webp" alt="Benefícios" style="width: 520px; max-width: 100%; height: auto; margin-bottom: 15px;">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 25px; margin: 15px 0 12px 0;">
+          <a href="https://www.instagram.com/lacoccinarestaurante/" target="_blank" style="color:white; text-decoration:none;">
+            <img src="ASSETS/imagens/instagram.webp" width="40" height="40" alt="Instagram">
+          </a>
+          <a href="https://wa.me/5548984138554" target="_blank" style="color:white; text-decoration:none;">
+            <img src="ASSETS/imagens/whatsapp.webp" width="40" height="40" alt="WhatsApp">
+          </a>
+        </div>
+
+        <div style="text-align:center; margin-top: 12px;">
+          <span style="font-size:0.82rem; color:#777;">© 2026 La Coccina - Todos os direitos reservados</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de seleção de acompanhamentos -->
+  <div id="acc-sel-overlay" onclick="if(event.target===this) closeAccSel()">
+    <div id="acc-sel-box">
+      <div class="acc-modal-header">
+        <h3 id="acc-sel-title"></h3>
+        <p class="acc-subtitle" id="acc-sel-subtitle"></p>
+        <div class="acc-counter-bar">
+          <span id="acc-count-label">0 selecionados</span>
+          <span id="acc-limit-hint" style="color:#888; font-size:0.8rem"></span>
+          <span id="acc-extra-label" class="acc-extra-total"></span>
+        </div>
+      </div>
+      <div id="acc-sel-list"></div>
+      <div class="acc-modal-footer">
+        <button id="btn-acc-cancel" onclick="closeAccSel()">Voltar</button>
+        <button id="btn-acc-confirm" onclick="confirmAccompaniments()" disabled>Adicionar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
