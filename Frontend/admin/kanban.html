@@ -118,9 +118,9 @@
       --kb-shadow: rgba(0, 0, 0, 0.45);
       --kb-overlay: rgba(0, 0, 0, 0.62);
     }
-    html, body { margin: 0; padding: 0; overflow-x: hidden; }
+    html, body { margin: 0; padding: 0; }
     body { background: var(--kb-bg); color: var(--kb-text); font-family: 'Inter', sans-serif; min-height: 100vh; }
-    .admin-panel { padding: 24px; width: 100%; }
+    .admin-panel { padding: 24px; width: 100%; display: flex; flex-direction: column; height: 100vh; }
     .admin-header-shell { position: sticky; top: 16px; z-index: 90; margin-bottom: 18px; }
     .admin-header { background: linear-gradient(180deg, var(--kb-surface-alt), var(--kb-surface)); padding: 10px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--kb-border); box-shadow: 0 12px 28px var(--kb-shadow); }
     .admin-brand { display: flex; align-items: center; gap: 12px; }
@@ -221,8 +221,8 @@
     .protein-chip { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 50px; padding: 4px 12px; font-size: 0.78rem; color: var(--kb-text); display: flex; align-items: center; gap: 6px; }
     .protein-chip strong { color: var(--kb-brand); font-size: 0.9rem; }
     #protein-summary .ps-label { font-size: 0.72rem; color: var(--kb-subtle); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
-    .kb-board { display: flex; gap: 10px; flex: 1; overflow-x: hidden; align-items: flex-start; }
-    .kb-col { flex: 1 1 0; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 0; background: var(--kb-surface); border-radius: 10px; border: 1px solid var(--kb-border); overflow: hidden; min-height: 260px; }
+    .kb-board { display: flex; gap: 10px; flex: 1; overflow-x: auto; overflow-y: hidden; align-items: stretch; padding-bottom: 12px; min-height: 0; }
+    .kb-col { flex: 1 1 0; min-width: 280px; max-width: 350px; display: flex; flex-direction: column; gap: 0; background: var(--kb-surface); border-radius: 10px; border: 1px solid var(--kb-border); overflow: hidden; min-height: 0; max-height: 100%; }
     .kb-col-header { padding: 10px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--kb-border); flex-shrink: 0; flex-wrap: wrap; }
     .kb-col-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; flex: 1; }
     .kb-col-count { background: var(--kb-surface-soft); color: var(--kb-muted); border-radius: 10px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; }
@@ -237,7 +237,7 @@
     .col-preparando_rota .kb-col-title { color: #f7dc6f; }
     .col-a_caminho .kb-col-indicator { background: #9b59b6; }
     .col-a_caminho .kb-col-title { color: #bb8fce; }
-    .kb-col-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 100px; }
+    .kb-col-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 100px; overflow-y: auto; }
     .kb-col-body.drag-over { background: var(--kb-surface-alt); border-radius: 8px; }
     .kb-col-header .kb-col-action { width: 100%; justify-content: center; padding: 8px; font-size: 0.75rem; }
     .kb-card { background: var(--kb-surface-alt); border: 1px solid var(--kb-border-soft); border-radius: 8px; padding: 10px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; user-select: none; }
@@ -373,7 +373,7 @@
     .kd-batch-loading { text-align: left; color: var(--kb-muted); }
     .kd-prev-order.clickable { cursor: pointer; }
     @media (max-width: 980px) {
-      .admin-panel { padding: 12px; }
+      .admin-panel { padding: 12px; height: 100vh; display: flex; flex-direction: column; }
       .admin-header-shell { top: 8px; }
       .admin-header { padding: 8px; }
       .admin-brand { width: 100%; }
