@@ -4004,6 +4004,9 @@
       const defaultFee = Number.parseFloat(String(document.getElementById('cfg-area-default-fee').value || '0').replace(',', '.'));
       const defaultActive = document.getElementById('cfg-area-default-active').checked;
 
+      document.getElementById('cfg-delivery-origin').value = originAddress;
+      document.getElementById('cfg-area-origin-address').value = originAddress;
+
       if (!originAddress || originAddress.length < 8) {
         msg.textContent = 'Informe um endereco-base valido para buscar sugestoes.';
         return;
@@ -4097,7 +4100,10 @@
 
     async function saveDeliverySettings() {
       const deliveryManagementEnabled = isDeliveryManagementEnabled();
-      const restaurantOriginAddress = document.getElementById('cfg-delivery-origin').value.trim();
+      let restaurantOriginAddress = document.getElementById('cfg-delivery-origin').value.trim();
+      if (!restaurantOriginAddress) {
+        restaurantOriginAddress = document.getElementById('cfg-area-origin-address').value.trim();
+      }
       const driverCancellationMode = getSelectedDriverCancellationMode();
       const showRouteProviderPicker = document.getElementById('cfg-show-route-provider-picker').checked;
       const showDriverCallButton = document.getElementById('cfg-show-driver-call-button').checked;
@@ -4110,6 +4116,7 @@
       const localServiceMsg = document.getElementById('cfg-local-service-msg');
       if (deliveryManagementEnabled && restaurantOriginAddress.length < 8) {
         msg.textContent = 'Informe um endereço-base válido para entregas.';
+        deliveryAreasMsg.textContent = 'Erro: Endereço-base ausente. Preencha o campo na secao acima.';
         return;
       }
 
