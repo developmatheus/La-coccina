@@ -3542,7 +3542,7 @@
           <td><span class="delivery-area-chip ${table.active ? 'active' : 'inactive'}">${table.active ? 'Ativa' : 'Inativa'}</span></td>
           <td>
             <div class="delivery-areas-actions">
-              ${table.qrToken ? `<button type="button" class="delivery-area-btn" onclick="copyTableLink('${table.qrToken}')" style="background:#27ae60; color:#fff;" title="Copiar link seguro da mesa">Copiar Link</button>` : ''}
+              ${table.qrToken ? `<button type="button" class="delivery-area-btn" onclick="copyTableLink('${table.qrToken}')" style="background:#27ae60; color:#fff; border-color:#27ae60;" title="Copiar link seguro da mesa">Copiar Link</button>` : `<button type="button" class="delivery-area-btn" onclick="copyTableLinkFallback(${Number(table.id)})" style="background:#27ae60; color:#fff; border-color:#27ae60;" title="Copiar link usando ID da mesa (Legacy)">Copiar Link</button>`}
               <button type="button" class="delivery-area-btn" onclick="editServiceTable(${Number(table.id)})">Editar</button>
               <button type="button" class="delivery-area-btn" onclick="toggleServiceTableActive(${Number(table.id)})" title="${table.active ? 'Deixa a mesa inativa para não aparecer no atendimento, sem apagar histórico.' : 'Reativa a mesa para voltar a aparecer no atendimento.'}">${table.active ? 'Desativar' : 'Ativar'}</button>
             </div>
@@ -3555,6 +3555,15 @@
       const link = `${window.location.origin}/cardapio-mesa.html?t=${token}`;
       navigator.clipboard.writeText(link).then(() => {
         alert('Link da mesa copiado! Você pode gerar um QR Code com este link.');
+      }).catch(() => {
+        prompt('Copie o link abaixo:', link);
+      });
+    }
+
+    function copyTableLinkFallback(id) {
+      const link = `${window.location.origin}/cardapio-mesa.html?mesa=${id}`;
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Link da mesa (Legacy) copiado! É recomendado recadastrar a mesa para obter um token seguro.');
       }).catch(() => {
         prompt('Copie o link abaixo:', link);
       });
