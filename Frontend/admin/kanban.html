@@ -191,7 +191,7 @@
       border-color: var(--kb-brand);
     }
     .sidebar-close-btn {
-      display: none;
+      display: block;
       background: none;
       border: none;
       color: var(--kb-muted);
@@ -242,6 +242,18 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 1.1rem;
+    }
+
+    @media (min-width: 981px) {
+      .admin-sidebar {
+        transition: margin-left 0.3s ease;
+      }
+      .admin-layout.sidebar-collapsed .admin-sidebar {
+        margin-left: -260px;
+      }
+      .admin-layout.sidebar-collapsed .mobile-menu-btn {
+        display: block;
+      }
     }
 
     .admin-panel { padding: 16px 24px; width: 100%; display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -475,7 +487,7 @@
   </style>
 </head>
 <body>
-<div class="admin-layout">
+<div class="admin-layout sidebar-collapsed">
   <aside class="admin-sidebar" id="admin-sidebar">
     <div class="sidebar-header">
       <div class="admin-brand">
@@ -1801,8 +1813,13 @@
   function toggleSidebar() {
     const sidebar = document.getElementById('admin-sidebar');
     const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar) sidebar.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('open');
+    const layout = document.querySelector('.admin-layout');
+    if (window.innerWidth <= 980) {
+      if (sidebar) sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('open');
+    } else {
+      if (layout) layout.classList.toggle('sidebar-collapsed');
+    }
   }
 
   if (!sessionStorage.getItem('adminToken') || localStorage.getItem('adminLogged') !== 'true') {
