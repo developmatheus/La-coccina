@@ -120,45 +120,132 @@
     }
     html, body { margin: 0; padding: 0; }
     body { background: var(--kb-bg); color: var(--kb-text); font-family: 'Inter', sans-serif; min-height: 100vh; }
-    .admin-panel { padding: 24px; width: 100%; display: flex; flex-direction: column; height: 100vh; }
-    .admin-header-shell { position: sticky; top: 16px; z-index: 90; margin-bottom: 18px; }
-    .admin-header { background: linear-gradient(180deg, var(--kb-surface-alt), var(--kb-surface)); padding: 10px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--kb-border); box-shadow: 0 12px 28px var(--kb-shadow); }
+    .admin-layout { display: flex; min-height: 100vh; width: 100%; }
+    .admin-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    
+    .admin-sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, var(--kb-surface-alt), var(--kb-surface));
+      border-right: 1px solid var(--kb-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 20px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--kb-border-soft);
+    }
     .admin-brand { display: flex; align-items: center; gap: 12px; }
     .admin-brand-mark { width: 32px; height: 32px; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid var(--kb-border); background: var(--kb-surface-soft); }
     .admin-brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .admin-brand-copy { display: flex; flex-direction: column; gap: 2px; }
     .admin-brand-logo { font-family: 'SomeTimeLater', cursive; font-size: 1.15rem; color: var(--kb-brand); line-height: 1; letter-spacing: 0.02em; }
-    .admin-brand-tag { font-size: 0.72rem; color: var(--kb-subtle); text-transform: uppercase; letter-spacing: 0.1em; }
-    .admin-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .admin-utility-btn,
-    .admin-header-status {
-      width: auto;
-      margin: 0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-decoration: none;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
+    .admin-brand-copy { display: none; }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
-      background: var(--kb-surface-alt);
-      color: var(--kb-brand);
-      border: 1px solid var(--kb-border-soft);
-      cursor: pointer;
-      transition: all 0.15s ease;
+      overflow-y: auto;
     }
-    .admin-utility-btn:hover {
+    .sidebar-footer {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid var(--kb-border-soft);
+    }
+    .sidebar-link, .sidebar-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--kb-muted);
+      text-decoration: none;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-link:hover, .sidebar-btn:hover {
       background: var(--kb-surface-soft);
       color: var(--kb-brand);
-      border-color: var(--kb-subtle);
     }
-    .admin-utility-btn.current-page {
-      border-color: var(--kb-brand);
+    .sidebar-link.current-page {
       background: color-mix(in srgb, var(--kb-surface-alt) 82%, var(--kb-brand) 18%);
       color: var(--kb-brand);
+      border-color: var(--kb-brand);
     }
+    .sidebar-close-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--kb-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      z-index: 90;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .kanban-topbar {
+      display: flex;
+      padding: 12px 16px;
+      background: linear-gradient(180deg, var(--kb-surface-alt), var(--kb-surface));
+      border-bottom: 1px solid var(--kb-border);
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 80;
+    }
+    .kanban-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .kanban-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mobile-menu-btn {
+      display: none;
+      background: var(--kb-surface-alt);
+      border: 1px solid var(--kb-border);
+      color: var(--kb-brand);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .admin-panel { padding: 16px 24px; width: 100%; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    
     .admin-header-status {
       color: var(--kb-muted);
       cursor: default;
@@ -373,13 +460,14 @@
     .kd-batch-loading { text-align: left; color: var(--kb-muted); }
     .kd-prev-order.clickable { cursor: pointer; }
     @media (max-width: 980px) {
-      .admin-panel { padding: 12px; height: 100vh; display: flex; flex-direction: column; }
-      .admin-header-shell { top: 8px; }
-      .admin-header { padding: 8px; }
-      .admin-brand { width: 100%; }
-      .admin-header-actions { width: 100%; }
-      .admin-utility-btn,
-      .admin-header-status { justify-content: center; }
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { position: fixed; transform: translateX(-100%); width: 280px; z-index: 100; }
+      .admin-sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; opacity: 1; }
+      .sidebar-close-btn { display: block; }
+      .kanban-topbar { top: 0; border-radius: 0; border-left: none; border-right: none; }
+      .mobile-menu-btn { display: block; }
+      .admin-panel { padding: 12px; height: calc(100vh - 64px); display: flex; flex-direction: column; }
       .route-modal-body { grid-template-columns: 1fr; }
       .route-map-wrap { min-height: 320px; border-right: none; border-bottom: 1px solid var(--kb-border); }
       .batch-modal-body { grid-template-columns: 1fr; }
@@ -387,33 +475,45 @@
   </style>
 </head>
 <body>
-<div class="admin-panel">
-  <div class="admin-header-shell">
-    <div class="admin-header">
+<div class="admin-layout">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="sidebar-header">
       <div class="admin-brand">
         <span class="admin-brand-mark" aria-hidden="true">
           <img src="../assets/imagens/favicon-192.png" alt="">
         </span>
-        <div class="admin-brand-copy">
-          <span class="admin-brand-logo">La Coccina</span>
-          <span class="admin-brand-tag">Kanban de Pedidos</span>
-        </div>
+        <span class="admin-brand-logo">La Coccina</span>
       </div>
-      <div class="admin-header-actions">
-        <a id="btn-kanban-link" class="admin-utility-btn current-page" href="kanban.html" aria-current="page">📋 Kanban</a>
-        <a class="admin-utility-btn" href="dashboard.html">📊 Dashboard</a>
-        <a class="admin-utility-btn" href="cadastros.html">🧾 Cadastros</a>
-        <button type="button" id="btn-theme-toggle" class="admin-utility-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️</button>
+      <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Fechar menu">✖</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link current-page" href="kanban.html" aria-current="page">📋 Kanban</a>
+      <a class="sidebar-link" href="dashboard.html">📊 Dashboard</a>
+      <a class="sidebar-link" href="cadastros.html">🧾 Cadastros</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button type="button" id="btn-theme-toggle" class="sidebar-btn" onclick="toggleAdminTheme()" aria-label="Alternar tema">☀️ Tema</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <main class="admin-main">
+    <header class="kanban-topbar">
+      <div class="kanban-topbar-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      </div>
+      <div class="kanban-topbar-right">
         <button type="button" class="hint-icon" id="kb-whatsapp-help" aria-label="Ajuda do modo WhatsApp" data-tooltip="Modo WhatsApp ativo: pedidos chegam pelo WhatsApp e sao movidos manualmente no Kanban.">i</button>
         <div class="admin-header-status" id="kb-conn"><div id="kb-conn-dot" class="admin-header-status-dot"></div><span id="kb-conn-label">Conectando...</span></div>
       </div>
+    </header>
+    <div class="admin-panel">
+      <div id="protein-summary">
+        <span class="ps-label">Proteínas em produção:</span>
+        <span id="protein-chips" class="protein-chips-placeholder">Carregando...</span>
+      </div>
+      <main class="kb-board" id="kb-board"></main>
     </div>
-  </div>
-  <div id="protein-summary">
-    <span class="ps-label">Proteínas em produção:</span>
-    <span id="protein-chips" class="protein-chips-placeholder">Carregando...</span>
-  </div>
-  <main class="kb-board" id="kb-board"></main>
+  </main>
 </div>
 
 <div class="modal-overlay" id="route-modal-overlay" onclick="closeRouteModal()"></div>
@@ -1696,6 +1796,13 @@
     document.getElementById('kb-detail-overlay').classList.remove('open');
     document.getElementById('kb-detail-drawer').classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open');
   }
 
   if (!sessionStorage.getItem('adminToken') || localStorage.getItem('adminLogged') !== 'true') {
