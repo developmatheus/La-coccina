@@ -21,5 +21,7 @@ jobs:
         run: |
           find backend Frontend scripts tests -type f \( -name '*.js' -o -name '*.mjs' \) -print0 |
             xargs -0 -n1 node --check
+      - name: Run unit tests
+        run: npm test
       - name: Check package metadata
         run: node -e "for (const f of ['package.json', 'package-lock.json', 'backend/package.json', 'backend/package-lock.json']) JSON.parse(require('node:fs').readFileSync(f, 'utf8'))"

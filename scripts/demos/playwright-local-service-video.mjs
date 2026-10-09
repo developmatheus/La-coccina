@@ -12,8 +12,13 @@ process.env.DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'backend',
 const db = require('../backend/db');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const requiredEnv = (name) => {
+  const value = String(process.env[name] || '').trim();
+  if (!value) throw new Error(`Defina ${name} no ambiente antes de executar esta demonstração local.`);
+  return value;
+};
+const ADMIN_USERNAME = requiredEnv('ADMIN_USERNAME');
+const ADMIN_PASSWORD = requiredEnv('ADMIN_PASSWORD');
 let ADMIN_TOKEN_CACHE = '';
 let SESSION_SECRET_CACHE = '';
 

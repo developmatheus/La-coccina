@@ -3,9 +3,14 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-const DRIVER_TOKEN = process.env.DRIVER_TOKEN || 'e449b48de9e19f20a0c1c102';
+const requiredEnv = (name) => {
+  const value = String(process.env[name] || '').trim();
+  if (!value) throw new Error(`Defina ${name} no ambiente antes de executar este fluxo local.`);
+  return value;
+};
+const ADMIN_USERNAME = requiredEnv('ADMIN_USERNAME');
+const ADMIN_PASSWORD = requiredEnv('ADMIN_PASSWORD');
+const DRIVER_TOKEN = requiredEnv('DRIVER_TOKEN');
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'playwright-personas');
 
 const links = {
@@ -38,7 +43,7 @@ function printLinks() {
   console.log(`- Administrativo: ${links.administrativo}`);
   console.log(`- Cozinha:        ${links.cozinha}`);
   console.log(`- Motoboy:        ${links.motoboy}`);
-  console.log(`\nCredenciais locais de admin: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
+  console.log(`\nUsuário administrativo configurado: ${ADMIN_USERNAME}`);
   console.log(`Saida do Playwright: ${OUTPUT_DIR}\n`);
 }
 

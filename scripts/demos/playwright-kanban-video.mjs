@@ -7,8 +7,13 @@ import { chromium } from 'playwright';
 const execFileAsync = promisify(execFile);
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const requiredEnv = (name) => {
+  const value = String(process.env[name] || '').trim();
+  if (!value) throw new Error(`Defina ${name} no ambiente antes de executar esta demonstração local.`);
+  return value;
+};
+const ADMIN_USERNAME = requiredEnv('ADMIN_USERNAME');
+const ADMIN_PASSWORD = requiredEnv('ADMIN_PASSWORD');
 
 const OUTPUT_DIR = path.join(process.cwd(), 'artifacts', 'tutorial-playwright-kanban');
 const RAW_DIR = path.join(OUTPUT_DIR, 'raw');

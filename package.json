@@ -5,6 +5,7 @@
   "scripts": {
     "start": "npm --prefix backend start",
     "dev": "npm --prefix backend run dev",
+    "test": "node backend/tests/sanitize.test.js",
     "migrate": "npm --prefix backend run migrate",
     "hash-password": "npm --prefix backend run hash-password --",
     "demo:prepare-orders": "npm --prefix backend run prepare:presentation-orders",

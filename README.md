@@ -6,6 +6,8 @@ Sistema web de pedidos e operação para restaurante, com cardápio digital, ped
 
 ![Workflow de verificações](https://github.com/developmatheus/La-coccina/actions/workflows/ci.yml/badge.svg)
 
+**Licença:** software proprietário — todos os direitos reservados. Consulte [LICENSE](LICENSE) para os termos.
+
 ## Visão geral
 
 O projeto reúne a experiência do cliente e a operação do restaurante em uma aplicação. O frontend é feito com HTML, CSS e JavaScript; o backend em Node.js e Express fornece a API, autenticação, persistência SQLite e arquivos do site.
@@ -42,6 +44,18 @@ O projeto reúne a experiência do cliente e a operação do restaurante em uma 
 | Cadastros e configurações | `/admin/cadastros.html` |
 | Atendimento local | `/local-service.html` |
 | Interface do entregador | `/delivery-batch.html?token=...` |
+
+## Demonstração visual
+
+As capturas abaixo mostram o cardápio público e áreas administrativas do sistema. Os pedidos exibidos nas telas administrativas são dados fictícios de demonstração.
+
+![Cardápio público](docs/screenshots/cardapio-publico.png)
+
+![Acesso administrativo](docs/screenshots/acesso-administrativo.png)
+
+![Painel administrativo](docs/screenshots/painel-administrativo.png)
+
+![Kanban de pedidos](docs/screenshots/kanban-pedidos.png)
 
 ## Tecnologias
 
@@ -110,6 +124,12 @@ Para desenvolvimento com reinicialização automática:
 npm run dev
 ```
 
+Execute os testes unitários com:
+
+```bash
+npm test
+```
+
 ## Configuração
 
 As variáveis são lidas de `backend/config/.env`. O arquivo `backend/config/.env.example` lista as opções disponíveis, incluindo:
@@ -126,21 +146,26 @@ Em produção, configure armazenamento persistente para o banco e para os upload
 
 Os fluxos Playwright usam `BASE_URL` para selecionar o servidor-alvo e podem criar pedidos de demonstração. Execute-os somente em ambiente local ou de testes, nunca contra dados reais de produção.
 
-Na raiz do projeto, instale as dependências de desenvolvimento e os navegadores do Playwright:
+Na raiz do projeto, instale as dependências de desenvolvimento e os navegadores do Playwright. Os fluxos exigem credenciais de teste configuradas no ambiente; não há senha padrão.
 
 ```bash
 npm ci
 npx playwright install chromium
 ```
 
-Com o backend em execução:
+No PowerShell, configure as variáveis do fluxo de personas:
 
-```bash
+```powershell
+$env:BASE_URL = "http://localhost:3001"
+$env:ADMIN_USERNAME = "usuario-local"
+$env:ADMIN_PASSWORD = "senha-local"
+$env:DRIVER_TOKEN = "token-de-lote-local"
 npm run playwright:personas
-npm run playwright:order-kanban
 ```
 
-O workflow em `.github/workflows/ci.yml` verifica sintaxe JavaScript e validade dos arquivos JSON de dependências; ele não executa os fluxos de navegador.
+Para o fluxo cliente → Kanban, configure `BASE_URL`, `ADMIN_USERNAME` e `ADMIN_PASSWORD` e execute `npm run playwright:order-kanban`. Os fluxos podem criar pedidos: use apenas ambiente local ou de testes, nunca dados reais de produção.
+
+O workflow em `.github/workflows/ci.yml` verifica a sintaxe JavaScript, valida os metadados JSON e executa os testes unitários. Ele não abre navegador nem cria pedidos.
 
 ## Documentação adicional
 
