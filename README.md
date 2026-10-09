@@ -147,4 +147,3 @@ O workflow em `.github/workflows/ci.yml` verifica sintaxe JavaScript e validade 
 - [Arquitetura](docs/arquitetura.md)
 - [Segurança e configuração](docs/seguranca.md)
 - [Fluxo de entregas](docs/fluxo-entregas-mermaid.md)
-
