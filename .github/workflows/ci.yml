@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    name: JavaScript syntax and metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: |
+          find backend Frontend scripts tests -type f \( -name '*.js' -o -name '*.mjs' \) -print0 |
+            xargs -0 -n1 node --check
+      - name: Check package metadata
+        run: node -e "for (const f of ['package.json', 'package-lock.json', 'backend/package.json', 'backend/package-lock.json']) JSON.parse(require('node:fs').readFileSync(f, 'utf8'))"

@@ -158,7 +158,7 @@ async function synthesizeSpeechFromFile(inputFile, outputFile) {
     await execFileAsync(
       process.execPath,
       [
-        path.join(process.cwd(), 'scripts', 'synthesize-speech-piper.mjs'),
+        path.join(process.cwd(), 'scripts', 'demos', 'synthesize-speech-piper.mjs'),
         '--input',
         inputFile,
         '--output',
@@ -184,7 +184,7 @@ async function synthesizeSpeechFromFile(inputFile, outputFile) {
     await execFileAsync(
       process.execPath,
       [
-        path.join(process.cwd(), 'scripts', 'synthesize-speech-openai.mjs'),
+        path.join(process.cwd(), 'scripts', 'demos', 'synthesize-speech-openai.mjs'),
         '--input',
         inputFile,
         '--output',
@@ -206,7 +206,7 @@ async function synthesizeSpeechFromFile(inputFile, outputFile) {
       '-ExecutionPolicy',
       'Bypass',
       '-File',
-      path.join(process.cwd(), 'scripts', 'synthesize-speech.ps1'),
+      path.join(process.cwd(), 'scripts', 'demos', 'synthesize-speech.ps1'),
       '-InputTextFile',
       inputFile,
       '-OutputAudioFile',

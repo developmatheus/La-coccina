@@ -7,15 +7,18 @@ backend/config/.env
 .env
 *.env.local
 
-# Uploads e cache
+# Uploads, dados locais e cache
 backend/uploads/*
 !backend/uploads/.gitkeep
 backend/data/*.db
 backend/data/*.sqlite*
-backend/tmp/
+data/*.db
+data/*.sqlite*
 data/*.db-wal
 data/*.db-shm
+backend/tmp/
 
+# Recursos opcionais de desenvolvimento
 tools/piper/
 
 # Sistema
@@ -26,5 +29,4 @@ Thumbs.db
 backend/.node-version
 .well-known/
 artifacts/
-
 *.exe
